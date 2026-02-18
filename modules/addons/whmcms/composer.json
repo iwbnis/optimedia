@@ -1,0 +1,11 @@
+{
+    "require": {
+        "altorouter/altorouter": "^1.2"
+    },
+	"autoload": {
+        "psr-4": {
+            "WHMCMS\\": "./vendor/sentq/whmcms/libs/"
+        },
+        "files": ["./libs/functions.php"]
+    }
+}

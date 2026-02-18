@@ -1,0 +1,30 @@
+<?php
+
+use WHMCS\Database\Capsule;
+use WHMCS\View\Menu\Item as Item;
+use WHMCS\Session;
+
+add_hook('ClientAreaHomepagePanels', 1, function (Item $homePagePanels)
+{
+   // Check if the client session is active
+   if (Session::get('uid')) {
+       $client = Menu::context('client');
+       $clientid = intval($client->id);
+       // Check if the client's credit is greater than 0
+       if ($client->credit > 0) {
+           $currencyData = getCurrency($clientid);
+           $bodyhtml = '<p>' . sprintf(Lang::trans('availcreditbaldesc'), formatCurrency($client->credit, $currencyData)) . '</p>';
+           $creditPanel = $homePagePanels->addChild('CreditBalance', [
+               'label' => Lang::trans('availcreditbal'),
+               'icon' => 'fa-money',
+               'extras' => [
+                   'color' => 'red',
+                   'btn-link' => 'clientarea.php?action=addfunds',
+                   'btn-text' => Lang::trans('addfunds'),
+                   'btn-icon' => 'fa-plus',
+               ],
+               'bodyHtml' => $bodyhtml,
+           ]);
+       }
+   }
+});

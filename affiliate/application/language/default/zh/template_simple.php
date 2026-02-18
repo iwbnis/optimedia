@@ -1,0 +1,36 @@
+<?php 
+$lang['first_name_is_required'] = '产品';
+$lang['first_name'] = '将以下代码复制并粘贴到您的网页或电子邮件中以进行推广';
+$lang['last_name_is_required'] = '预览登陆';
+$lang['last_name'] = '产品列表';
+$lang['username_is_required'] = '在网站上预览';
+$lang['username'] = '再次要求提款';
+$lang['valid_email_is_required'] = '输入您的产品视频链接{Youtube/Vimeo}';
+$lang['email'] = '输入您的产品名称';
+$lang['password_is_required'] = '数字化商店流程';
+$lang['repeat_password_is_required'] = '联盟统计';
+$lang['repeat_password'] = '概述';
+$lang['address_is_required'] = '我的付款';
+$lang['address'] = '清除通知';
+$lang['country_is_required'] = '我的付款';
+$lang['country'] = '主题设置';
+$lang['state_is_required'] = '无推荐交易';
+$lang['state'] = '管理员已成功更新';
+$lang['paypal_email_is_required'] = '无横幅';
+$lang['paypal_email'] = '查看所有集成订单';
+$lang['phone_number_is_required'] = '集成订单';
+$lang['phone_number'] = '产品优惠券';
+$lang['alternate_phone_number_is_required'] = '尚无联盟活动';
+$lang['alternate_phone_number'] = '支付方式';
+$lang['i_accept_the_terms_of_the'] = '分享系统活动并开始赚取佣金...';
+$lang['affiliate_policy'] = '树设计';
+$lang['password'] = '删除产品';
+$lang['sign_in'] = '转到优惠券';
+$lang['sign_up'] = '我的交易';
+$lang['forget_password'] = '活动';
+$lang['registered_email'] = '雷弗树';
+$lang['send_mail'] = '启用配送';
+$lang['back_login'] = '我的链接';
+$lang['privacy_policy'] = '下载';
+$lang['close'] = '如果用户创建成功，将返回成功消息。';
+

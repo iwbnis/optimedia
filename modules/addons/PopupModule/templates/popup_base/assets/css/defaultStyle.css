@@ -1,0 +1,27 @@
+/*
+Here comes the text of your license
+Each line should be prefixed with 
+*/
+/* 
+    Created on : 2018-12-21, 11:41:47
+    Author     : Tomasz Bielecki<tomasz.bi@modulesgarden.com>
+*/
+
+.popup-message{
+    max-height: calc(80vh - 10px);
+    max-width: calc(100vh - 10px);
+    overflow-y: auto;
+}
+
+.popup-message img
+{
+    max-width: 100%;
+    height: auto;
+}
+
+@media (max-width: 800px) and (orientation: landscape) {
+    .popup-message{
+        max-height: calc(70vh - 10px);
+        max-width: calc(100vw - 10px);
+    }
+}

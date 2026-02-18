@@ -1,0 +1,55 @@
+<?php
+
+if (!defined("WHMCS")) die("This file cannot be accessed directly");
+
+add_hook('OrderPaid', 1, function ($vars) {
+    try {
+        $settings = AutoAcceptOrders_settings();
+        $ispaid = false;
+        // Check if invoice
+        if ($vars['invoiceId']) {
+            $results = localAPI('GetInvoice', ['invoiceid' => $vars['invoiceId']]);
+            if ($results['result'] != 'success') {
+                throw new Exception("Unable to get Invoice #{$vars['invoiceId']}, {$results['message']}");
+            } else {
+                $ispaid = $results['status'] == 'Paid' && $results['balance'] <= 0;
+            }
+        }
+        // Check if invoice id paid
+        if ($ispaid) {
+            logActivity("Order #{$vars['orderId']} is paid");
+            $results = localAPI('AcceptOrder', [
+                'orderid' => $vars['orderId'],
+                'autosetup' => $settings['autosetup'],
+                'sendemail' => $settings['sendemail'],
+                'sendregistrar' => $settings['sendregistrar']
+                //'registrar' => $settings['registrar'] [optional]
+            ]);
+            // If success, log activity.
+            if ($results['result'] != 'success') {
+                throw new Exception("Unable to accept Order #{$vars['orderId']},{$results['message']}");
+            } else {
+                logActivity("Order #{$vars['orderId']} accepted");
+            }
+        }
+    } catch (Exception $e) {
+        logActivity("[Auto Accept Orders] {$e->getMessage()}");
+    }
+});
+
+/*******************************
+ * Auto Accept Orders Settings *
+ ******************************/
+function AutoAcceptOrders_settings(): array
+{
+    return [
+        'apiuser' => 'choiceiptv35556', // one of the admins username
+        'autosetup' => true, // determines whether product provisioning is performed
+        //'registrar' =>'enom', // determines which registrar will get the registration request [optional]
+       // 'sendregistrar' => true, // determines whether domain automation is performed
+        'sendemail' => true, // sets if welcome emails for products and registration confirmation emails for domains should be sent
+        'ispaid' => true, // set to true if you want to accept only paid orders
+    ];
+}
+?>
+

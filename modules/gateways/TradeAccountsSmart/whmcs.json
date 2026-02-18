@@ -1,0 +1,29 @@
+{
+  "schema": "1.0",
+  "type": "whmcs-gateways",
+  "name": "TradeAccountsSmart",
+  "license": "proprietary",
+  "category": "payments",
+  "description": {
+    "name": "Trade Accounts Smart",
+    "tagline": "Credit Card Transaction via Trade Accounts using Smart method",
+    "long": "Simplify and automate your billing operations so you can focus on growth",
+    "features": [
+      "Accept Credit Cards"
+    ]
+  },
+  "logo": {
+    "filename": "logo.jpg"
+  },
+  "support": {
+    "homepage": "https:\/\/support.ibeehost.com",
+    "docs_url": ""
+  },
+  "authors": [
+    {
+      "name": "iBeeHost",
+      "homepage": "https:\/\/ibeehost.com\/"
+    }
+  ]
+}
+ 

@@ -1,0 +1,4 @@
+<?php
+add_hook('UserLogin', 1, function($vars) {
+	setcookie(loggedin, 1, time() + (86400 * 30), "/");
+}

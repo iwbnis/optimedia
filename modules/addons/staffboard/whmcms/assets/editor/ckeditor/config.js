@@ -1,0 +1,25 @@
+/**
+ * @license Copyright (c) 2003-2016, CKSource - Frederico Knabben. All rights reserved.
+ * For licensing, see LICENSE.md or http://ckeditor.com/license
+ */
+
+CKEDITOR.editorConfig = function( config ) {
+	// Define changes to default configuration here. For example:
+	// config.language = 'fr';
+	// config.uiColor = '#AADC6E';
+    
+    config.skin = 'bootstrapck';
+    
+    config.docType = '<!DOCTYPE html>';
+    
+    config.allowedContent = true;
+    
+    config.autoGrow_minHeight = 400;
+    
+    config.autoGrow_maxHeight = 600;
+    
+    config.autoGrow_onStartup = true;
+    
+    config.removePlugins = 'newpage,save,templates,forms';
+    
+};

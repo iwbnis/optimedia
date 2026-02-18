@@ -1,0 +1,92 @@
+<?php
+
+$panel_url = 'https://choiceip.tv/reseller/';
+$username = 'ltksolutions81@gmail.com';
+$password = 'J@m3s35556';
+
+//curl to check credentials 
+$cookie_path = dirname(__FILE__) . '/Cookie.txt';
+$GetFileContent = file_get_contents($cookie_path);
+$Exploded = explode("PHPSESSID", $GetFileContent);
+$XSRF = "";
+if (empty($XSRF)) {
+    $ch = curl_init($panel_url . '/login');
+    curl_setopt($ch, CURLOPT_URL, $panel_url . "/login");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 0);
+    curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_path);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+    $ret1 = curl_exec($ch);
+    $GetFileContent = file_get_contents($cookie_path);
+    $Exploded = explode("PHPSESSID", $GetFileContent);
+    $XSRF = "";
+    if (!empty($Exploded) && isset($Exploded['1']) && !empty(trim($Exploded['1']))) {
+        $againEXlpode = explode("\n", $Exploded['1']);
+        $XSRF = "PHPSESSID=" . trim($againEXlpode['0']);
+    }
+}
+print_r($ret1);
+exit;
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $panel_url . '/login');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_POSTFIELDS, "referrer=&username=$username&password=$password&login=");
+curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+$headers = array();
+$headers[] = 'Connection: keep-alive';
+$headers[] = 'Cache-Control: max-age=0';
+$headers[] = 'Upgrade-Insecure-Requests: 1';
+$headers[] = 'Content-Type: application/x-www-form-urlencoded';
+$headers[] = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36';
+$headers[] = 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9';
+$headers[] = 'Referer: ' . $panel_url . '/login';
+$headers[] = 'Accept-Language: en-US,en;q=0.9';
+$headers[] = 'Cookie: ' . $XSRF;
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+$result = curl_exec($ch);
+
+
+if (curl_errno($ch)) {
+    echo 'Error:' . curl_error($ch);
+}
+curl_setopt($ch, CURLOPT_URL,  $panel_url . '/dashboard');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+$result = curl_exec($ch);
+
+$login = "";
+$credits = "";
+$reseller_name = "";
+$dom = new DOMDocument();
+@$dom->loadHTML($result);
+$tags = $dom->getElementsByTagName('span');
+for ($i = 0; $i < $tags->length; $i++) {
+    $grab = $tags->item($i);
+    if ($grab->nodeValue == "Logout") {
+        $login = "yes";
+    }
+    if ($grab->getAttribute('id') == "owner_credits") {
+        $credits = $grab->nodeValue;
+    }
+}
+
+$classname = "m-0";
+$finder = new DomXPath($dom);
+$tags = $finder->query("//*[contains(@class, '$classname')]");
+for ($i = 0; $i < $tags->length; $i++) {
+    $grab = $tags->item($i);
+    if ($grab->tagName == "h5") {
+        $reseller_name = $grab->nodeValue;
+    }
+    break;
+}
+if ($login == "yes") {
+    echo "yes";
+    exit;
+} else {
+    echo "no";
+    exit;
+}

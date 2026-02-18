@@ -1,0 +1,861 @@
+2019/08/10 20:09:13 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5d4f24694ee8b
+    [order] => Array
+        (
+            [reference_id] => 132_5d4f24694ee8b
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Choiceiptv - Invoice #132
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 999
+                                    [currency] => CAD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => ltksolutions81@gmail.com
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => 124 test
+            [address_line_2] => 
+            [locality] => perth
+            [administrative_district_level_1] => Western Australia
+            [postal_code] => 13445
+            [first_name] => test
+            [last_name] => test2
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/08/10 20:09:13 | 
+Creating SquareUp order for Invoice ID : 132
+2019/08/10 20:09:13 | 
+Checkout Response from SquareUp server : 
+2019/08/10 20:09:13 | \nError While Creating Order : no response at all, maybe the server is down
+2019/08/10 20:10:04 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5d4f249ccad78
+    [order] => Array
+        (
+            [reference_id] => 222_5d4f249ccad78
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Choiceiptv - Invoice #222
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 1400
+                                    [currency] => CAD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => ltksolutions81@gmail.com
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => 124 test
+            [address_line_2] => 
+            [locality] => perth
+            [administrative_district_level_1] => Western Australia
+            [postal_code] => 13445
+            [first_name] => test
+            [last_name] => test2
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/08/10 20:10:04 | 
+Creating SquareUp order for Invoice ID : 222
+2019/08/10 20:10:05 | 
+Checkout Response from SquareUp server : 
+2019/08/10 20:10:05 | \nError While Creating Order : no response at all, maybe the server is down
+2019/08/10 20:14:10 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5d4f259278084
+    [order] => Array
+        (
+            [reference_id] => 131_5d4f259278084
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Choiceiptv - Invoice #131
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 999
+                                    [currency] => CAD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => ltksolutions81@gmail.com
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => 124 test
+            [address_line_2] => 
+            [locality] => perth
+            [administrative_district_level_1] => Western Australia
+            [postal_code] => 13445
+            [first_name] => test
+            [last_name] => test2
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/08/10 20:14:10 | 
+Creating SquareUp order for Invoice ID : 131
+2019/08/10 20:14:10 | 
+Checkout Response from SquareUp server : 
+2019/08/10 20:14:10 | \nError While Creating Order : no response at all, maybe the server is down
+2019/08/10 20:17:16 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5d4f264c62e19
+    [order] => Array
+        (
+            [reference_id] => 234_5d4f264c62e19
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Choiceiptv - Invoice #234
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 1400
+                                    [currency] => CAD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => jlm823@icloud.com
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => 191 Lydia Ave
+            [address_line_2] => 
+            [locality] => -
+            [administrative_district_level_1] => RI
+            [postal_code] => 02895
+            [first_name] => Jorge
+            [last_name] => Martinez
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/08/10 20:17:16 | 
+Creating SquareUp order for Invoice ID : 234
+2019/08/10 20:17:17 | 
+Checkout Response from SquareUp server : 
+2019/08/10 20:17:17 | \nError While Creating Order : no response at all, maybe the server is down
+2019/08/10 20:34:59 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5d4f2a732e4ec
+    [order] => Array
+        (
+            [reference_id] => 234_5d4f2a732e4ec
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Choiceiptv - Invoice #234
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 1400
+                                    [currency] => CAD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => jlm823@icloud.com
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => 191 Lydia Ave
+            [address_line_2] => 
+            [locality] => -
+            [administrative_district_level_1] => RI
+            [postal_code] => 02895
+            [first_name] => Jorge
+            [last_name] => Martinez
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/08/10 20:34:59 | 
+Creating SquareUp order for Invoice ID : 234
+2019/08/10 20:34:59 | 
+Checkout Response from SquareUp server : 
+2019/08/10 20:34:59 | \nError While Creating Order : no response at all, maybe the server is down
+2019/08/10 20:39:11 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5d4f2b6f5d76b
+    [order] => Array
+        (
+            [reference_id] => 234_5d4f2b6f5d76b
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Choiceiptv - Invoice #234
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 1400
+                                    [currency] => CAD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => jlm823@icloud.com
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => 191 Lydia Ave
+            [address_line_2] => 
+            [locality] => -
+            [administrative_district_level_1] => RI
+            [postal_code] => 02895
+            [first_name] => Jorge
+            [last_name] => Martinez
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/08/10 20:39:11 | 
+Creating SquareUp order for Invoice ID : 234
+2019/08/10 20:39:12 | 
+Checkout Response from SquareUp server : Array
+(
+    [checkoutID] => CBASEIzvvlI3X-zh3m7QnBm3jd0gAQ
+    [checkoutUrl] => https://connect.squareup.com/v2/checkout?c=CBASEIzvvlI3X-zh3m7QnBm3jd0gAQ&l=CBASELttRK4B8TrENEUYXD33TvsgAQ
+)
+
+2019/08/10 20:39:41 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5d4f2b8d75c2f
+    [order] => Array
+        (
+            [reference_id] => 234_5d4f2b8d75c2f
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Choiceiptv - Invoice #234
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 1400
+                                    [currency] => CAD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => jlm823@icloud.com
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => 191 Lydia Ave
+            [address_line_2] => 
+            [locality] => -
+            [administrative_district_level_1] => RI
+            [postal_code] => 02895
+            [first_name] => Jorge
+            [last_name] => Martinez
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/08/10 20:39:41 | 
+Creating SquareUp order for Invoice ID : 234
+2019/08/10 20:39:42 | 
+Checkout Response from SquareUp server : Array
+(
+    [checkoutID] => CBASELXYjiFnVvDU-Q8jL4xgqTIgAQ
+    [checkoutUrl] => https://connect.squareup.com/v2/checkout?c=CBASELXYjiFnVvDU-Q8jL4xgqTIgAQ&l=CBASELttRK4B8TrENEUYXD33TvsgAQ
+)
+
+2019/08/10 20:40:17 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5d4f2bb1766a3
+    [order] => Array
+        (
+            [reference_id] => 234_5d4f2bb1766a3
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Choiceiptv - Invoice #234
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 1400
+                                    [currency] => CAD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => jlm823@icloud.com
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => 191 Lydia Ave
+            [address_line_2] => 
+            [locality] => -
+            [administrative_district_level_1] => RI
+            [postal_code] => 02895
+            [first_name] => Jorge
+            [last_name] => Martinez
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/08/10 20:40:17 | 
+Creating SquareUp order for Invoice ID : 234
+2019/08/10 20:40:18 | 
+Checkout Response from SquareUp server : 
+2019/08/10 20:40:18 | \nError While Creating Order : no response at all, maybe the server is down
+2019/08/10 23:06:59 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5d4f4e137dc55
+    [order] => Array
+        (
+            [reference_id] => 235_5d4f4e137dc55
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Choiceiptv - Invoice #235
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 1400
+                                    [currency] => CAD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => jlm823@icloud.com
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => 191 Lydia Ave
+            [address_line_2] => 
+            [locality] => -
+            [administrative_district_level_1] => RI
+            [postal_code] => 02895
+            [first_name] => Jorge
+            [last_name] => Martinez
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/08/10 23:06:59 | 
+Creating SquareUp order for Invoice ID : 235
+2019/08/10 23:07:00 | 
+Checkout Response from SquareUp server : 
+2019/08/10 23:07:00 | \nError While Creating Order : no response at all, maybe the server is down
+2019/08/11 18:50:03 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5d50635bb6710
+    [order] => Array
+        (
+            [reference_id] => 131_5d50635bb6710
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Choiceiptv - Invoice #131
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 999
+                                    [currency] => CAD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => ltksolutions81@gmail.com
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => 124 test
+            [address_line_2] => 
+            [locality] => perth
+            [administrative_district_level_1] => Western Australia
+            [postal_code] => 13445
+            [first_name] => test
+            [last_name] => test2
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/08/11 18:50:03 | 
+Creating SquareUp order for Invoice ID : 131
+2019/08/11 18:50:04 | 
+Checkout Response from SquareUp server : 
+2019/08/11 18:50:04 | \nError While Creating Order : no response at all, maybe the server is down
+2019/08/16 01:09:54 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5d5602622865f
+    [order] => Array
+        (
+            [reference_id] => 236_5d5602622865f
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Choice IPTV - Invoice #236
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 2800
+                                    [currency] => USD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => jlm823@icloud.com
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => 191 Lydia Ave
+            [address_line_2] => 
+            [locality] => -
+            [administrative_district_level_1] => RI
+            [postal_code] => 02895
+            [first_name] => Jorge
+            [last_name] => Martinez
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/08/16 01:09:54 | 
+Creating SquareUp order for Invoice ID : 236
+2019/08/16 01:09:54 | 
+Checkout Response from SquareUp server : 
+2019/08/16 01:09:54 | \nError While Creating Order : no response at all, maybe the server is down
+2019/11/03 01:02:44 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5dbe2734a9fb6
+    [order] => Array
+        (
+            [reference_id] => 390_5dbe2734a9fb6
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Zuluhosting - Invoice #390
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 2000
+                                    [currency] => USD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => jay@ottawacapitals.ca
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => -
+            [address_line_2] => 
+            [locality] => -
+            [administrative_district_level_1] => -
+            [postal_code] => -
+            [first_name] => Jay
+            [last_name] => Fox
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/11/03 01:02:44 | 
+Creating SquareUp order for Invoice ID : 390
+2019/11/03 01:02:45 | 
+Checkout Response from SquareUp server : 
+2019/11/03 01:02:45 | \nError While Creating Order : no response at all, maybe the server is down
+2019/11/03 01:02:46 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5dbe2736b8bf0
+    [order] => Array
+        (
+            [reference_id] => 390_5dbe2736b8bf0
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Zuluhosting - Invoice #390
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 2000
+                                    [currency] => USD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => jay@ottawacapitals.ca
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => -
+            [address_line_2] => 
+            [locality] => -
+            [administrative_district_level_1] => -
+            [postal_code] => -
+            [first_name] => Jay
+            [last_name] => Fox
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/11/03 01:02:46 | 
+Creating SquareUp order for Invoice ID : 390
+2019/11/03 01:02:47 | 
+Checkout Response from SquareUp server : 
+2019/11/03 01:02:47 | \nError While Creating Order : no response at all, maybe the server is down
+2019/11/03 01:02:53 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5dbe273d460e0
+    [order] => Array
+        (
+            [reference_id] => 390_5dbe273d460e0
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Zuluhosting - Invoice #390
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 2000
+                                    [currency] => USD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => jay@ottawacapitals.ca
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => -
+            [address_line_2] => 
+            [locality] => -
+            [administrative_district_level_1] => -
+            [postal_code] => -
+            [first_name] => Jay
+            [last_name] => Fox
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/11/03 01:02:53 | 
+Creating SquareUp order for Invoice ID : 390
+2019/11/03 01:02:53 | 
+Checkout Response from SquareUp server : 
+2019/11/03 01:02:53 | \nError While Creating Order : no response at all, maybe the server is down
+2019/11/03 01:26:08 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5dbe2cb0b64fe
+    [order] => Array
+        (
+            [reference_id] => 390_5dbe2cb0b64fe
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Zuluhosting - Invoice #390
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 2000
+                                    [currency] => USD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => jay@ottawacapitals.ca
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => -
+            [address_line_2] => 
+            [locality] => -
+            [administrative_district_level_1] => -
+            [postal_code] => -
+            [first_name] => Jay
+            [last_name] => Fox
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/11/03 01:26:08 | 
+Creating SquareUp order for Invoice ID : 390
+2019/11/03 01:26:09 | 
+Checkout Response from SquareUp server : 
+2019/11/03 01:26:09 | \nError While Creating Order : no response at all, maybe the server is down
+2019/11/03 01:26:15 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5dbe2cb7702b4
+    [order] => Array
+        (
+            [reference_id] => 390_5dbe2cb7702b4
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Zuluhosting - Invoice #390
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 2000
+                                    [currency] => USD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => jay@ottawacapitals.ca
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => -
+            [address_line_2] => 
+            [locality] => -
+            [administrative_district_level_1] => -
+            [postal_code] => -
+            [first_name] => Jay
+            [last_name] => Fox
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/11/03 01:26:15 | 
+Creating SquareUp order for Invoice ID : 390
+2019/11/03 01:26:16 | 
+Checkout Response from SquareUp server : 
+2019/11/03 01:26:16 | \nError While Creating Order : no response at all, maybe the server is down
+2019/11/03 01:26:18 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5dbe2cba51d79
+    [order] => Array
+        (
+            [reference_id] => 390_5dbe2cba51d79
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Zuluhosting - Invoice #390
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 2000
+                                    [currency] => USD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => jay@ottawacapitals.ca
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => -
+            [address_line_2] => 
+            [locality] => -
+            [administrative_district_level_1] => -
+            [postal_code] => -
+            [first_name] => Jay
+            [last_name] => Fox
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/11/03 01:26:18 | 
+Creating SquareUp order for Invoice ID : 390
+2019/11/03 01:26:19 | 
+Checkout Response from SquareUp server : 
+2019/11/03 01:26:19 | \nError While Creating Order : no response at all, maybe the server is down
+2019/11/03 01:47:43 | 
+Data sending to SquareUp for creating order : Array
+(
+    [idempotency_key] => 5dbe31bf2d2e1
+    [order] => Array
+        (
+            [reference_id] => 390_5dbe31bf2d2e1
+            [line_items] => Array
+                (
+                    [0] => Array
+                        (
+                            [name] => Zuluhosting - Invoice #390
+                            [quantity] => 1
+                            [base_price_money] => Array
+                                (
+                                    [amount] => 2000
+                                    [currency] => USD
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [ask_for_shipping_address] => 1
+    [merchant_support_email] => support@zuluhosting.org
+    [pre_populate_buyer_email] => jay@ottawacapitals.ca
+    [pre_populate_shipping_address] => Array
+        (
+            [address_line_1] => -
+            [address_line_2] => 
+            [locality] => -
+            [administrative_district_level_1] => -
+            [postal_code] => -
+            [first_name] => Jay
+            [last_name] => Fox
+        )
+
+    [redirect_url] => https://choice.zuluhosting.org/modules/gateways/callback/squareup.php
+)
+
+2019/11/03 01:47:43 | 
+Creating SquareUp order for Invoice ID : 390
+2019/11/03 01:47:43 | 
+Checkout Response from SquareUp server : 
+2019/11/03 01:47:43 | \nError While Creating Order : no response at all, maybe the server is down
+2020/05/27 02:10:02 | 
+Callback response: Array
+(
+)
+
+2020/05/27 02:10:02 | 
+Callback called with no checkoutId or transactionId or referenceId, redirecting to homepage.

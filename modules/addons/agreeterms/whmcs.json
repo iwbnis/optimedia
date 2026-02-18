@@ -1,0 +1,33 @@
+{
+  "schema": "1.0",
+  "type": "ws-addons",
+  "name": "agreeterms",
+  "version": "5.5.3",
+  "license": "proprietary",
+  "category": "utilities",
+  "description": {
+    "name": "Agree Terms",
+    "tagline": "Terms and Conditions for individual product groups.",
+    "long": "You can set up this module based on different terms and conditions for individual product groups. For example, if you sell dedicated server and you have difference terms then what you show on your site then you can add the term of this group only.",
+    "features": [
+      "Admin can add their own terms on any product group",
+      "Admin has the option to delete older agree terms",
+      "Admin has the option to delete client agree terms history",
+      "Admin can see history with the IP",
+      "And more"
+    ]
+  },
+  "logo": {
+    "filename": "logo.png"
+  },
+  "support": {
+    "docs_url": "https:\/\/whmcsservices.community\/forumdisplay.php?fid=35",
+	"learn_more": "https:\/\/www.whmcsservices.com\/agreeterms.php"
+  },
+  "authors": [
+    {
+      "name": "WHMCS Services",
+      "homepage": "https:\/\/www.whmcsservices.com\/"
+    }
+  ]
+}

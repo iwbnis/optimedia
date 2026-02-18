@@ -1,0 +1,125 @@
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access 1 year"
+    ExpiresByType image/jpeg "access 1 year"
+    ExpiresByType image/png "access 1 year"
+    ExpiresByType image/gif "access 1 year"
+    ExpiresByType text/css "access 1 month"
+    ExpiresByType text/javascript "access 1 month"
+    ExpiresByType application/javascript "access 1 month"
+</IfModule>
+
+# WHMCMS Code Started
+<IfModule mod_rewrite.c>
+RewriteEngine on
+
+# RewriteBase is set to "/" so rules do not need updating if the
+# installation directory is relocated.  It is imperative that
+# there is also a RewriteCond rule later that can effectively get
+# the actual value by comparison against the request URI.
+#
+# If there are _any_ other RewriteBase directives in this file,
+# the last entry will take precedence!
+RewriteBase /
+
+# Determine the actual base and use it
+RewriteCond $0#%{REQUEST_URI} ([^#]*)#(.*)\1$
+# Send all requests to WHMCMS
+# Excluding all built-in WHMCS paths
+RewriteCond %{REQUEST_URI} !/knowledgebase
+RewriteCond %{REQUEST_URI} !/announcements
+RewriteCond %{REQUEST_URI} !/download
+RewriteCond %{REQUEST_URI} !/subscription
+RewriteCond %{REQUEST_URI} !/domain
+#RewriteCond %{REQUEST_URI} !/store
+#RewriteCond %{REQUEST_URI} !/cart
+RewriteCond %{REQUEST_URI} !/invoices
+RewriteCond %{REQUEST_URI} !/invoice
+RewriteCond %{REQUEST_URI} !/auth
+RewriteCond %{REQUEST_URI} !/password
+RewriteCond %{REQUEST_URI} !/account
+RewriteCond %{REQUEST_URI} !/login
+RewriteCond %{REQUEST_URI} !/L0m0t3tt3h35556739
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+RewriteRule ^.*$ %2whmcms.php [QSA,L]
+
+
+</IfModule>
+# WHMCMS Code Ended
+
+
+
+
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    RewriteCond %{HTTP_USER_AGENT}  ^choicehubApp$ [NC]
+    RewriteCond %{THE_REQUEST} !device= [NC]
+    RewriteRule index.php /index.php?%{QUERY_STRING}&device=choicehubApp [L,R]	
+#    RewriteCond %{HTTP_USER_AGENT}  ^choicehubApp$ [NC]
+#    RewriteCond %{THE_REQUEST} !device= [NC]
+#    RewriteRule viewinvoice.php /viewinvoice.php?%{QUERY_STRING}&device=choicehubApp [L,R]
+    # Redirect www to non-www and enforce HTTPS
+    RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+    RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+
+    # WHMCMS Rules
+    # Determine the actual base and use it
+    RewriteCond $0#%{REQUEST_URI} ([^#]*)#(.*)\1$
+    # Excluding all built-in WHMCS paths
+    RewriteCond %{REQUEST_URI} !/knowledgebase
+    RewriteCond %{REQUEST_URI} !/announcements
+    RewriteCond %{REQUEST_URI} !/download
+    RewriteCond %{REQUEST_URI} !/subscription
+    RewriteCond %{REQUEST_URI} !/domain
+    RewriteCond %{REQUEST_URI} !/store
+    RewriteCond %{REQUEST_URI} !/auth
+    RewriteCond %{REQUEST_URI} !/l0m0t3tt3hc35556739
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^.*$ %2whmcms.php [QSA,L]
+
+    # WHMCS Rules
+    # Redirect directories to an address with slash
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^(.+[^/])$ $1/ [R]
+    # Send all other routable paths through index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond $0#%{REQUEST_URI} ([^#]*)#(.*)\1$
+    RewriteRule ^.*$ %2index.php [QSA,L]
+</IfModule>
+
+
+Options -Indexes
+
+SetEnvIf X-Forwarded-Protocol https HTTPS=on
+
+### BEGIN - WHMCS managed rules - DO NOT EDIT BETWEEN WHMCS MARKERS ###
+<IfModule mod_rewrite.c>
+RewriteEngine on
+
+# RewriteBase is set to "/" so rules do not need updating if the
+# installation directory is relocated.  It is imperative that
+# there is also a RewriteCond rule later that can effectively get
+# the actual value by comparison against the request URI.
+# 
+# If there are _any_ other RewriteBase directives in this file,
+# the last entry will take precedence!
+RewriteBase /
+
+# Redirect directories to an address with slash
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^(.+[^/])$  $1/ [R]
+
+# Send all remaining (routable paths) through index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+# Determine and use the actual base
+RewriteCond $0#%{REQUEST_URI} ([^#]*)#(.*)\1$
+RewriteRule ^.*$ %2index.php [QSA,L]
+</IfModule>
+### END - WHMCS managed rules - DO NOT EDIT BETWEEN WHMCS MARKERS ###

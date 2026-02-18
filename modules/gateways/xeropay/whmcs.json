@@ -1,0 +1,17 @@
+{
+  "schema": "1.0",
+  "type": "whmcs-gateways",
+  "name": "xeropay",
+  "license": "proprietary",
+  "category": "payments",
+  "description": {
+    "name": "Xero Payments",
+    "tagline": "Accept payments with Xero."
+  },
+  "authors": [
+    {
+      "name": "WHMCS",
+      "homepage": "https:\/\/www.whmcs.com\/"
+    }
+  ]
+}

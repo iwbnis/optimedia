@@ -1,0 +1,65 @@
+/* iCheck plugin Minimal skin, black
+
+@descritpion - background is image, if u want to change image change position -> background-position: 20 or 40 or 60 or ...
+----------------------------------- */
+.icheckbox_minimal,
+.iradio_minimal {
+    display: inline-block;
+    *display: inline;
+    vertical-align: middle;
+    margin: 0;
+    padding: 0;
+    width: 18px;
+    height: 18px;
+    background: url(minimal.png) no-repeat;
+    border: none;
+    cursor: pointer;
+}
+
+.icheckbox_minimal {
+    background-position: 0 0;
+}
+    .icheckbox_minimal.hover {
+        background-position: -20px 0;
+    }
+    .icheckbox_minimal.checked {
+        background-position: -40px 0;
+    }
+    .icheckbox_minimal.disabled {
+        background-position: -60px 0;
+        cursor: default;
+    }
+    .icheckbox_minimal.checked.disabled {
+        background-position: -80px 0;
+    }
+
+.iradio_minimal {
+    background-size: 1000% 100%;
+    background-position: 55% 0;/*1*/
+}
+    .iradio_minimal.hover {
+        background-size: 1000% 100%;
+        background-position: 66% 0;/*2*/
+    }
+    .iradio_minimal.checked {
+        background-size: 1000% 100%;
+        background-position: 77% 0;/*3*/
+    }
+    .iradio_minimal.disabled {
+        background-size: 1000% 100%;
+        background-position: 88% 0;/*4*/
+    }
+    .iradio_minimal.checked.disabled {
+        background-size: 1000% 100%;
+        background-position: 99% 0; /*5*/
+    }
+
+/* HiDPI support */
+@media (-o-min-device-pixel-ratio: 5/4), (-webkit-min-device-pixel-ratio: 1.25), (min-resolution: 120dpi), (min-resolution: 1.25dppx) {
+    .icheckbox_minimal,
+    .iradio_minimal {
+        background-image: url(minimal@2x.png);
+        -webkit-background-size: 200px 20px;
+        background-size: 200px 20px;
+    }
+}

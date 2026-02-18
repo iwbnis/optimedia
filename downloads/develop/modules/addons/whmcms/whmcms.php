@@ -1,0 +1,2345 @@
+<?php
+/**
+*
+* @ This file is created by http://DeZender.Net
+* @ deZender (PHP7 Decoder for ionCube Encoder)
+*
+* @ Version			:	4.1.0.0
+* @ Author			:	DeZender
+* @ Release on		:	15.05.2020
+* @ Official site	:	http://DeZender.Net
+*
+*/
+
+final class WHMCMSLicense
+{
+	protected $licenseKey;
+	protected $localKey;
+	private $secretKey = '';
+	private $serverURI = '';
+	private $forceRemoteCheck = false;
+	private $localKeyDays = 15;
+	private $allowCheckFailDays = 5;
+	private $todayDate;
+
+	public function __construct($licenseKey, $localKey)
+	{
+		if ($licenseKey) {
+			$this->setLicenseKey($licenseKey);
+		}
+
+		if ($localKey) {
+			$this->setLocalKey($localKey);
+		}
+
+		$this->todayDate = date('Ymd', mktime(0, 0, 0, date('m'), date('d') + 0, date('Y')));
+	}
+
+	private function setLicenseKey($licenseKey)
+	{
+		$this->licenseKey = $licenseKey;
+	}
+
+	private function setLocalKey($localKey)
+	{
+		$this->localKey = $localKey;
+	}
+
+	public function getLicenseKey()
+	{
+		return $this->licenseKey;
+	}
+
+	public function getLocalKey()
+	{
+		return $this->localKey;
+	}
+
+	public function verify()
+	{
+		$token = time() . md5($this->secretKey . $this->getLicenseKey());
+		$installationDomain = str_replace('www.', '', $this->toLower($_SERVER['SERVER_NAME']));
+		$installationIP = $this->getInstallationIP();
+		$installationDirectory = ROOTDIR;
+		$localKeyValid = true;
+		$localKeyResults = $this->decryptLocalKey();
+		$results = [];
+
+		if ($localKeyResults === false) {
+			$localKeyValid = false;
+		}
+		else {
+			$originalCheckDate = $localKeyResults['checkdate'];
+
+			if (!in_array($installationDomain, $localKeyResults['validdomains'])) {
+				$localKeyValid = false;
+				$localKeyResults['status'] = 'Invalid';
+			}
+
+			if (!in_array($installationIP, $localKeyResults['validips'])) {
+				$localKeyValid = false;
+				$localKeyResults['status'] = 'Invalid';
+			}
+
+			if (!in_array($installationDirectory, $localKeyResults['validdirectories'])) {
+				$localKeyValid = false;
+				$localKeyResults['status'] = 'Invalid';
+			}
+		}
+		if (($localKeyValid === true) && ($this->forceRemoteCheck === false)) {
+			$results = $localKeyResults;
+			$results['localcheck'] = true;
+		}
+		else if (($localKeyValid !== true) || ($this->forceRemoteCheck === true)) {
+			$responseCode = 0;
+			$remoteData = '';
+			$serverCheckParams = ['key' => $this->getLicenseKey(), 'domain' => $installationDomain, 'ip' => $installationIP, 'directory' => $installationDirectory, 'token' => $token];
+
+			if (function_exists('curl_exec')) {
+				$remoteConnection = $this->curlConnection($serverCheckParams);
+			}
+			else {
+				$remoteConnection = $this->socketConnection($serverCheckParams);
+			}
+
+			if ($remoteConnection['responsecode'] != 200) {
+				$localKeyCheckDate = $this->parseDate($originalCheckDate);
+
+				if ($localKeyCheckDate === false) {
+					return ['status' => 'Invalid', 'description' => 'Connection to license server was failed!'];
+				}
+
+				$localKeyExpiry = date('Ymd', mktime(0, 0, 0, $localKeyCheckDate['month'], $localKeyCheckDate['day'] + ($this->localKeyDays + $this->allowCheckFailDays), $localKeyCheckDate['year']));
+
+				if ($localKeyExpiry < $this->todayDate) {
+					$results = $localKeyResults;
+					$results['localcheck'] = true;
+				}
+				else {
+					return ['status' => 'Invalid', 'description' => 'Connection to license server was failed!'];
+				}
+			}
+			else {
+				$remoteResults = json_decode($remoteConnection['data'], true);
+				if (!is_array($remoteResults) || (json_last_error() !== JSON_ERROR_NONE)) {
+					return ['status' => 'Invalid', 'message' => 'Invalid License Server Response'];
+				}
+				else {
+					$results = $remoteResults;
+				}
+			}
+			if (!isset($results['token']) || ($results['token'] != $token)) {
+				return ['status' => 'Invalid', 'message' => 'MD5 Checksum Verification Failed'];
+			}
+
+			if ($results['status'] == 'Active') {
+				$results['checkdate'] = $this->todayDate;
+				unset($results['token']);
+				$this->setLocalKey($this->encryptLocalKey($results));
+			}
+
+			$results['localkey'] = $this->getLocalKey();
+			$results['remotecheck'] = true;
+		}
+
+		unset($serverCheckParams, $token, $installationIP, $installationDomain, $installationDirectory, $md5Hash);
+		return $results;
+	}
+
+	private function encryptLocalKey($data)
+	{
+		$serialize = serialize($data);
+		$base64Encode = base64_encode($serialize);
+		$base64Encode = trim($base64Encode, '=');
+		$base64Encode = strrev($base64Encode);
+		$base64Encode = base64_encode($base64Encode);
+		$base64Encode = trim($base64Encode, '=');
+		$base64Encode = strrev($base64Encode);
+		$checkDateHash = md5($data['checkdate'] . $this->secretKey);
+		$checkDateHash = $checkDateHash . $base64Encode;
+		$reverse = strrev($checkDateHash);
+		$reverseHash = md5($reverse . $this->secretKey);
+		$localKey = $reverse . $reverseHash;
+		$wordWrap = wordwrap($localKey, 80, "\n", true);
+		return $wordWrap;
+	}
+
+	private function decryptLocalKey()
+	{
+		$wordWrap = preg_replace('/[' . "\t\r\n" . ']+/', '', $this->getLocalKey());
+		$reverseHash = substr($wordWrap, strlen($wordWrap) - 32);
+		$preReverse = substr($wordWrap, 0, strlen($wordWrap) - 32);
+		$reverse = strrev($preReverse);
+		$checkDateHash = substr($reverse, 0, 32);
+		$preBase64Decode = substr($reverse, 32);
+		$base64Decode = strrev($preBase64Decode);
+		$base64Decode = base64_decode($base64Decode);
+		$base64Decode = strrev($base64Decode);
+		$base64Decode = base64_decode($base64Decode);
+		$unserialize = unserialize($base64Decode);
+		if (($reverseHash != md5($preReverse . $this->secretKey)) || ($checkDateHash != md5($unserialize['checkdate'] . $this->secretKey))) {
+			return false;
+		}
+
+		$localKeyCheckDate = $this->parseDate($unserialize['checkdate']);
+
+		if ($localKeyCheckDate === false) {
+			return false;
+		}
+
+		$localKeyExpiry = date('Ymd', mktime(0, 0, 0, $localKeyCheckDate['month'], $localKeyCheckDate['day'] + $this->localKeyDays, $localKeyCheckDate['year']));
+
+		if ($localKeyExpiry < $this->todayDate) {
+			return false;
+		}
+
+		return $unserialize;
+	}
+
+	private function curlConnection($params)
+	{
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $this->serverURI);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+		curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36');
+		$remoteData = curl_exec($ch);
+		$responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_close($ch);
+		return ['responsecode' => intval($responseCode), 'data' => $remoteData];
+	}
+
+	private function socketConnection($params)
+	{
+		$responseCode = 0;
+		$remoteData = '';
+		$responseCodePattern = '/^HTTP\\/\\d+\\.\\d+\\s+(\\d+)/';
+		$splitServerURI = parse_url($this->serverURI);
+		$openSocket = fsockopen($splitServerURI['host'], 80, $errno, $errstr, 5);
+
+		if ($openSocket) {
+			$headers = ['POST ' . $splitServerURI['path'] . ' HTTP/1.0', 'Host: ' . $splitServerURI['host'], 'User-Agent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36', 'Content-type: application/x-www-form-urlencoded', 'Content-length: ' . strlen(http_build_query($params)), 'Connection: close', '', http_build_query($params)];
+			stream_set_timeout($openSocket, 20);
+			fputs($openSocket, join("\r\n", $headers));
+			$status = socket_get_status($openSocket);
+			$line = '';
+
+			while (!feof($openSocket) && $status) {
+				$line = fgets($openSocket, 1024);
+				$patternMatches = [];
+				if (!$responseCode && preg_match($responseCodePattern, trim($line), $patternMatches)) {
+					$responseCode = (empty($patternMatches[1]) ? 0 : $patternMatches[1]);
+				}
+
+				$remoteData .= $line;
+				$line = '';
+				$status = socket_get_status($openSocket);
+			}
+
+			fclose($openSocket);
+			preg_match_all('/\\{(?:[^{}]|(?R))*\\}/', $remoteData, $matches);
+			return ['responsecode' => intval($responseCode), 'data' => $matches[0][0]];
+		}
+
+		return [];
+	}
+
+	public function getExtras($fieldName)
+	{
+		$localKeyResults = $this->decryptLocalKey();
+
+		if (isset($localKeyResults['extras'][$fieldName])) {
+			return $localKeyResults['extras'][$fieldName];
+		}
+
+		return NULL;
+	}
+
+	protected function toLower($string)
+	{
+		if (function_exists('mb_strtolower')) {
+			return mb_strtolower($string);
+		}
+
+		return strtolower($string);
+	}
+
+	public function forceRemoteCheck($status)
+	{
+		if ($status === true) {
+			$this->forceRemoteCheck = true;
+		}
+		else {
+			$this->forceRemoteCheck = false;
+		}
+	}
+
+	private function parseDate($date)
+	{
+		if (strlen($date) != 8) {
+			return false;
+		}
+
+		return ['year' => substr($date, 0, 4), 'month' => substr($date, 4, 2), 'day' => substr($date, 6, 2)];
+	}
+
+	protected function getInstallationIP()
+	{
+		$getHostName = (WHMCMS\Base::fromInput($_SERVER['SERVER_NAME']) !== '' ? $_SERVER['SERVER_NAME'] : gethostname());
+		$installationIP = gethostbyname($getHostName);
+		if ((WHMCMS\Base::fromInput($_SERVER['SERVER_ADDR']) !== '') && (filter_var($_SERVER['SERVER_ADDR'], FILTER_VALIDATE_IP) !== false)) {
+			$installationIP = $_SERVER['SERVER_ADDR'];
+		}
+		if ((WHMCMS\Base::fromInput($_SERVER['LOCAL_ADDR']) !== '') && (filter_var($_SERVER['LOCAL_ADDR'], FILTER_VALIDATE_IP) !== false)) {
+			$installationIP = $_SERVER['LOCAL_ADDR'];
+		}
+
+		if (filter_var($installationIP, FILTER_VALIDATE_IP) === false) {
+			$installationIP = '0.0.0.0';
+		}
+
+		return $installationIP;
+	}
+}
+
+function whmcms_config()
+{
+	return [
+		'name'        => 'WHMCMS',
+		'version'     => '3.2.2',
+		'author'      => '<a href="http://www.whmcms.com" taret="_blank">SENTQ</a>',
+		'language'    => 'english',
+		'description' => 'a WHMCS feature-rich multilingual cms addon enabling the creation of unlimited custom pages easily with many awesome features!',
+		'fields'      => []
+	];
+}
+
+function whmcms_activate()
+{
+	$querylist = [];
+	$querylist[] = 'CREATE TABLE IF NOT EXISTS `mod_whmcms_errorlog` (  `logid` int(11) NOT NULL AUTO_INCREMENT,  `code` varchar(20) COLLATE utf8_unicode_ci NOT NULL,  `refurl` text COLLATE utf8_unicode_ci NOT NULL,  `targeturl` text COLLATE utf8_unicode_ci NOT NULL,  `datecreate` datetime NOT NULL,  `ip` varchar(50) COLLATE utf8_unicode_ci NOT NULL,  `useragent` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  PRIMARY KEY (`logid`)) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
+	$querylist[] = 'CREATE TABLE IF NOT EXISTS `mod_whmcms_errorpages` (  `pageid` int(11) NOT NULL AUTO_INCREMENT,  `topid` int(11) NOT NULL DEFAULT \'0\',  `code` varchar(20) COLLATE utf8_unicode_ci NOT NULL,  `title` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  `content` longtext COLLATE utf8_unicode_ci NOT NULL,  `datemodify` datetime NOT NULL,  `datelastvisit` datetime NOT NULL,  `hits` int(11) NOT NULL DEFAULT \'0\',  `language` varchar(25) COLLATE utf8_unicode_ci NOT NULL,  `headercontent` text COLLATE utf8_unicode_ci NOT NULL,  PRIMARY KEY (`pageid`)) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
+	$querylist[] = 'CREATE TABLE IF NOT EXISTS `mod_whmcms_faq` (  `faqid` int(11) NOT NULL AUTO_INCREMENT,  `topid` int(11) NOT NULL DEFAULT \'0\',  `groupid` int(11) NOT NULL,  `question` text COLLATE utf8_unicode_ci NOT NULL,  `answer` text COLLATE utf8_unicode_ci NOT NULL,  `enable` tinyint(1) NOT NULL DEFAULT \'1\',  `hits` int(11) NOT NULL DEFAULT \'0\',  `datecreate` datetime NOT NULL,  `datemodify` datetime NOT NULL,  `language` varchar(50) COLLATE utf8_unicode_ci NOT NULL,  PRIMARY KEY (`faqid`)) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
+	$querylist[] = 'CREATE TABLE IF NOT EXISTS `mod_whmcms_faqgroups` (  `groupid` int(11) NOT NULL AUTO_INCREMENT,  `topid` int(11) NOT NULL DEFAULT \'0\',  `title` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  `alias` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  `hits` int(11) NOT NULL DEFAULT \'0\',  `language` varchar(50) COLLATE utf8_unicode_ci NOT NULL,  PRIMARY KEY (`groupid`)) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
+	$querylist[] = 'CREATE TABLE IF NOT EXISTS `mod_whmcms_menu` (  `menuid` int(10) NOT NULL AUTO_INCREMENT,  `categoryid` int(11) NOT NULL,  `topid` int(11) NOT NULL DEFAULT \'0\',  `parentid` int(11) NOT NULL DEFAULT \'0\',  `title` text COLLATE utf8_unicode_ci NOT NULL,  `url` text COLLATE utf8_unicode_ci NOT NULL,  `url_type` varchar(50) COLLATE utf8_unicode_ci NOT NULL,  `target` enum(\'_self\',\'_blank\') COLLATE utf8_unicode_ci NOT NULL DEFAULT \'_self\',  `reorder` int(11) NOT NULL DEFAULT \'0\',  `enable` int(1) NOT NULL DEFAULT \'1\',  `private` int(1) NOT NULL DEFAULT \'0\',  `css_class` varchar(50) COLLATE utf8_unicode_ci NOT NULL,  `css_id` varchar(50) COLLATE utf8_unicode_ci NOT NULL,  `css_hassubclass` varchar(50) COLLATE utf8_unicode_ci NOT NULL,  `css_submenuclass` varchar(50) COLLATE utf8_unicode_ci NOT NULL,  `datecreate` datetime NOT NULL,  `datemodify` datetime NOT NULL,  `language` varchar(50) COLLATE utf8_unicode_ci NOT NULL,  PRIMARY KEY (`menuid`)) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
+	$querylist[] = 'CREATE TABLE IF NOT EXISTS `mod_whmcms_menucategories` (  `categoryid` int(11) NOT NULL AUTO_INCREMENT,  `title` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  `css_class` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  `css_id` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  PRIMARY KEY (`categoryid`)) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
+	$querylist[] = 'CREATE TABLE IF NOT EXISTS `mod_whmcms_pages` (  `pageid` int(11) NOT NULL AUTO_INCREMENT,  `topid` int(11) NOT NULL DEFAULT \'0\',  `parentid` int(11) NOT NULL DEFAULT \'0\',  `alias` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  `title` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  `subtitle` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  `content` longtext COLLATE utf8_unicode_ci NOT NULL,  `private` int(1) NOT NULL DEFAULT \'0\',  `metadescription` text COLLATE utf8_unicode_ci NOT NULL,  `metakeywords` text COLLATE utf8_unicode_ci NOT NULL,  `datecreate` datetime NOT NULL,  `datemodify` datetime NOT NULL,  `enable` tinyint(1) NOT NULL DEFAULT \'1\',  `hits` int(11) NOT NULL DEFAULT \'0\',  `language` varchar(25) COLLATE utf8_unicode_ci NOT NULL,  `metaindex` varchar(2) COLLATE utf8_unicode_ci NOT NULL,  `metafollow` varchar(2) COLLATE utf8_unicode_ci NOT NULL,  `metaarchive` varchar(2) COLLATE utf8_unicode_ci NOT NULL,  `metaodp` varchar(2) COLLATE utf8_unicode_ci NOT NULL,  `metasnippet` varchar(2) COLLATE utf8_unicode_ci NOT NULL,  `hidetitle` varchar(2) COLLATE utf8_unicode_ci NOT NULL,  `breadcrumbs` varchar(2) COLLATE utf8_unicode_ci NOT NULL,  `googleplus` varchar(2) COLLATE utf8_unicode_ci NOT NULL,  `fblike` varchar(2) COLLATE utf8_unicode_ci NOT NULL,  `twitter` varchar(2) COLLATE utf8_unicode_ci NOT NULL,  `fbcomment` varchar(2) COLLATE utf8_unicode_ci NOT NULL,  `headercontent` text COLLATE utf8_unicode_ci NOT NULL,  PRIMARY KEY (`pageid`)) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
+	$querylist[] = 'CREATE TABLE IF NOT EXISTS `mod_whmcms_photos` (  `photoid` int(11) NOT NULL AUTO_INCREMENT,  `topid` int(11) NOT NULL DEFAULT \'0\',  `parentid` int(11) NOT NULL,  `title` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  `details` text COLLATE utf8_unicode_ci NOT NULL,  `source` text COLLATE utf8_unicode_ci NOT NULL,  `datemodify` datetime NOT NULL,  `enable` tinyint(1) NOT NULL DEFAULT \'0\',  `language` varchar(50) COLLATE utf8_unicode_ci NOT NULL,  PRIMARY KEY (`photoid`)) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
+	$querylist[] = 'CREATE TABLE IF NOT EXISTS `mod_whmcms_portfolio` (  `projectid` int(11) NOT NULL AUTO_INCREMENT,  `topid` int(11) NOT NULL DEFAULT \'0\',  `client` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  `title` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  `alias` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  `url` text COLLATE utf8_unicode_ci NOT NULL,  `details` text COLLATE utf8_unicode_ci NOT NULL,  `logo` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  `tags` text COLLATE utf8_unicode_ci NOT NULL,  `enable` tinyint(1) NOT NULL DEFAULT \'0\',  `language` varchar(50) COLLATE utf8_unicode_ci NOT NULL,  `datemodify` datetime NOT NULL,  `datecreate` datetime NOT NULL,  `datepublished` varchar(20) COLLATE utf8_unicode_ci NOT NULL,  `hits` int(11) NOT NULL DEFAULT \'0\',  PRIMARY KEY (`projectid`)) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
+	$querylist[] = 'CREATE TABLE IF NOT EXISTS `mod_whmcms_portfoliocategories` (  `categoryid` int(11) NOT NULL AUTO_INCREMENT,  `topid` int(11) NOT NULL DEFAULT \'0\',  `title` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  `alias` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  `enable` int(1) NOT NULL DEFAULT \'1\',  `language` varchar(50) COLLATE utf8_unicode_ci NOT NULL,  PRIMARY KEY (`categoryid`)) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
+	$querylist[] = 'CREATE TABLE IF NOT EXISTS `mod_whmcms_portfoliorelations` (  `projectid` int(11) NOT NULL,  `categoryid` int(11) NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
+	$querylist[] = 'CREATE TABLE IF NOT EXISTS `mod_whmcms_settings` (  `varname` varchar(250) COLLATE utf8_unicode_ci NOT NULL,  `value` text COLLATE utf8_unicode_ci NOT NULL) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;';
+	$querylist[] = 'INSERT INTO `mod_whmcms_errorpages` (`pageid`, `topid`, `code`, `title`, `content`, `datemodify`, `datelastvisit`, `hits`, `language`, `headercontent`) VALUES (1, 0, \'400\', \'400 Bad Request\', \'&lt;p&gt;The request cannot be fulfilled due to bad syntax.&lt;/p&gt;\', \'0000-00-00 00:00:00\', \'0000-00-00 00:00:00\', 0, \'english\', \'\'),(2, 0, \'403\', \'403 Forbidden\', \'&lt;p&gt;The server has refused to fulfil your request.&lt;/p&gt;\', \'0000-00-00 00:00:00\', \'0000-00-00 00:00:00\', 0, \'english\', \'\'),(3, 0, \'404\', \'404 Not Found\', \'&lt;p&gt;The page you requested was not found on this server.&lt;/p&gt;\', \'0000-00-00 00:00:00\', \'0000-00-00 00:00:00\', 0, \'english\', \'\'),(4, 0, \'405\', \'405 Method Not Allowed\', \'&lt;p&gt;The method specified in the request is not allowed for the specified resource.&lt;/p&gt;\', \'0000-00-00 00:00:00\', \'0000-00-00 00:00:00\', 0, \'english\', \'\'),(5, 0, \'408\', \'408 Request Timeout\', \'&lt;p&gt;Your browser failed to send a request in the time allowed by the server.&lt;/p&gt;\', \'0000-00-00 00:00:00\', \'0000-00-00 00:00:00\', 0, \'english\', \'\'),(6, 0, \'500\', \'500 Internal Server Error\', \'&lt;p&gt;The request was unsuccessful due to an unexpected condition encountered by the server.&lt;/p&gt;\', \'0000-00-00 00:00:00\', \'0000-00-00 00:00:00\', 0, \'english\', \'\'),(7, 0, \'502\', \'502 Bad Gateway\', \'&lt;p&gt;The server received an invalid response while trying to carry out the request.&lt;/p&gt;\', \'0000-00-00 00:00:00\', \'0000-00-00 00:00:00\', 0, \'english\', \'\'),(8, 0, \'504\', \'504 Gateway Timeout\', \'&lt;p&gt;The upstream server failed to send a request in the time allowed by the server.&lt;/p&gt;\', \'0000-00-00 00:00:00\', \'0000-00-00 00:00:00\', 0, \'english\', \'\');';
+	$querylist[] = 'INSERT INTO `mod_whmcms_settings` (`varname`, `value`) VALUES (\'license\', \'\'),(\'licensekey\', \'\'),(\'photowidth\', \'800\'),(\'photoheight\', \'600\'),(\'thumbwidth\', \'200\'),(\'thumbheight\', \'200\'),(\'imagequality\', \'90\'),(\'customize_css\', \'\'),(\'customize_js\', \'\'),(\'frontendfile\', \'whmcms.php\'),(\'homepage\', \'default\'),(\'editor\', \'ckeditor\'),(\'seourls\', \'disable\'),(\'portfoliolayout\', \'filter\'),(\'portfolioitemsinrow\', \'3\'),(\'portfolioitemsinpage\', \'\'),(\'error400\', \'disable\'),(\'error403\', \'disable\'),(\'error404\', \'disable\'),(\'error405\', \'disable\'),(\'error408\', \'disable\'),(\'error500\', \'disable\'),(\'error502\', \'disable\'),(\'error504\', \'disable\'),(\'whmcsdir\', \'\'),(\'metatags\', \'enable\'),(\'metakeywords\', \'default, meta, keywords\'),(\'metadescription\', \'default meta description\'),(\'metaimage\', \'\'),(\'portfoliosort\', \'DESC\'),(\'portfoliofilterby\', \'category\');';
+	$querylist[] = 'INSERT INTO `mod_whmcms_settings` (`varname` ,`value`) VALUES (\'metaimage398\', \'\');';
+	$querylist[] = 'ALTER TABLE  `mod_whmcms_menu` ADD  `css_iconclass` VARCHAR( 250 ) NOT NULL AFTER  `css_submenuclass`';
+	$querylist[] = 'ALTER TABLE  `mod_whmcms_menu` ADD  `menucondition` VARCHAR( 100 ) NOT NULL AFTER  `css_iconclass`';
+	$querylist[] = 'ALTER TABLE  `mod_whmcms_menu` ADD  `menubadge` VARCHAR( 100 ) NOT NULL AFTER  `menucondition`';
+	$querylist[] = 'ALTER TABLE  `mod_whmcms_menucategories` ADD  `css_activeclass` VARCHAR( 100 ) NOT NULL';
+
+	foreach ($querylist as $key => $queryorder) {
+		WHMCMS\Database\Capsule::statement($queryorder);
+	}
+
+	WHMCMS\Base::setConfig('vsixtemplate', 'yes');
+	WHMCMS\Base::setConfig('UploadEnableCache', 'yes');
+	WHMCMS\Base::setConfig('UploadCachePeriod', 24);
+	WHMCMS\Base::setConfig('UploadResizeWidth', 400);
+	WHMCMS\Base::setConfig('UploadDirectory', 'attachments');
+	WHMCMS\Base::setConfig('UploadCustomDirectory', '');
+	WHMCMS\Base::setConfig('PrimaryNavbarCategoryid', 0);
+	WHMCMS\Base::setConfig('SecondaryNavbarCategoryid', 0);
+	WHMCMS\Base::setConfig('AutoApplyRewriteRules', 'yes');
+	WHMCMS\Database\Capsule::statement('ALTER TABLE `mod_whmcms_menucategories` ADD `integration` TINYINT(1) NOT NULL DEFAULT \'0\' AFTER `css_activeclass`;');
+	WHMCMS\Base::setConfig('FriendlyURLsMode', 'basic');
+	return ['status' => 'success', 'description' => 'WHMCMS installed successfully.'];
+}
+
+function whmcms_upgrade($vars)
+{
+	$queries = [];
+	$version = $vars['version'];
+
+	if (version_compare($version, '2.1', '<') === true) {
+		WHMCMS\Base::setConfig('metaimage398', '');
+	}
+
+	if (version_compare($version, '2.1.1', '<') === true) {
+		$queries = [];
+		$queries[] = 'ALTER TABLE  `mod_whmcms_menu` ADD  `css_iconclass` VARCHAR( 250 ) NOT NULL AFTER  `css_submenuclass`;';
+		$queries[] = 'ALTER TABLE  `mod_whmcms_menu` ADD  `menucondition` VARCHAR( 100 ) NOT NULL AFTER  `css_iconclass`;';
+		$queries[] = 'ALTER TABLE  `mod_whmcms_menu` ADD  `menubadge` VARCHAR( 100 ) NOT NULL AFTER  `menucondition`;';
+		$queries[] = 'ALTER TABLE  `mod_whmcms_menucategories` ADD  `css_activeclass` VARCHAR( 100 ) NOT NULL;';
+
+		foreach ($queries as $key => $queryorder) {
+			WHMCMS\Database\Capsule::statement($queryorder);
+		}
+	}
+
+	if (version_compare($version, '2.5.0', '<') === true) {
+		WHMCMS\Base::setConfig('UploadEnableCache', 'yes');
+		WHMCMS\Base::setConfig('UploadCachePeriod', 24);
+		WHMCMS\Base::setConfig('UploadResizeWidth', 400);
+		WHMCMS\Base::setConfig('UploadDirectory', 'attachments');
+		WHMCMS\Base::setConfig('UploadCustomDirectory', '');
+		WHMCMS\Base::setConfig('PrimaryNavbarCategoryid', 0);
+		WHMCMS\Base::setConfig('SecondaryNavbarCategoryid', 0);
+	}
+
+	if (version_compare($version, '2.5.1', '<') === true) {
+		WHMCMS\Base::setConfig('AutoApplyRewriteRules', 'yes');
+	}
+
+	if (version_compare($version, '3.0.0', '<') === true) {
+		WHMCMS\Database\Capsule::statement('ALTER TABLE `mod_whmcms_menucategories` ADD `integration` TINYINT(1) NOT NULL DEFAULT \'0\' AFTER `css_activeclass`;');
+		WHMCMS\Base::setConfig('FriendlyURLsMode', 'basic');
+	}
+
+	return ['status' => 'success', 'description' => 'WHMCMS updated successfully.'];
+}
+
+function whmcms_deactivate()
+{
+	$queries = [];
+	$queries[] = 'DROP TABLE `mod_whmcms_errorlog`;';
+	$queries[] = 'DROP TABLE `mod_whmcms_errorpages`;';
+	$queries[] = 'DROP TABLE `mod_whmcms_faq`;';
+	$queries[] = 'DROP TABLE `mod_whmcms_faqgroups`;';
+	$queries[] = 'DROP TABLE `mod_whmcms_menu`;';
+	$queries[] = 'DROP TABLE `mod_whmcms_menucategories`;';
+	$queries[] = 'DROP TABLE `mod_whmcms_pages`;';
+	$queries[] = 'DROP TABLE `mod_whmcms_photos`;';
+	$queries[] = 'DROP TABLE `mod_whmcms_portfolio`;';
+	$queries[] = 'DROP TABLE `mod_whmcms_portfoliocategories`;';
+	$queries[] = 'DROP TABLE `mod_whmcms_portfoliorelations`;';
+	$queries[] = 'DROP TABLE `mod_whmcms_settings`;';
+
+	foreach ($queries as $index => $query) {
+		WHMCMS\Database\Capsule::statement($query);
+	}
+
+	return ['status' => 'success', 'description' => 'WHMCMS successfully deactivated.'];
+}
+
+function whmcms_sidebar($vars)
+{
+	$moduleLink = $vars['modulelink'];
+	$moduleVersion = $vars['version'];
+	$updateAvailabel = '<a href="' . $moduleLink . '&action=updates" class="label label-danger">' . WHMCMS\Base::__('sideBarUpdateNow') . '</a>';
+	$updateLatest = '<a href="' . $moduleLink . '&action=updates" class="label label-success">' . WHMCMS\Base::__('sideBarUptoDate') . '</a>';
+	$sidebar = '<span class="header"><i class="fa fa-home"></i> WHMCMS</span>' . "\r\n" . '    <ul class="menu whmcms_sidemenu">' . "\r\n" . '        <li><a href="' . $moduleLink . '"><i class="fa fa-fw fa-tachometer-alt fa-dashboard"></i> ' . WHMCMS\Base::__('sideBarDashboard') . '</a></li>' . "\r\n" . '        <li><a href="' . $moduleLink . '&action=listpages"><i class="fa fa-fw fa-file-alt fa-file-text"></i> ' . WHMCMS\Base::__('sideBarPages') . '</a></li>' . "\r\n" . '        <li><a href="' . $moduleLink . '&action=menu"><i class="fa fa-fw fa-bars"></i> ' . WHMCMS\Base::__('sideBarMenu') . '</a></li>' . "\r\n" . '        <li><a href="' . $moduleLink . '&action=faq"><i class="fa fa-fw fa-question-circle"></i> ' . WHMCMS\Base::__('sideBarFaq') . '</a></li>' . "\r\n" . '        <li><a href="' . $moduleLink . '&action=errorpages"><i class="fa fa-fw fa-times"></i> ' . WHMCMS\Base::__('sideBarErrorPages') . '</a></li>' . "\r\n" . '        <li><a href="' . $moduleLink . '&action=customize"><i class="fa fa-fw fa-code"></i> ' . WHMCMS\Base::__('sideBarCustomize') . '</a></li>' . "\r\n" . '        <li><a href="' . $moduleLink . '&action=settings"><i class="fa fa-fw fa-cog"></i> ' . WHMCMS\Base::__('sideBarSettings') . '</a></li>' . "\r\n" . '        <li><a href="' . $moduleLink . '&action=support"><i class="fa fa-fw fa-question-circle"></i> ' . WHMCMS\Base::__('sideBarSupport') . '</a></li>' . "\r\n" . '        <li><a href="' . $moduleLink . '&action=updates"><i class="fa fa-fw fa-download"></i> ' . WHMCMS\Base::__('sideBarVersion') . ' ' . $moduleVersion . '</a></li>' . "\r\n" . '        <li class="label-version">' . (version_compare(WHMCMS\Base::getLatestVersion(), $moduleVersion, '>') ? $updateAvailabel : $updateLatest) . '</li>' . "\r\n" . '    </ul>';
+	$sidebar .= '<span class="header"><i class="fa fa-image fa-picture-o"></i> ' . WHMCMS\Base::__('sideBarPortfolio') . '</span>' . "\r\n" . '    <ul class="menu whmcms_sidemenu">' . "\r\n" . '        <li><a href="' . $moduleLink . '&action=listprojects"><i class="fa fa-fw fa-image fa-picture-o"></i> ' . WHMCMS\Base::__('sideBarProjects') . '</a></li>' . "\r\n" . '        <li><a href="' . $moduleLink . '&action=portfolio"><i class="fa fa-fw fa-folder-open"></i> ' . WHMCMS\Base::__('sideBarCategories') . '</a></li>' . "\r\n" . '    </ul>';
+	return $sidebar;
+}
+
+function whmcms_output($vars)
+{
+	global $attachments_dir;
+	global $templates_compiledir;
+	define('MODURL', $vars['modulelink']);
+	define('MODVERSION', $vars['version']);
+	define('TEMPLATE', ROOTDIR . '/modules/addons/whmcms/assets/tpl/');
+	define('DB_PREFIX', 'mod_whmcms_');
+	$smarty = new Smarty();
+	$smarty->setCompileDir($templates_compiledir);
+	$smarty->setTemplateDir(ROOTDIR . '/modules/addons/whmcms/assets/tpl/');
+	$smarty->compile_id = 'efccb7ef69c80261e2fba91ae5d82688';
+	$smarty->registerClass('WHMCMS', '\\WHMCMS\\Base');
+	$smarty->assign('modurl', MODURL);
+	define('MODLICENSE', WHMCMS\Base::getConfig('licensekey'));
+
+
+/*
+	if (WHMCMS\Base::fromRequest('action') === 'updatelicensekey') {
+		WHMCMS\Base::setConfig('licensekey', WHMCMS\Base::fromPost('licensekey'));
+		WHMCMS\Base::setConfig('license', '');
+		header('Location: ' . MODURL);
+		exit();
+	}
+
+	if (WHMCMS\Base::fromRequest('action') === 'forcelicensecheck') {
+		WHMCMS\Base::setConfig('license', '');
+		header('Location: ' . MODURL);
+		exit();
+	}
+
+	$license = new WHMCMSLicense(WHMCMS\Base::getConfig('licensekey'), WHMCMS\Base::getConfig('license'));
+	$licenseResults = $license->verify();
+
+	if (WHMCMS\Base::fromInput($licenseResults['localkey']) !== '') {
+		WHMCMS\Base::setConfig('license', $licenseResults['localkey']);
+	}
+
+	if ($licenseResults['status'] !== 'Active') {
+		if (WHMCMS\Base::fromInput(WHMCMS\Base::getConfig('licensekey')) !== '') {
+			$smarty->assign('licenseStatus', $licenseResults['status']);
+			$smarty->assign('licenseMessage', $licenseResults['message']);
+		}
+
+		$smarty->assign('licensekey', WHMCMS\Base::getConfig('licensekey'));
+		$smarty->display('license.tpl');
+		return NULL;
+	}
+
+	if ($license->getExtras('allowedversion') === NULL) {
+		$license->forceRemoteCheck(true);
+		$licenseResults = $license->verify();
+	}
+
+	if (version_compare($license->getExtras('allowedversion'), MODVERSION, '>') === true) {
+		$smarty->assign('licenseStatus', 'Renewal Required');
+		$smarty->assign('licenseMessage', 'You are using an WHMCMS version for which the support & updates validity period expired before this release. Therefore in order to use this version of WHMCMS, you first need to renew your support & updates access. You can do this from our client area @ <a href=\'http://www.whmcms.com\' target=\'_blank\'>www.whmcms.com</a>');
+		$smarty->assign('licensekey', WHMCMS\Base::getConfig('licensekey'));
+		$smarty->display('license.tpl');
+		echo 'Hi 2';
+		return NULL;
+	}
+*/
+	$action = WHMCMS\Base::fromRequest('action');
+	$pageId = WHMCMS\Base::fromRequest('pageid', 'int');
+	$categoryId = WHMCMS\Base::fromRequest('categoryid', 'int');
+	$projectId = WHMCMS\Base::fromRequest('projectid', 'int');
+	$photoId = WHMCMS\Base::fromRequest('photoid', 'int');
+	$groupId = WHMCMS\Base::fromRequest('groupid', 'int');
+	$faqId = WHMCMS\Base::fromRequest('faqid', 'int');
+	$menuId = WHMCMS\Base::fromRequest('menuid', 'int');
+	$code = WHMCMS\Base::fromRequest('code', 'int');
+	$pagenum = WHMCMS\Base::fromRequest('page', 'int');
+	$tab = WHMCMS\Base::fromRequest('tab');
+	$smarty->assign('action', $action);
+	$smarty->assign('pageid', $pageId);
+	$smarty->assign('categoryid', $categoryId);
+	$smarty->assign('projectid', $projectId);
+	$smarty->assign('photoid', $photoId);
+	$smarty->assign('groupid', $groupId);
+	$smarty->assign('faqid', $faqId);
+	$smarty->assign('menuid', $menuId);
+	$smarty->assign('code', $code);
+	$smarty->assign('pagenum', $pagenum);
+	$smarty->assign('tab', $tab);
+	$smarty->assign('editor', WHMCMS\Base::getConfig('editor'));
+
+	if (WHMCMS\Base::getSystemConfig('SystemSSLURL') !== NULL) {
+		$_systemurl = str_replace('https:', '', WHMCMS\Base::getSystemConfig('SystemSSLURL'));
+	}
+	else {
+		$_systemurl = str_replace('http:', '', WHMCMS\Base::getSystemConfig('SystemURL'));
+	}
+
+	$smarty->assign('_systemurl', $_systemurl);
+	$ajax = WHMCMS\Base::fromRequest('ajax', 'int');
+	$isAjax = false;
+
+	if ($ajax === 1) {
+		$isAjax = true;
+		header('HTTP/1.1 200 OK;');
+		header('Content-Type: application/json; charset=utf-8;');
+	}
+
+	$BC = [];
+	$BC[MODURL] = WHMCMS\Base::__('breadcrumbsDashboard');
+
+	if (true) {
+		if ($action === '') {
+			$integration = [
+				'errors'     => [],
+				'warnings'   => [],
+				'successful' => []
+			];
+
+			if (WHMCMS\Base::isUpToDate() === 'update available') {
+				$integration['errors'][] = ['title' => 'New Version Available', 'description' => 'update to the latest version to benefit from latest improvements, fixes and new features.'];
+			}
+			else if (WHMCMS\Base::isUpToDate() === 'unknown') {
+				$integration['warnings'][] = ['title' => 'v' . MODVERSION, 'description' => 'unable to determine whether you have the latest version or not, visit <a href=\'https://www.whmcms.com/\' target=\'_blank\'>www.whmcms.com</a> for more information'];
+			}
+			else if (WHMCMS\Base::isUpToDate() === 'up to date') {
+				$integration['successful'][] = ['title' => 'Up To Date', 'description' => 'Your installation is up-to-date, check this page in regular basis to be informed when new version became available.'];
+			}
+			if (!is_file(ROOTDIR . '/.htaccess') || !is_writable(ROOTDIR . '/.htaccess')) {
+				$integration['errors'][] = ['title' => '.htaccess file not exists', 'description' => 'make sure ".htaccess" file exists and writable in WHMCS main directory in order to use SEO Friendly URLs, <a href=\'https://www.whmcms.com/knowledgebase/11/SEO-Friendly-URLs.html\' target=\'_blank\'>click here</a> for more information.'];
+			}
+
+			$isRewriteRulesUpToDate = WHMCMS\Base::isRewriteRulesUpToDate();
+
+			if ($isRewriteRulesUpToDate['result'] === 'nomatch') {
+				$integration['errors'][] = ['title' => 'Rewrite Rules Outdated', 'description' => '.htaccess file has outdated rules, please update it in order for WHMCMS to work as expected <a href=\'' . MODURL . '&action=applyrewriterules\'>click here</a> to apply the updated rules automatically (recommended), or you may copy the <a href=\'' . MODURL . '&action=customize&tab=htaccess\'>required rules</a> and apply it manually, <a href=\'https://www.whmcms.com/knowledgebase/11/SEO-Friendly-URLs.html\' target=\'_blank\'>click here</a> for more information.'];
+			}
+
+			if (is_file(ROOTDIR . '/templates/' . WHMCMS\Base::getSystemConfig('Template') . '/whmcms/output.tpl') === false) {
+				$integration['errors'][] = ['title' => 'Default Template Integration Missing', 'description' => 'The default template (' . WHMCMS\Base::getSystemConfig('Template') . ') missing the required integration for WHMCMS to work as expected, you need to copy this directory "/templates/six/<b>whmcms</b>/" from WHMCMS downloaded .zip file, <a href=\'https://www.whmcms.com/knowledgebase/9/Template-Integration.html\' target=\'_blank\'>click here</a> for more information.'];
+			}
+
+			$missingTemplates = [];
+
+			foreach (WHMCMS\Base::getClientAreaTemplates(true) as $template) {
+				if (is_file(ROOTDIR . '/templates/' . $template . '/whmcms/output.tpl') === false) {
+					$missingTemplates[] = $template;
+				}
+			}
+
+			if (0 < count($missingTemplates)) {
+				$integration['warnings'][] = ['title' => 'Template Integration Missing', 'description' => 'The following template(s) does not have the required integration for WHMCMS to work as expected if/when you switch to one of them:<br>+ ' . join('<br>+ ', $missingTemplates) . '<br><br>You need to copy this directory "/templates/six/<b>whmcms</b>/" from WHMCMS downloaded .zip file inside each of the mentioned templates directory, <a href=\'https://www.whmcms.com/knowledgebase/9/Template-Integration.html\' target=\'_blank\'>click here</a> for more information.'];
+			}
+
+			if (is_file(ROOTDIR . '/' . WHMCMS\Base::getConfig('frontendfile')) === false) {
+				$integration['errors'][] = ['title' => 'Client Area File Missing', 'description' => 'The following file (' . WHMCMS\Base::getConfig('frontendfile') . ') does not exists in WHMCS main directory, copy the original file from latest version of WHMCMS .zip file and upload it to WHMCS main directory, and/or make sure WHMCMS -> <a href=\'' . MODURL . '&action=settings\'>General Settings</a> has the right file name, <a href=\'https://www.whmcms.com/knowledgebase/13/Client-Area-File.html\' target=\'_blank\'>click here</a> for more information.'];
+			}
+			else {
+				$frontendFileVersion = WHMCMS\Base::getFrontendFileVersion();
+				$requireFileVersion = MINIMUMFRONTENDFILEVERSION;
+				if ((version_compare($requireFileVersion, $frontendFileVersion, '>') === true) && ($frontendFileVersion !== false)) {
+					$integration['errors'][] = ['title' => 'Client Area File Outdated', 'description' => 'Update (' . WHMCMS\Base::getConfig('frontendfile') . ') file located in WHMCS main directory to the latest version, <a href=\'https://www.whmcms.com/knowledgebase/13/Client-Area-File.html\' target=\'_blank\'>click here</a> for more information.'];
+				}
+			}
+
+			if (WHMCMS\Base::getConfig('UploadDirectory') === 'custom') {
+				if ((is_dir(WHMCMS\Base::getConfig('UploadCustomDirectory')) === false) || (is_writable(WHMCMS\Base::getConfig('UploadCustomDirectory')) === false)) {
+					$integration['errors'][] = ['title' => 'Upload Directory', 'description' => 'The following directory (' . WHMCMS\Base::getConfig('UploadCustomDirectory') . ') does not exists or not writable, you need to fix this in order for WHMCMS to upload images.'];
+				}
+			}
+
+			$smarty->assign('integration', $integration);
+			$templateFile = 'index.tpl';
+			$smarty->assign('noBreadcrumbButton', true);
+		}
+		else if ($action === 'generatealias') {
+			$string = WHMCMS\Base::fromPost('string');
+			$relType = WHMCMS\Base::fromPost('reltype');
+			$relId = WHMCMS\Base::fromPost('relid', 'int');
+			$generateAlias = WHMCMS\Base::validateAlias($relType, $relId, '', $string);
+
+			if ($generateAlias === NULL) {
+				echo json_encode(['alias' => '']);
+				exit();
+			}
+
+			echo json_encode(['alias' => $generateAlias]);
+			exit();
+		}
+		else if ($action === 'listpages') {
+			$getPages = WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('topid', 0);
+			$pageParams = [];
+			$pageParams['module'] = 'whmcms';
+			$pageParams['action'] = 'listpages';
+			$pagination = pagination($getPages->count(), 25, WHMCMS\Base::fromGet('page', 'int'), $pageParams);
+			$getPages->orderBy('pageid', 'asc')->skip($pagination['LimitFrom'])->take($pagination['LimitTo']);
+
+			foreach ($getPages->get() as $page) {
+				$page = (array) $page;
+				$page['datemodify'] = ($page['datemodify'] == '0000-00-00 00:00:00' ? $page['datecreate'] : $page['datemodify']);
+				$page['datemodify'] = fromMySQLDate($page['datemodify'], true, false);
+				$page['viewurl'] = WHMCMS\Base::generateFriendlyURL($page, 'pages.page');
+				$getParentPage = WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('pageid', '=', $page['parentid'])->first();
+				$page['parent'] = ['id' => intval($getParentPage->pageid), 'title' => $getParentPage->title];
+				$pagelist[] = $page;
+				unset($page['child']);
+			}
+
+			$smarty->assign('pages', $pagelist);
+			$smarty->assign('pagination', $pagination);
+			$templateFile = 'pages.tpl';
+			$BC[MODURL . '&action=listpages'] = WHMCMS\Base::__('breadcrumbsPages');
+		}
+		else if ($action === 'addpage') {
+			$smarty->assign('pageMain', pageForm('', 'main', '', $smarty));
+			$smarty->assign('pageEditor', pageForm('', 'editor', '', $smarty));
+			$smarty->assign('pageOptions', pageForm('', 'options', '', $smarty));
+			$smarty->assign('pageAdvanced', pageForm('', 'advanced', '', $smarty));
+			$languages = WHMCMS\Base::getSystemLanguages(true);
+			$translations = [];
+
+			foreach ($languages as $language) {
+				$translation = ['language' => $language, 'form' => pageForm('', 'translate', $language, $smarty)];
+				$translations[] = $translation;
+			}
+
+			$smarty->assign('translations', $translations);
+			$templateFile = 'pages.tpl';
+			$BC[MODURL . '&action=listpages'] = WHMCMS\Base::__('breadcrumbsPages');
+			$BC[MODURL . '&action=addpage'] = WHMCMS\Base::__('breadcrumbsPagesAdd');
+			$smarty->assign('goBackURL', MODURL . '&action=listpages');
+		}
+		else if ($action === 'doaddpage') {
+			$alias = WHMCMS\Base::validateAlias('pages', 0, WHMCMS\Base::fromPost('alias'), WHMCMS\Base::fromPost('title'));
+			$data = ['topid' => 0, 'parentid' => WHMCMS\Base::fromPost('parentid', 'int'), 'alias' => WHMCMS\Base::fromInput($alias), 'title' => WHMCMS\Base::fromPost('title'), 'subtitle' => WHMCMS\Base::fromPost('subtitle'), 'content' => WHMCMS\Base::fromPost('content'), 'private' => WHMCMS\Base::fromPost('private', 'int'), 'metadescription' => WHMCMS\Base::fromPost('description'), 'metakeywords' => WHMCMS\Base::fromPost('keywords'), 'datecreate' => date('Y-m-d H:i:s'), 'enable' => WHMCMS\Base::fromPost('enable', 'int'), 'language' => WHMCMS\Base::getSystemDefaultLanguage(), 'hidetitle' => WHMCMS\Base::fromPost('hidetitle'), 'breadcrumbs' => WHMCMS\Base::fromPost('breadcrumbs'), 'googleplus' => WHMCMS\Base::fromPost('googleplus'), 'fblike' => WHMCMS\Base::fromPost('fblike'), 'fbcomment' => WHMCMS\Base::fromPost('fbcomment'), 'twitter' => WHMCMS\Base::fromPost('twitter'), 'headercontent' => WHMCMS\Base::fromPost('headercontent')];
+			$pageId = WHMCMS\Database\Capsule::table('mod_whmcms_pages')->insertGetId($data);
+
+			foreach (WHMCMS\Base::fromPost('translate_title', 'array') as $language => $title) {
+				if (WHMCMS\Base::fromInput($title) !== '') {
+					WHMCMS\Database\Capsule::table('mod_whmcms_pages')->insert(['topid' => $pageId, 'language' => $language, 'title' => WHMCMS\Base::fromInput($title), 'subtitle' => WHMCMS\Base::fromInput($_POST['translate_subtitle'][$language]), 'content' => WHMCMS\Base::fromInput($_POST['translate_content'][$language])]);
+				}
+			}
+
+			WHMCMS\Base::redirect(WHMCMS\Base::__('pageCreatedMessage'), 'success', MODURL . '&action=updatepage&pageid=' . $pageId);
+		}
+		else if ($action === 'updatepage') {
+			$pageId = WHMCMS\Base::fromRequest('pageid', 'int');
+			$getPage = WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('pageid', '=', $pageId)->first();
+			$smarty->assign('pageMain', pageForm($pageId, 'main', '', $smarty));
+			$smarty->assign('pageEditor', pageForm($pageId, 'editor', '', $smarty));
+			$smarty->assign('pageOptions', pageForm($pageId, 'options', '', $smarty));
+			$smarty->assign('pageAdvanced', pageForm($pageId, 'advanced', '', $smarty));
+			$languages = WHMCMS\Base::getSystemLanguages(true);
+			$translations = [];
+
+			foreach ($languages as $language) {
+				$translation = ['language' => $language, 'form' => pageForm($pageId, 'translate', $language, $smarty)];
+				$translations[] = $translation;
+			}
+
+			$smarty->assign('translations', $translations);
+			$templateFile = 'pages.tpl';
+			$BC[MODURL . '&action=listpages'] = WHMCMS\Base::__('breadcrumbsPages');
+			$BC[MODURL . '&action=addpage'] = WHMCMS\Base::__('breadcrumbsPagesEdit') . $getPage->title;
+			$smarty->assign('goBackURL', MODURL . '&action=listpages');
+		}
+		else if ($action === 'doupdatepage') {
+			$pageId = WHMCMS\Base::fromRequest('pageid', 'int');
+			$alias = WHMCMS\Base::validateAlias('pages', $pageId, WHMCMS\Base::fromPost('alias'), WHMCMS\Base::fromPost('title'));
+			$data = ['topid' => 0, 'parentid' => WHMCMS\Base::fromPost('parentid', 'int'), 'alias' => WHMCMS\Base::fromInput($alias), 'title' => WHMCMS\Base::fromPost('title'), 'subtitle' => WHMCMS\Base::fromPost('subtitle'), 'content' => WHMCMS\Base::fromPost('content'), 'private' => WHMCMS\Base::fromPost('private', 'int'), 'metadescription' => WHMCMS\Base::fromPost('description'), 'metakeywords' => WHMCMS\Base::fromPost('keywords'), 'datemodify' => date('Y-m-d H:i:s'), 'enable' => WHMCMS\Base::fromPost('enable', 'int'), 'language' => WHMCMS\Base::getSystemDefaultLanguage(), 'hidetitle' => WHMCMS\Base::fromPost('hidetitle'), 'breadcrumbs' => WHMCMS\Base::fromPost('breadcrumbs'), 'googleplus' => WHMCMS\Base::fromPost('googleplus'), 'fblike' => WHMCMS\Base::fromPost('fblike'), 'fbcomment' => WHMCMS\Base::fromPost('fbcomment'), 'twitter' => WHMCMS\Base::fromPost('twitter'), 'headercontent' => WHMCMS\Base::fromPost('headercontent')];
+			WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('pageid', '=', $pageId)->update($data);
+
+			if (0 < WHMCMS\Base::fromPost('deletetranslation', 'int')) {
+				WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('pageid', '=', WHMCMS\Base::fromPost('deletetranslation', 'int'))->delete();
+			}
+
+			foreach (WHMCMS\Base::fromPost('translate_title', 'array') as $language => $title) {
+				if (WHMCMS\Base::fromInput($title) !== '') {
+					$data = ['topid' => $pageId, 'language' => $language, 'title' => WHMCMS\Base::fromInput($title), 'subtitle' => WHMCMS\Base::fromInput($_POST['translate_subtitle'][$language]), 'content' => WHMCMS\Base::fromInput($_POST['translate_content'][$language])];
+					$getTranslation = WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('topid', '=', $pageId)->where('language', '=', $language);
+
+					if ($getTranslation->count() === 0) {
+						WHMCMS\Database\Capsule::table('mod_whmcms_pages')->insert($data);
+					}
+					else {
+						$getTranslation->update($data);
+					}
+				}
+			}
+
+			if (isset($_POST['saveandreturn'])) {
+				WHMCMS\Base::redirect(WHMCMS\Base::__('pageUpdatedMessage'), 'success', MODURL . '&action=listpages');
+			}
+
+			WHMCMS\Base::redirect(WHMCMS\Base::__('pageUpdatedMessage'), 'success', MODURL . '&action=updatepage&pageid=' . $pageId);
+		}
+		else if ($action == 'deletepage') {
+			$pageId = WHMCMS\Base::fromRequest('pageid', 'int');
+			$getPageInfo = WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('pageid', '=', $pageId)->where('topid', '=', 0)->first();
+			$pagedata = (array) $getPageInfo;
+			$smarty->assign('pagedata', $pagedata);
+			$templateFile = 'pages.tpl';
+		}
+		else if ($action == 'dodeletepage') {
+			$pageId = WHMCMS\Base::fromRequest('pageid', 'int');
+			WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('parentid', '=', $pageId)->update(['parentid' => '0']);
+			WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('pageid', '=', $pageId)->delete();
+			WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('topid', '=', $pageId)->delete();
+			WHMCMS\Base::redirect(WHMCMS\Base::__('pageDeletedMessage'), 'success', MODURL . '&action=listpages');
+		}
+		else if (in_array($action, ['disablepage', 'enablepage', 'privatepage'])) {
+			$pageId = WHMCMS\Base::fromRequest('pageid', 'int');
+
+			if ($action === 'disablepage') {
+				WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('pageid', '=', $pageId)->update(['enable' => 0]);
+			}
+			else if ($action === 'enablepage') {
+				WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('pageid', '=', $pageId)->update(['enable' => 1]);
+			}
+			else if ($action === 'privatepage') {
+				WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('pageid', '=', $pageId)->update(['private' => WHMCMS\Base::fromRequest('status', 'int')]);
+			}
+
+			if ($isAjax === true) {
+				echo json_encode(['result' => 'success']);
+				exit();
+			}
+
+			WHMCMS\Base::redirect('', '', MODURL . '&action=listpages');
+		}
+		else if ($action == 'bulkpage') {
+			$bulkaction = WHMCMS\Base::fromPost('bulkaction');
+			if ((0 < count(WHMCMS\Base::fromPost('bulkcheckbox', 'array'))) && ($bulkaction != '')) {
+				foreach (WHMCMS\Base::fromPost('bulkcheckbox', 'array') as $index => $pageId) {
+					if ($bulkaction == 'public') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('pageid', '=', $pageId)->update(['private' => 0]);
+					}
+					else if ($bulkaction == 'private') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('pageid', '=', $pageId)->update(['private' => 1]);
+					}
+					else if ($bulkaction == 'publish') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('pageid', '=', $pageId)->update(['enable' => 1]);
+					}
+					else if ($bulkaction == 'unpublish') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('pageid', '=', $pageId)->update(['enable' => 0]);
+					}
+					else if ($bulkaction == 'hits') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_pages')->where('pageid', '=', $pageId)->update(['hits' => 0]);
+					}
+				}
+			}
+
+			WHMCMS\Base::redirect('', '', MODURL . '&action=listpages');
+		}
+		else if ($action === 'portfolio') {
+			$languages = WHMCMS\Base::getSystemLanguages(true);
+			$smarty->assign('categoryMain', categoryForm(0, 'main', '', $smarty));
+			$translations = [];
+
+			foreach ($languages as $language) {
+				$translation = ['language' => $language, 'form' => categoryForm(0, 'translate', $language, $smarty)];
+				$translations[] = $translation;
+			}
+
+			$smarty->assign('translations', $translations);
+			$getCategories = WHMCMS\Database\Capsule::table('mod_whmcms_portfoliocategories')->where('topid', '=', 0);
+			$pageParams = [];
+			$pageParams['module'] = 'whmcms';
+			$pageParams['action'] = 'portfolio';
+			$pagination = pagination($getCategories->count(), 25, WHMCMS\Base::fromGet('page', 'int'), $pageParams);
+			$getCategories->orderBy('categoryid', 'asc')->skip($pagination['LimitFrom'])->take($pagination['LimitTo']);
+
+			foreach ($getCategories->get() as $category) {
+				$category = (array) $category;
+				$getProjectsTotal = WHMCMS\Database\Capsule::table('mod_whmcms_portfoliorelations')->where('categoryid', '=', $category['categoryid']);
+				$category['projects'] = $getProjectsTotal->count();
+				$category['categoryMain'] = categoryForm($category['categoryid'], 'main', '', $smarty);
+				$category['viewurl'] = WHMCMS\Base::generateFriendlyURL($category, 'portfolio.category');
+				$translations = [];
+
+				foreach ($languages as $language) {
+					$translation = ['formid' => WHMCMS\Base::randomInt(), 'language' => $language, 'form' => categoryForm($category['categoryid'], 'translate', $language, $smarty)];
+					$translations[] = $translation;
+				}
+
+				$category['translations'] = $translations;
+				$categories[] = $category;
+			}
+
+			$smarty->assign('categories', $categories);
+			$smarty->assign('pagination', $pagination);
+			$templateFile = 'portfolio.tpl';
+			$BC[MODURL . '&action=portfolio'] = WHMCMS\Base::__('portfolioPageTitle');
+		}
+		else if ($action === 'doaddcategory') {
+			$alias = WHMCMS\Base::validateAlias('portfolio-category', 0, WHMCMS\Base::fromPost('alias'), WHMCMS\Base::fromPost('title'));
+			$data = ['topid' => 0, 'title' => WHMCMS\Base::fromPost('title'), 'alias' => WHMCMS\Base::fromInput($alias), 'enable' => WHMCMS\Base::fromPost('enable', 'int'), 'language' => WHMCMS\Base::getSystemDefaultLanguage()];
+			$categoryId = WHMCMS\Database\Capsule::table('mod_whmcms_portfoliocategories')->insertGetId($data);
+
+			foreach (WHMCMS\Base::fromPost('translate_title', 'array') as $language => $title) {
+				if (WHMCMS\Base::fromInput($title) !== '') {
+					$data = ['topid' => $categoryId, 'language' => $language, 'title' => WHMCMS\Base::fromInput($title)];
+					WHMCMS\Database\Capsule::table('mod_whmcms_portfoliocategories')->insert($data);
+				}
+			}
+
+			WHMCMS\Base::redirect(WHMCMS\Base::__('portfolioCategoryCreatedMessage'), 'success', MODURL . '&action=portfolio');
+		}
+		else if ($action === 'doupdatecategory') {
+			$categoryId = WHMCMS\Base::fromRequest('categoryid', 'int');
+			$alias = WHMCMS\Base::validateAlias('portfolio-category', $categoryId, WHMCMS\Base::fromPost('alias'), WHMCMS\Base::fromPost('title'));
+			$data = ['topid' => 0, 'title' => WHMCMS\Base::fromPost('title'), 'alias' => WHMCMS\Base::fromInput($alias), 'enable' => WHMCMS\Base::fromPost('enable', 'int'), 'language' => WHMCMS\Base::getSystemDefaultLanguage()];
+			WHMCMS\Database\Capsule::table('mod_whmcms_portfoliocategories')->where('categoryid', '=', $categoryId)->update($data);
+
+			if (WHMCMS\Base::fromPost('deletetranslation', 'int') !== 0) {
+				WHMCMS\Database\Capsule::table('mod_whmcms_portfoliocategories')->where('categoryid', '=', WHMCMS\Base::fromPost('deletetranslation', 'int'))->delete();
+			}
+
+			foreach (WHMCMS\Base::fromPost('translate_title', 'array') as $language => $title) {
+				if (WHMCMS\Base::fromInput($title) !== '') {
+					$data = ['topid' => $categoryId, 'language' => $language, 'title' => WHMCMS\Base::fromInput($title)];
+					$getTranslation = WHMCMS\Database\Capsule::table('mod_whmcms_portfoliocategories')->where('topid', '=', $categoryId)->where('language', '=', $language);
+
+					if ($getTranslation->count() == '0') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_portfoliocategories')->insert($data);
+					}
+					else {
+						WHMCMS\Database\Capsule::table('mod_whmcms_portfoliocategories')->where('topid', '=', $categoryId)->where('language', $language)->update($data);
+					}
+				}
+			}
+
+			WHMCMS\Base::redirect(WHMCMS\Base::__('portfolioCategoryUpdatedMessage'), 'success', MODURL . '&action=portfolio');
+		}
+		else if ($action === 'dodeletecategory') {
+			$categoryId = WHMCMS\Base::fromRequest('categoryid', 'int');
+			WHMCMS\Database\Capsule::table('mod_whmcms_portfoliocategories')->where('categoryid', '=', $categoryId)->delete();
+			WHMCMS\Database\Capsule::table('mod_whmcms_portfoliocategories')->where('topid', '=', $categoryId)->delete();
+			WHMCMS\Base::redirect(WHMCMS\Base::__('portfolioCategoryDeletedMessage'), 'success', MODURL . '&action=portfolio');
+		}
+		else if (($action === 'disablecategory') || ($action === 'enablecategory')) {
+			$categoryId = WHMCMS\Base::fromRequest('categoryid', 'int');
+
+			if ($action === 'disablecategory') {
+				WHMCMS\Database\Capsule::table('mod_whmcms_portfoliocategories')->where('categoryid', '=', $categoryId)->update(['enable' => 0]);
+			}
+			else if ($action === 'enablecategory') {
+				WHMCMS\Database\Capsule::table('mod_whmcms_portfoliocategories')->where('categoryid', '=', $categoryId)->update(['enable' => 1]);
+			}
+
+			if ($isAjax === true) {
+				echo json_encode(['result' => 'success']);
+				exit();
+			}
+
+			WHMCMS\Base::redirect('', '', MODURL . '&action=portfolio');
+		}
+		else if ($action === 'bulkcategory') {
+			$bulkaction = WHMCMS\Base::fromPost('bulkaction');
+			if ((0 < count(WHMCMS\Base::fromPost('bulkcheckbox', 'array'))) && ($bulkaction != '')) {
+				foreach (WHMCMS\Base::fromPost('bulkcheckbox', 'array') as $index => $categoryId) {
+					if ($bulkaction === 'publish') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_portfoliocategories')->where('categoryid', '=', $categoryId)->update(['enable' => 1]);
+					}
+					else if ($bulkaction === 'unpublish') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_portfoliocategories')->where('categoryid', '=', $categoryId)->update(['enable' => 0]);
+					}
+				}
+			}
+
+			WHMCMS\Base::redirect('', '', MODURL . '&action=portfolio');
+		}
+		else if ($action === 'listprojects') {
+			$categoryId = WHMCMS\Base::fromRequest('categoryid', 'int');
+			$getCategory = WHMCMS\Database\Capsule::table('mod_whmcms_portfoliocategories')->where('categoryid', '=', $categoryId)->first();
+			$getCategory = (array) $getCategory;
+			$pageParams = [];
+			$getProjects = WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->where('topid', '=', 0);
+
+			if ($categoryId != 0) {
+				$pageParams['categoryid'] = $categoryId;
+				$getProjects->join('mod_whmcms_portfoliorelations', 'mod_whmcms_portfoliorelations.projectid', '=', 'mod_whmcms_portfolio.projectid');
+				$getProjects->where('mod_whmcms_portfoliorelations.categoryid', '=', $categoryId);
+			}
+
+			$pageParams['module'] = 'whmcms';
+			$pageParams['action'] = 'listprojects';
+			$pagination = pagination($getProjects->count(), 25, WHMCMS\Base::fromGet('page', 'int'), $pageParams);
+			$getProjects->orderBy('mod_whmcms_portfolio.projectid', 'asc')->skip($pagination['LimitFrom'])->take($pagination['LimitTo']);
+			$projects = [];
+
+			foreach ($getProjects->get() as $project) {
+				$project = (array) $project;
+				$getTotalPhotos = WHMCMS\Database\Capsule::table('mod_whmcms_photos')->where('topid', '=', 0)->where('parentid', '=', $project['projectid'])->count();
+				$project['photos'] = $getTotalPhotos;
+				$project['datemodify'] = ($project['datemodify'] == '0000-00-00 00:00:00' ? $project['datecreate'] : $project['datemodify']);
+				$project['datemodify'] = fromMySQLDate($project['datemodify'], true, false);
+				$project['viewurl'] = WHMCMS\Base::generateFriendlyURL($project, 'portfolio.project');
+				$projects[] = $project;
+			}
+
+			$smarty->assign('projects', $projects);
+			$smarty->assign('pagination', $pagination);
+			$templateFile = 'portfolio.tpl';
+			$BC[MODURL . '&action=portfolio'] = WHMCMS\Base::__('portfolioPageTitle');
+
+			if (0 < $categoryId) {
+				$BC[MODURL . '&action=listprojects&categoryid=' . $categoryId] = $getCategory['title'] . ' ' . WHMCMS\Base::__('projectsPageTitle');
+			}
+			else {
+				$BC[MODURL . '&action=listprojects'] = WHMCMS\Base::__('projectsPageTitle');
+			}
+		}
+		else if ($action === 'addproject') {
+			$categoryId = WHMCMS\Base::fromRequest('categoryid', 'int');
+			$getCategory = WHMCMS\Database\Capsule::table('mod_whmcms_portfoliocategories')->where('categoryid', '=', $categoryId)->first();
+			$getCategory = (array) $getCategory;
+			$smarty->assign('projectMain', projectForm('', 'main', '', $smarty));
+			$smarty->assign('projectMainEditor', projectForm('', 'maineditor', '', $smarty));
+			$smarty->assign('projectOptions', projectForm('', 'options', '', $smarty));
+			$languages = WHMCMS\Base::getSystemLanguages(true);
+			$translations = [];
+
+			foreach ($languages as $language) {
+				$translation = ['language' => $language, 'form' => projectForm(0, 'translate', $language, $smarty)];
+				$translations[] = $translation;
+			}
+
+			$smarty->assign('translations', $translations);
+			$templateFile = 'portfolio.tpl';
+			$BC[MODURL . '&action=portfolio'] = WHMCMS\Base::__('portfolioPageTitle');
+			$BC[MODURL . '&action=listprojects'] = WHMCMS\Base::__('projectsPageTitle');
+			$BC[MODURL . '&action=addproject'] = WHMCMS\Base::__('projectsCreatePageTitle');
+			$smarty->assign('goBackURL', MODURL . '&action=listprojects&categoryid=' . $categoryId);
+		}
+		else if ($action === 'doaddproject') {
+			$alias = WHMCMS\Base::validateAlias('portfolio-project', 0, WHMCMS\Base::fromPost('alias'), WHMCMS\Base::fromPost('title'));
+			$uploadLogo = WHMCMS\Upload::uploadImage(['file' => $_FILES['projectlogo']]);
+			$data = ['topid' => 0, 'alias' => WHMCMS\Base::fromInput($alias), 'title' => WHMCMS\Base::fromPost('title'), 'client' => WHMCMS\Base::fromPost('client'), 'url' => WHMCMS\Base::fromPost('url'), 'details' => WHMCMS\Base::fromPost('details'), 'tags' => WHMCMS\Base::fromPost('tags'), 'logo' => WHMCMS\Base::fromInput($uploadLogo['filename']), 'datecreate' => date('Y-m-d H:i:s'), 'enable' => WHMCMS\Base::fromPost('enable', 'int'), 'datepublished' => WHMCMS\Base::fromPost('datepublished'), 'language' => WHMCMS\Base::getSystemDefaultLanguage()];
+			$projectId = WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->insertGetId($data);
+
+			if (0 < count(WHMCMS\Base::fromPost('categoryid', 'array'))) {
+				foreach (WHMCMS\Base::fromPost('categoryid', 'array') as $index => $categoryId) {
+					WHMCMS\Database\Capsule::table('mod_whmcms_portfoliorelations')->insert(['projectid' => $projectId, 'categoryid' => $categoryId]);
+				}
+			}
+
+			foreach (WHMCMS\Base::fromPost('translate_title', 'array') as $language => $title) {
+				if (WHMCMS\Base::fromInput($title) !== '') {
+					$data = ['topid' => $projectId, 'language' => $language, 'title' => WHMCMS\Base::fromInput($title), 'details' => WHMCMS\Base::fromInput($_POST['translate_details'][$language])];
+					WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->insert($data);
+				}
+			}
+
+			WHMCMS\Base::redirect(WHMCMS\Base::__('projectCreatedMessage'), 'success', MODURL . '&action=updateproject&projectid=' . $projectId);
+		}
+		else if ($action === 'updateproject') {
+			$projectId = WHMCMS\Base::fromRequest('projectid', 'int');
+			$getProject = WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->where('projectid', '=', $projectId)->first();
+			$getProject = (array) $getProject;
+			$smarty->assign('projectMain', projectForm($projectId, 'main', '', $smarty));
+			$smarty->assign('projectMainEditor', projectForm($projectId, 'maineditor', '', $smarty));
+			$smarty->assign('projectOptions', projectForm($projectId, 'options', '', $smarty));
+			$languages = WHMCMS\Base::getSystemLanguages(true);
+			$translations = [];
+
+			foreach ($languages as $language) {
+				$translation = ['language' => $language, 'form' => projectForm($projectId, 'translate', $language, $smarty)];
+				$translations[] = $translation;
+			}
+
+			$smarty->assign('translations', $translations);
+			$templateFile = 'portfolio.tpl';
+			$BC[MODURL . '&action=portfolio'] = WHMCMS\Base::__('portfolioPageTitle');
+			$BC[MODURL . '&action=listprojects'] = WHMCMS\Base::__('projectsPageTitle');
+			$BC[MODURL . '&action=updateproject&projectid=' . $projectId] = WHMCMS\Base::__('projectsUpdatePageTitle') . $getProject['title'];
+			$smarty->assign('goBackURL', MODURL . '&action=listprojects');
+		}
+		else if ($action === 'doupdateproject') {
+			$projectId = WHMCMS\Base::fromRequest('projectid', 'int');
+			$alias = WHMCMS\Base::validateAlias('portfolio-project', $projectId, WHMCMS\Base::fromPost('alias'), WHMCMS\Base::fromPost('title'));
+			$uploadLogo = WHMCMS\Upload::uploadImage(['file' => $_FILES['projectlogo']]);
+			$data = ['topid' => 0, 'alias' => WHMCMS\Base::fromInput($alias), 'title' => WHMCMS\Base::fromPost('title'), 'client' => WHMCMS\Base::fromPost('client'), 'url' => WHMCMS\Base::fromPost('url'), 'details' => WHMCMS\Base::fromPost('details'), 'tags' => WHMCMS\Base::fromPost('tags'), 'datemodify' => date('Y-m-d H:i:s'), 'enable' => WHMCMS\Base::fromPost('enable', 'int'), 'datepublished' => WHMCMS\Base::fromPost('datepublished'), 'language' => WHMCMS\Base::getSystemDefaultLanguage()];
+
+			if (WHMCMS\Base::fromInput($uploadLogo['filename']) !== '') {
+				$data['logo'] = $uploadLogo['filename'];
+			}
+
+			WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->where('projectid', '=', $projectId)->update($data);
+			WHMCMS\Database\Capsule::table('mod_whmcms_portfoliorelations')->where('projectid', '=', $projectId)->delete();
+
+			if (0 < count(WHMCMS\Base::fromPost('categoryid', 'array'))) {
+				foreach (WHMCMS\Base::fromPost('categoryid', 'array') as $index => $categoryId) {
+					$relationData = ['projectid' => $projectId, 'categoryid' => $categoryId];
+					WHMCMS\Database\Capsule::table('mod_whmcms_portfoliorelations')->insert($relationData);
+				}
+			}
+
+			if (0 < WHMCMS\Base::fromPost('deletetranslation', 'int')) {
+				WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->where('projectid', '=', WHMCMS\Base::fromPost('deletetranslation', 'int'))->delete();
+			}
+
+			foreach (WHMCMS\Base::fromPost('translate_title', 'array') as $language => $title) {
+				if (WHMCMS\Base::fromInput($title) !== '') {
+					$data = ['topid' => $projectId, 'language' => $language, 'title' => WHMCMS\Base::fromInput($title), 'details' => WHMCMS\Base::fromInput($_POST['translate_details'][$language])];
+					$getTranslation = WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->where('topid', '=', $projectId)->where('language', '=', $language);
+
+					if ($getTranslation->count() == '0') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->insert($data);
+					}
+					else {
+						WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->where('topid', '=', $projectId)->where('language', '=', $language)->update($data);
+					}
+				}
+			}
+
+			if (isset($_POST['saveandreturn'])) {
+				WHMCMS\Base::redirect(WHMCMS\Base::__('projectUpdatedMessage'), 'success', MODURL . '&action=listprojects');
+			}
+
+			WHMCMS\Base::redirect(WHMCMS\Base::__('projectUpdatedMessage'), 'success', MODURL . '&action=updateproject&projectid=' . $projectId);
+		}
+		else if ($action === 'dodeleteproject') {
+			$projectId = WHMCMS\Base::fromRequest('projectid', 'int');
+			WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->where('projectid', '=', $projectId)->delete();
+			WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->where('topid', '=', $projectId)->delete();
+			WHMCMS\Database\Capsule::table('mod_whmcms_portfoliorelations')->where('projectid', '=', $projectId)->delete();
+			WHMCMS\Database\Capsule::table('mod_whmcms_photos')->where('parentid', '=', $projectId)->delete();
+			WHMCMS\Base::redirect(WHMCMS\Base::__('projectDeletedMessage'), 'success', MODURL . '&action=listprojects');
+		}
+		else if (($action === 'disableproject') || ($action == 'enableproject')) {
+			$projectId = WHMCMS\Base::fromRequest('projectid', 'int');
+
+			if ($action === 'disableproject') {
+				WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->where('projectid', '=', $projectId)->update(['enable' => 0]);
+			}
+			else if ($action == 'enableproject') {
+				WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->where('projectid', '=', $projectId)->update(['enable' => 1]);
+			}
+
+			if ($isAjax === true) {
+				echo json_encode(['result' => 'success']);
+				exit();
+			}
+
+			WHMCMS\Base::redirect('', '', MODURL . '&action=listprojects');
+		}
+		else if ($action === 'bulkproject') {
+			$bulkaction = WHMCMS\Base::fromRequest('bulkaction');
+			if ((0 < count(WHMCMS\Base::fromPost('bulkcheckbox', 'array'))) && ($bulkaction !== '')) {
+				foreach (WHMCMS\Base::fromPost('bulkcheckbox', 'array') as $index => $projectId) {
+					if ($bulkaction === 'publish') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->where('projectid', '=', $projectId)->update(['enable' => 1]);
+					}
+					else if ($bulkaction === 'unpublish') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->where('projectid', '=', $projectId)->update(['enable' => 0]);
+					}
+					else if ($bulkaction === 'hits') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->where('projectid', '=', $projectId)->update(['hits' => 0]);
+					}
+				}
+			}
+
+			WHMCMS\Base::redirect('', '', MODURL . '&action=listprojects');
+		}
+		else if ($action === 'listphotos') {
+			$projectId = WHMCMS\Base::fromRequest('projectid', 'int');
+			$getProject = WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->where('projectid', '=', $projectId)->first();
+			$getProject = (array) $getProject;
+			$languages = WHMCMS\Base::getSystemLanguages(true);
+			$smarty->assign('photoMain', photoForm(0, 'main', '', $smarty));
+			$translations = [];
+
+			foreach ($languages as $language) {
+				$translation = ['language' => $language, 'form' => photoForm(0, 'translate', $language, $smarty)];
+				$translations[] = $translation;
+			}
+
+			$smarty->assign('translations', $translations);
+			$getPhotos = WHMCMS\Database\Capsule::table('mod_whmcms_photos');
+			$pageParams = [];
+			$pageParams['module'] = 'whmcms';
+			$pageParams['action'] = 'listphotos';
+
+			if (0 < $projectId) {
+				$pageParams['projectid'] = $projectId;
+				$getPhotos->where('topid', '=', 0)->where('parentid', '=', $projectId);
+			}
+			else {
+				$getPhotos->where('topid', 0);
+			}
+
+			$getProjectTitles = WHMCMS\Database\Capsule::table('mod_whmcms_portfolio')->where('topid', '=', 0);
+			$projects = [];
+
+			foreach ($getProjectTitles->get() as $project) {
+				$project = (array) $project;
+				$projects[$project['projectid']] = $project['title'];
+			}
+
+			$pagination = pagination($getPhotos->count(), 25, WHMCMS\Base::fromGet('page', 'int'), $pageParams);
+			$getPhotos->orderBy('photoid', 'desc')->skip($pagination['LimitFrom'])->take($pagination['LimitTo']);
+			$photos = [];
+
+			foreach ($getPhotos->get() as $photo) {
+				$photo = (array) $photo;
+				$photo['photoMain'] = photoForm($photo['photoid'], 'main', '', $smarty);
+				$translations = [];
+
+				foreach ($languages as $language) {
+					$translation = ['formid' => WHMCMS\Base::randomInt(), 'language' => $language, 'form' => photoForm($photo['photoid'], 'translate', $language, $smarty)];
+					$translations[] = $translation;
+				}
+
+				$photo['translations'] = $translations;
+				$photo['project'] = $projects[$photo['parentid']];
+				$photo['datemodify'] = fromMySQLDate($photo['datemodify'], true, false);
+				$photo['viewurl'] = WHMCMS\Base::getSystemURL() . 'modules/addons/whmcms/resize.php?src=' . $photo['source'];
+				$photos[] = $photo;
+			}
+
+			$smarty->assign('photos', $photos);
+			$smarty->assign('pagination', $pagination);
+			$templateFile = 'portfolio.tpl';
+			$BC[MODURL . '&action=portfolio'] = WHMCMS\Base::__('portfolioPageTitle');
+			$BC[MODURL . '&action=listprojects'] = WHMCMS\Base::__('projectsPageTitle');
+			$BC[MODURL . '&action=updateproject&projectid=' . $projectId] = $getProject['title'];
+			$BC[MODURL . '&action=listphotos&projectid=' . $projectId] = WHMCMS\Base::__('photosPageTitle');
+		}
+		else if ($action === 'doaddphoto') {
+			$projectId = WHMCMS\Base::fromRequest('projectid', 'int');
+			$uploadPhoto = WHMCMS\Upload::uploadImage(['file' => $_FILES['source']]);
+			$data = ['topid' => 0, 'parentid' => $projectId, 'title' => WHMCMS\Base::fromPost('title'), 'details' => WHMCMS\Base::fromPost('details'), 'source' => WHMCMS\Base::fromInput($uploadPhoto['filename']), 'datemodify' => date('Y-m-d H:i:s'), 'enable' => WHMCMS\Base::fromPost('enable', 'int'), 'language' => WHMCMS\Base::getSystemDefaultLanguage()];
+			$photoId = WHMCMS\Database\Capsule::table('mod_whmcms_photos')->insertGetId($data);
+
+			foreach (WHMCMS\Base::fromPost('translate_title', 'array') as $language => $title) {
+				if (WHMCMS\Base::fromInput($title) !== '') {
+					$data = ['topid' => $photoId, 'language' => $language, 'title' => WHMCMS\Base::fromInput($title), 'details' => WHMCMS\Base::fromInput($_POST['translate_details'][$language])];
+					WHMCMS\Database\Capsule::table('mod_whmcms_photos')->insert($data);
+				}
+			}
+
+			WHMCMS\Base::redirect(WHMCMS\Base::__('photoCreatedMessage'), 'success', MODURL . '&action=listphotos&projectid=' . $projectId);
+		}
+		else if ($action == 'doupdatephoto') {
+			$photoId = WHMCMS\Base::fromRequest('photoid', 'int');
+			$projectId = WHMCMS\Base::fromRequest('projectid', 'int');
+			$uploadPhoto = WHMCMS\Upload::uploadImage(['file' => $_FILES['source']]);
+			$data = ['topid' => 0, 'title' => WHMCMS\Base::fromPost('title'), 'details' => WHMCMS\Base::fromPost('details'), 'datemodify' => date('Y-m-d H:i:s'), 'enable' => WHMCMS\Base::fromPost('enable', 'int'), 'language' => WHMCMS\Base::getSystemDefaultLanguage()];
+
+			if (WHMCMS\Base::fromInput($uploadPhoto['filename']) !== '') {
+				$data['source'] = $uploadPhoto['filename'];
+			}
+
+			WHMCMS\Database\Capsule::table('mod_whmcms_photos')->where('photoid', '=', $photoId)->update($data);
+
+			if (WHMCMS\Base::fromPost('deletetranslation', 'int') !== 0) {
+				WHMCMS\Database\Capsule::table('mod_whmcms_photos')->where('photoid', '=', WHMCMS\Base::fromPost('deletetranslation', 'int'))->delete();
+			}
+
+			foreach (WHMCMS\Base::fromPost('translate_title', 'array') as $language => $title) {
+				if (WHMCMS\Base::fromInput($title) !== '') {
+					$data = ['topid' => $photoId, 'language' => $language, 'title' => WHMCMS\Base::fromInput($title), 'details' => WHMCMS\Base::fromInput($_POST['translate_details'][$language])];
+					$getTranslation = WHMCMS\Database\Capsule::table('mod_whmcms_photos')->where('topid', '=', $photoId)->where('language', '=', $language);
+
+					if ($getTranslation->count() === 0) {
+						WHMCMS\Database\Capsule::table('mod_whmcms_photos')->insert($data);
+					}
+					else {
+						WHMCMS\Database\Capsule::table('mod_whmcms_photos')->where('topid', '=', $photoId)->where('language', '=', $language)->update($data);
+					}
+				}
+			}
+
+			WHMCMS\Base::redirect(WHMCMS\Base::__('photoUpdatedMessage'), 'success', MODURL . '&action=listphotos&projectid=' . $projectId);
+		}
+		else if ($action === 'dodeletephoto') {
+			$photoId = WHMCMS\Base::fromRequest('photoid', 'int');
+			$projectId = WHMCMS\Base::fromRequest('projectid', 'int');
+			WHMCMS\Database\Capsule::table('mod_whmcms_photos')->where('photoid', '=', $photoId)->delete();
+			WHMCMS\Database\Capsule::table('mod_whmcms_photos')->where('topid', '=', $photoId)->delete();
+			WHMCMS\Base::redirect(WHMCMS\Base::__('photoDeletedMessage'), 'success', MODURL . '&action=listphotos&projectid=' . $projectId);
+		}
+		else if (($action === 'disablephoto') || ($action === 'enablephoto')) {
+			$photoId = WHMCMS\Base::fromRequest('photoid', 'int');
+			$projectId = WHMCMS\Base::fromRequest('projectid', 'int');
+
+			if ($action === 'disablephoto') {
+				WHMCMS\Database\Capsule::table('mod_whmcms_photos')->where('photoid', '=', $photoId)->update(['enable' => 0]);
+			}
+			else if ($action === 'enablephoto') {
+				WHMCMS\Database\Capsule::table('mod_whmcms_photos')->where('photoid', '=', $photoId)->update(['enable' => 1]);
+			}
+
+			if ($isAjax === true) {
+				echo json_encode(['result' => 'success']);
+				exit();
+			}
+
+			WHMCMS\Base::redirect('', '', MODURL . '&action=listphotos&projectid=' . $projectId);
+		}
+		else if ($action === 'bulkphotos') {
+			$projectId = WHMCMS\Base::fromRequest('projectid', 'int');
+			$bulkaction = WHMCMS\Base::fromPost('bulkaction');
+			if ((0 < count(WHMCMS\Base::fromPost('bulkcheckbox', 'array'))) && ($bulkaction !== '')) {
+				foreach (WHMCMS\Base::fromPost('bulkcheckbox', 'array') as $index => $photoId) {
+					if ($bulkaction === 'publish') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_photos')->where('photoid', '=', $photoId)->update(['enable' => 1]);
+					}
+					else if ($bulkaction === 'unpublish') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_photos')->where('photoid', '=', $photoId)->update(['enable' => 0]);
+					}
+				}
+			}
+
+			WHMCMS\Base::redirect('', '', MODURL . '&action=listphotos&projectid=' . $projectId);
+		}
+		else if ($action === 'faq') {
+			$languages = WHMCMS\Base::getSystemLanguages(true);
+			$smarty->assign('faqGroupMain', faqGroupForm(0, 'main', '', $smarty));
+			$translations = [];
+
+			foreach ($languages as $language) {
+				$translation = ['language' => $language, 'form' => faqGroupForm(0, 'translate', $language, $smarty)];
+				$translations[] = $translation;
+			}
+
+			$smarty->assign('translations', $translations);
+			$getGroups = WHMCMS\Database\Capsule::table('mod_whmcms_faqgroups')->where('topid', '=', 0);
+			$pageParams = [];
+			$pageParams['module'] = 'whmcms';
+			$pageParams['action'] = 'faq';
+			$pagination = pagination($getGroups->count(), 25, WHMCMS\Base::fromGet('page', 'int'), $pageParams);
+			$getGroups->orderBy('groupid', 'asc')->skip($pagination['LimitFrom'])->take($pagination['LimitTo']);
+
+			foreach ($getGroups->get() as $group) {
+				$group = (array) $group;
+				$getTotalQuestions = WHMCMS\Database\Capsule::table('mod_whmcms_faq')->where('groupid', '=', $group['groupid'])->count();
+				$group['questions'] = $getTotalQuestions;
+				$group['groupMain'] = faqGroupForm($group['groupid'], 'main', '', $smarty);
+				$translations = [];
+
+				foreach ($languages as $language) {
+					$translation = ['formid' => WHMCMS\Base::randomInt(), 'language' => $language, 'form' => faqGroupForm($group['groupid'], 'translate', $language, $smarty)];
+					$translations[] = $translation;
+				}
+
+				$group['translations'] = $translations;
+				$group['viewurl'] = WHMCMS\Base::generateFriendlyURL($group, 'faq.group');
+				$groups[] = $group;
+			}
+
+			$smarty->assign('groups', $groups);
+			$smarty->assign('pagination', $pagination);
+			$templateFile = 'faq.tpl';
+			$BC[MODURL . '&action=faq'] = WHMCMS\Base::__('faqPageTitle');
+		}
+		else if ($action === 'doaddgroup') {
+			$alias = WHMCMS\Base::validateAlias('faq', 0, WHMCMS\Base::fromPost('alias'), WHMCMS\Base::fromPost('title'));
+			$groupId = WHMCMS\Database\Capsule::table('mod_whmcms_faqgroups')->insertGetId(['topid' => 0, 'title' => WHMCMS\Base::fromPost('title'), 'alias' => WHMCMS\Base::fromInput($alias), 'language' => WHMCMS\Base::getSystemDefaultLanguage()]);
+
+			foreach (WHMCMS\Base::fromPost('translate_title') as $language => $title) {
+				if (WHMCMS\Base::fromInput($title) !== '') {
+					WHMCMS\Database\Capsule::table('mod_whmcms_faqgroups')->insert(['topid' => $groupId, 'language' => $language, 'title' => WHMCMS\Base::fromInput($title)]);
+				}
+			}
+
+			WHMCMS\Base::redirect(WHMCMS\Base::__('faqGroupCreatedMessage'), 'success', MODURL . '&action=faq');
+		}
+		else if ($action === 'doupdategroup') {
+			$groupId = WHMCMS\Base::fromRequest('groupid', 'int');
+			$alias = WHMCMS\Base::validateAlias('faq', $groupId, WHMCMS\Base::fromPost('alias'), WHMCMS\Base::fromPost('title'));
+			$data = ['topid' => 0, 'title' => WHMCMS\Base::fromPost('title'), 'alias' => WHMCMS\Base::fromInput($alias), 'language' => WHMCMS\Base::getSystemDefaultLanguage()];
+			WHMCMS\Database\Capsule::table('mod_whmcms_faqgroups')->where('groupid', '=', $groupId)->update($data);
+
+			if (0 < WHMCMS\Base::fromPost('deletetranslation', 'int')) {
+				WHMCMS\Database\Capsule::table('mod_whmcms_faqgroups')->where('groupid', '=', WHMCMS\Base::fromPost('deletetranslation', 'int'))->delete();
+			}
+
+			foreach (WHMCMS\Base::fromPost('translate_title') as $language => $title) {
+				if (WHMCMS\Base::fromInput($title) !== '') {
+					$data = ['topid' => $groupId, 'language' => $language, 'title' => WHMCMS\Base::fromInput($title)];
+					$getTranslation = WHMCMS\Database\Capsule::table('mod_whmcms_faqgroups')->where('topid', '=', $groupId)->where('language', '=', $language);
+
+					if ($getTranslation->count() == '0') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_faqgroups')->insert($data);
+					}
+					else {
+						WHMCMS\Database\Capsule::table('mod_whmcms_faqgroups')->where('topid', '=', $groupId)->where('language', '=', $language)->update($data);
+					}
+				}
+			}
+
+			WHMCMS\Base::redirect(WHMCMS\Base::__('faqGroupUpdatedMessage'), 'success', MODURL . '&action=faq');
+		}
+		else if ($action === 'dodeletegroup') {
+			$groupId = WHMCMS\Base::fromRequest('groupid', 'int');
+			WHMCMS\Database\Capsule::table('mod_whmcms_faqgroups')->where('groupid', '=', $groupId)->delete();
+			WHMCMS\Database\Capsule::table('mod_whmcms_faqgroups')->where('topid', '=', $groupId)->delete();
+			WHMCMS\Base::redirect(WHMCMS\Base::__('faqGroupDeletedMessage'), 'success', MODURL . '&action=faq');
+		}
+		else if ($action === 'bulkgroup') {
+			$bulkaction = WHMCMS\Base::fromPost('bulkaction');
+			if ((0 < count(WHMCMS\Base::fromPost('bulkcheckbox', 'array'))) && ($bulkaction !== '')) {
+				foreach (WHMCMS\Base::fromPost('bulkcheckbox', 'array') as $index => $groupId) {
+					if ($bulkaction === 'delete') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_faqgroups')->where('groupid', '=', $groupId)->delete();
+					}
+				}
+			}
+
+			WHMCMS\Base::redirect('', '', MODURL . '&action=faq');
+		}
+		else if ($action == 'listfaq') {
+			$groupId = WHMCMS\Base::fromGet('groupid', 'int');
+			$getGroup = WHMCMS\Database\Capsule::table('mod_whmcms_faqgroups')->where('groupid', '=', $groupId)->first();
+			$getGroup = (array) $getGroup;
+			$getItems = WHMCMS\Database\Capsule::table('mod_whmcms_faq')->where('topid', '=', 0)->where('groupid', '=', $groupId);
+			$pageParams = [];
+			$pageParams['module'] = 'whmcms';
+			$pageParams['action'] = 'listfaq';
+			$pageParams['groupid'] = $groupId;
+			$pagination = pagination($getItems->count(), 25, WHMCMS\Base::fromGet('page', 'int'), $pageParams);
+			$getItems->orderBy('faqid', 'asc')->skip($pagination['LimitFrom'])->take($pagination['LimitTo']);
+
+			foreach ($getItems->get() as $item) {
+				$item = (array) $item;
+				$item['datemodify'] = ($item['datemodify'] == '0000-00-00 00:00:00' ? $item['datecreate'] : $item['datemodify']);
+				$item['datemodify'] = fromMySQLDate($item['datemodify'], true, false);
+				$items[] = $item;
+			}
+
+			$smarty->assign('items', $items);
+			$smarty->assign('pagination', $pagination);
+			$templateFile = 'faq.tpl';
+			$BC[MODURL . '&action=faq'] = WHMCMS\Base::__('faqPageTitle');
+			$BC[MODURL . '&action=listfaq&groupid=' . $groupId] = $getGroup['title'];
+		}
+		else if ($action === 'addfaq') {
+			$groupId = WHMCMS\Base::fromRequest('groupid', 'int');
+			$getGroup = WHMCMS\Database\Capsule::table('mod_whmcms_faqgroups')->where('groupid', '=', $groupId)->first();
+			$getGroup = (array) $getGroup;
+			$smarty->assign('faqMain', faqItemForm('', 'main', '', $smarty));
+			$smarty->assign('faqMainEditor', faqItemForm('', 'maineditor', '', $smarty));
+			$smarty->assign('faqOptions', faqItemForm('', 'options', '', $smarty));
+			$languages = WHMCMS\Base::getSystemLanguages(true);
+			$translations = [];
+
+			foreach ($languages as $language) {
+				$translation = ['language' => $language, 'form' => faqItemForm(0, 'translate', $language, $smarty)];
+				$translations[] = $translation;
+			}
+
+			$smarty->assign('translations', $translations);
+			$templateFile = 'faq.tpl';
+			$BC[MODURL . '&action=faq'] = WHMCMS\Base::__('faqPageTitle');
+			$BC[MODURL . '&action=listfaq&groupid=' . $groupId] = $getGroup['title'];
+			$BC[MODURL . '&action=addfaq&groupid=' . $groupId] = WHMCMS\Base::__('faqItemCreatePageTitle');
+			$smarty->assign('goBackURL', MODURL . '&action=listfaq&groupid=' . $groupId);
+		}
+		else if ($action === 'doaddfaq') {
+			$data = ['topid' => 0, 'groupid' => WHMCMS\Base::fromPost('groupid', 'int'), 'question' => WHMCMS\Base::fromPost('question'), 'answer' => WHMCMS\Base::fromPost('answer'), 'datecreate' => date('Y-m-d H:i:s'), 'enable' => WHMCMS\Base::fromPost('enable', 'int'), 'language' => WHMCMS\Base::getSystemDefaultLanguage()];
+			$itemId = WHMCMS\Database\Capsule::table('mod_whmcms_faq')->insertGetId($data);
+
+			foreach (WHMCMS\Base::fromPost('translate_question', 'array') as $language => $question) {
+				if (WHMCMS\Base::fromInput($question) !== '') {
+					$data = ['topid' => $itemId, 'language' => $language, 'question' => WHMCMS\Base::fromInput($question), 'answer' => WHMCMS\Base::fromInput($_POST['translate_answer'][$language])];
+					WHMCMS\Database\Capsule::table('mod_whmcms_faq')->insert($data);
+				}
+			}
+
+			WHMCMS\Base::redirect(WHMCMS\Base::__('questionCreatedMessage'), 'success', MODURL . '&action=updatefaq&faqid=' . $itemId);
+		}
+		else if ($action === 'updatefaq') {
+			$itemId = WHMCMS\Base::fromRequest('faqid', 'int');
+			$getItem = WHMCMS\Database\Capsule::table('mod_whmcms_faq')->where('faqid', '=', $itemId)->first();
+			$getItem = (array) $getItem;
+			$getGroup = WHMCMS\Database\Capsule::table('mod_whmcms_faqgroups')->where('groupid', '=', $getItem['groupid'])->first();
+			$getGroup = (array) $getGroup;
+			$smarty->assign('faqMain', faqItemForm($itemId, 'main', '', $smarty));
+			$smarty->assign('faqMainEditor', faqItemForm($itemId, 'maineditor', '', $smarty));
+			$smarty->assign('faqOptions', faqItemForm($itemId, 'options', '', $smarty));
+			$languages = WHMCMS\Base::getSystemLanguages(true);
+			$translations = [];
+
+			foreach ($languages as $language) {
+				$translation = ['language' => $language, 'form' => faqItemForm($itemId, 'translate', $language, $smarty)];
+				$translations[] = $translation;
+			}
+
+			$smarty->assign('translations', $translations);
+			$templateFile = 'faq.tpl';
+			$BC[MODURL . '&action=faq'] = WHMCMS\Base::__('faqPageTitle');
+			$BC[MODURL . '&action=listfaq&groupid=' . $groupId] = $getGroup['title'];
+			$BC[MODURL . '&action=updatefaq&faqid=' . $itemId] = WHMCMS\Base::__('faqItemUpdatePageTitle') . $getItem['question'];
+			$smarty->assign('goBackURL', MODURL . '&action=listfaq&groupid=' . $getGroup['groupid']);
+		}
+		else if ($action == 'doupdatefaq') {
+			$itemId = WHMCMS\Base::fromRequest('faqid', 'int');
+			$data = ['topid' => 0, 'groupid' => WHMCMS\Base::fromPost('groupid', 'int'), 'question' => WHMCMS\Base::fromPost('question'), 'answer' => WHMCMS\Base::fromPost('answer'), 'datemodify' => date('Y-m-d H:i:s'), 'enable' => WHMCMS\Base::fromPost('enable', 'int'), 'language' => WHMCMS\Base::getSystemDefaultLanguage()];
+			WHMCMS\Database\Capsule::table('mod_whmcms_faq')->where('faqid', '=', $itemId)->update($data);
+
+			if (0 < WHMCMS\Base::fromPost('deletetranslation', 'int')) {
+				WHMCMS\Database\Capsule::table('mod_whmcms_faq')->where('faqid', '=', WHMCMS\Base::fromPost('deletetranslation', 'int'))->delete();
+			}
+
+			foreach (WHMCMS\Base::fromPost('translate_question', 'array') as $language => $question) {
+				if (WHMCMS\Base::fromInput($question) !== '') {
+					$data = ['topid' => $itemId, 'language' => $language, 'question' => WHMCMS\Base::fromInput($question), 'answer' => WHMCMS\Base::fromInput($_POST['translate_answer'][$language])];
+					$getTranslation = WHMCMS\Database\Capsule::table('mod_whmcms_faq')->where('topid', '=', $itemId)->where('language', '=', $language);
+
+					if ($getTranslation->count() == '0') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_faq')->insert($data);
+					}
+					else {
+						WHMCMS\Database\Capsule::table('mod_whmcms_faq')->where('topid', '=', $itemId)->where('language', '=', $language)->update($data);
+					}
+				}
+			}
+
+			if (isset($_POST['saveandreturn'])) {
+				WHMCMS\Base::redirect(WHMCMS\Base::__('questionUpdatedMessage'), 'success', MODURL . '&action=listfaq&groupid=' . WHMCMS\Base::fromPost('groupid', 'int'));
+			}
+
+			WHMCMS\Base::redirect(WHMCMS\Base::__('questionUpdatedMessage'), 'success', MODURL . '&action=updatefaq&faqid=' . $itemId);
+		}
+		else if ($action === 'dodeletefaq') {
+			$itemId = WHMCMS\Base::fromRequest('faqid', 'int');
+			$groupId = WHMCMS\Base::fromRequest('groupid', 'int');
+			WHMCMS\Database\Capsule::table('mod_whmcms_faq')->where('faqid', '=', $itemId)->delete();
+			WHMCMS\Database\Capsule::table('mod_whmcms_faq')->where('topid', '=', $itemId)->delete();
+			WHMCMS\Base::redirect(WHMCMS\Base::__('questionDeletedMessage'), 'success', MODURL . '&action=listfaq&groupid=' . $groupId);
+		}
+		else if (($action === 'disablefaq') || ($action == 'enablefaq')) {
+			$itemId = WHMCMS\Base::fromRequest('faqid', 'int');
+			$groupId = WHMCMS\Base::fromRequest('groupid', 'int');
+
+			if ($action === 'disablefaq') {
+				WHMCMS\Database\Capsule::table('mod_whmcms_faq')->where('faqid', '=', $itemId)->update(['enable' => 0]);
+			}
+			else if ($action === 'enablefaq') {
+				WHMCMS\Database\Capsule::table('mod_whmcms_faq')->where('faqid', '=', $itemId)->update(['enable' => 1]);
+			}
+
+			if ($isAjax === true) {
+				echo json_encode(['result' => 'success']);
+				exit();
+			}
+
+			WHMCMS\Base::redirect('', '', MODURL . '&action=listfaq&groupid=' . $groupId);
+		}
+		else if ($action === 'bulkfaq') {
+			$groupId = WHMCMS\Base::fromRequest('groupid', 'int');
+			$bulkaction = WHMCMS\Base::fromRequest('bulkaction');
+			if ((0 < count(WHMCMS\Base::fromPost('bulkcheckbox', 'array'))) && ($bulkaction != '')) {
+				foreach (WHMCMS\Base::fromPost('bulkcheckbox', 'array') as $index => $itemId) {
+					if ($bulkaction === 'publish') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_faq')->where('faqid', '=', $itemId)->update(['enable' => 1]);
+					}
+					else if ($bulkaction === 'unpublish') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_faq')->where('faqid', '=', $itemId)->update(['enable' => 0]);
+					}
+					else if ($bulkaction === 'delete') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_faq')->where('faqid', '=', $itemId)->delete();
+					}
+				}
+			}
+
+			WHMCMS\Base::redirect('', '', MODURL . '&action=listfaq&groupid=' . $groupId);
+		}
+		else if ($action === 'errorpages') {
+			$getPages = WHMCMS\Database\Capsule::table('mod_whmcms_errorpages')->where('topid', '=', 0);
+			$pageParams = [];
+			$pageParams['module'] = 'whmcms';
+			$pageParams['action'] = 'errorpages';
+			$pagination = pagination($getPages->count(), 25, WHMCMS\Base::fromGet('page', 'int'), $pageParams);
+			$getPages->orderBy('pageid', 'asc')->skip($pagination['LimitFrom'])->take($pagination['LimitTo']);
+
+			foreach ($getPages->get() as $page) {
+				$page = (array) $page;
+				$getTotalLogs = WHMCMS\Database\Capsule::table('mod_whmcms_errorlog')->where('code', '=', $page['code']);
+				$page['logs'] = $getTotalLogs->count();
+				$page['datelastvisit'] = ($page['datelastvisit'] == '0000-00-00 00:00:00' ? 'Never' : fromMySQLDate($page['datelastvisit'], true, false));
+				$page['datemodify'] = ($page['datemodify'] == '0000-00-00 00:00:00' ? 'Never' : fromMySQLDate($page['datemodify'], true, false));
+				$page['viewurl'] = WHMCMS\Base::generateFriendlyURL($page, 'errorpages.errorpages');
+				$pages[] = $page;
+			}
+
+			$smarty->assign('errorpages', $pages);
+			$smarty->assign('pagination', $pagination);
+			$templateFile = 'errorpages.tpl';
+			$BC[MODURL . '&action=errorpages'] = WHMCMS\Base::__('errorPagesPageTitle');
+			$smarty->assign('noBreadcrumbButton', true);
+		}
+		else if ($action == 'updateerrorpage') {
+			$pageId = WHMCMS\Base::fromRequest('pageid', 'int');
+			$getPage = WHMCMS\Database\Capsule::table('mod_whmcms_errorpages')->where('pageid', '=', $pageId)->first();
+			$getPage = (array) $getPage;
+			$smarty->assign('pageMain', errorPageForm($pageId, 'main', '', $smarty));
+			$smarty->assign('pageMainEditor', errorPageForm($pageId, 'maineditor', '', $smarty));
+			$smarty->assign('pageOptions', errorPageForm($pageId, 'options', '', $smarty));
+			$smarty->assign('pageAdvanced', errorPageForm($pageId, 'advanced', '', $smarty));
+			$languages = WHMCMS\Base::getSystemLanguages(true);
+			$translations = [];
+
+			foreach ($languages as $language) {
+				$translation = ['language' => $language, 'form' => errorPageForm($pageId, 'translate', $language, $smarty)];
+				$translations[] = $translation;
+			}
+
+			$smarty->assign('translations', $translations);
+			$templateFile = 'errorpages.tpl';
+			$BC[MODURL . '&action=errorpages'] = WHMCMS\Base::__('errorPagesPageTitle');
+			$BC[MODURL . '&action=updateerrorpage&pageid=' . $pageId] = WHMCMS\Base::__('errorPageUpdatePageTitle') . $getPage['title'];
+			$smarty->assign('goBackURL', MODURL . '&action=errorpages');
+		}
+		else if ($action === 'doupdateerrorpage') {
+			$pageId = WHMCMS\Base::fromRequest('pageid', 'int');
+			$data = ['topid' => 0, 'title' => WHMCMS\Base::fromPost('title'), 'content' => WHMCMS\Base::fromPost('content'), 'datemodify' => date('Y-m-d H:i:s'), 'language' => WHMCMS\Base::getSystemDefaultLanguage(), 'headercontent' => WHMCMS\Base::fromPost('headercontent')];
+			WHMCMS\Database\Capsule::table('mod_whmcms_errorpages')->where('pageid', '=', $pageId)->update($data);
+
+			if (0 < WHMCMS\Base::fromPost('deletetranslation', 'int')) {
+				WHMCMS\Database\Capsule::table('mod_whmcms_errorpages')->where('pageid', '=', WHMCMS\Base::fromPost('deletetranslation', 'int'))->delete();
+			}
+
+			foreach (WHMCMS\Base::fromPost('translate_title', 'array') as $language => $title) {
+				if (WHMCMS\Base::fromInput($title) !== '') {
+					$data = ['topid' => $pageId, 'language' => $language, 'title' => WHMCMS\Base::fromInput($title), 'content' => WHMCMS\Base::fromInput($_POST['translate_content'][$language])];
+					$getTranslation = WHMCMS\Database\Capsule::table('mod_whmcms_errorpages')->where('topid', '=', $pageId)->where('language', '=', $language);
+
+					if ($getTranslation->count() == '0') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_errorpages')->insert($data);
+					}
+					else {
+						WHMCMS\Database\Capsule::table('mod_whmcms_errorpages')->where('topid', '=', $pageId)->where('language', '=', $language)->update($data);
+					}
+				}
+			}
+
+			if (isset($_POST['saveandreturn'])) {
+				WHMCMS\Base::redirect(WHMCMS\Base::__('errorPageUpdatedMessage'), 'success', MODURL . '&action=errorpages');
+			}
+
+			WHMCMS\Base::redirect(WHMCMS\Base::__('errorPageUpdatedMessage'), 'success', MODURL . '&action=updateerrorpage&pageid=' . $pageId);
+		}
+		else if ($action === 'bulkerrorpage') {
+			$bulkaction = WHMCMS\Base::fromPost('bulkaction');
+			if ((0 < count(WHMCMS\Base::fromPost('bulkcheckbox', 'array'))) && ($bulkaction != '')) {
+				foreach (WHMCMS\Base::fromPost('bulkcheckbox', 'array') as $index => $code) {
+					if ($bulkaction === 'log') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_errorlog')->where('code', '=', $code)->delete();
+					}
+					else if ($bulkaction === 'hits') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_errorpages')->where('code', '=', $code)->update(['hits' => 0]);
+					}
+				}
+			}
+
+			WHMCMS\Base::redirect('', '', MODURL . '&action=errorpages');
+		}
+		else if ($action === 'logerrors') {
+			$code = WHMCMS\Base::fromRequest('code', 'int');
+			$getPage = WHMCMS\Database\Capsule::table('mod_whmcms_errorpages')->where('topid', '=', 0)->where('code', '=', $code)->first();
+			$getPage = (array) $getPage;
+			$getLogs = WHMCMS\Database\Capsule::table('mod_whmcms_errorlog')->where('code', '=', $code);
+			$pageParams = [];
+			$pageParams['module'] = 'whmcms';
+			$pageParams['action'] = 'logerrors';
+			$pageParams['code'] = $code;
+			$pagination = pagination($getLogs->count(), 25, WHMCMS\Base::fromGet('page', 'int'), $pageParams);
+			$getLogs->orderBy('logid', 'desc')->skip($pagination['LimitFrom'])->take($pagination['LimitTo']);
+			$logs = [];
+
+			foreach ($getLogs->get() as $log) {
+				$log = (array) $log;
+				$isIPBanned = WHMCMS\Database\Capsule::table('tblbannedips')->where('ip', $log['ip'])->take(1)->count();
+				$log['ipbanned'] = $isIPBanned;
+
+				if ($isIPBanned === 0) {
+					$log['banipform'] = banErrorIP($log['logid']);
+				}
+
+				$log['loginfo'] = errorLogInfo($log['logid']);
+				$log['datecreate'] = fromMySQLDate($log['datecreate'], true, false);
+				$logs[] = $log;
+			}
+
+			$smarty->assign('logs', $logs);
+			$smarty->assign('pagination', $pagination);
+			$templateFile = 'errorpages.tpl';
+			$BC[MODURL . '&action=errorpages'] = WHMCMS\Base::__('errorPagesPageTitle');
+			$BC[MODURL . '&action=logerrors&code=' . $code] = $getPage['title'] . ' ' . WHMCMS\Base::__('errorPagesLogsPageTitle');
+			$smarty->assign('noBreadcrumbButton', true);
+		}
+		else if ($action === 'bulkerrorlog') {
+			$bulkaction = WHMCMS\Base::fromPost('bulkaction');
+			if ((0 < count(WHMCMS\Base::fromPost('bulkcheckbox', 'array'))) && ($bulkaction != '')) {
+				foreach (WHMCMS\Base::fromPost('bulkcheckbox', 'array') as $index => $logId) {
+					if ($bulkaction === 'delete') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_errorlog')->where('logid', '=', $logId)->delete();
+					}
+				}
+			}
+
+			WHMCMS\Base::redirect('', '', MODURL . '&action=logerrors&code=' . $code);
+		}
+		else if ($action === 'deletelogitem') {
+			$logId = WHMCMS\Base::fromGet('logid', 'int');
+			$code = WHMCMS\Base::fromGet('code', 'int');
+			WHMCMS\Database\Capsule::table('mod_whmcms_errorlog')->where('logid', '=', $logId)->delete();
+			WHMCMS\Base::redirect('', '', MODURL . '&action=logerrors&code=' . $code);
+		}
+		else if ($action === 'banip') {
+			$ipaddress = WHMCMS\Base::fromPost('ipaddress');
+			$days = WHMCMS\Base::fromPost('days', 'int');
+			$reason = WHMCMS\Base::fromPost('reason');
+			WHMCMS\Database\Capsule::table('tblbannedips')->where('ip', '=', $ipaddress)->delete();
+			WHMCMS\Database\Capsule::table('tblbannedips')->insert(['ip' => $ipaddress, 'reason' => $reason, 'expires' => date('Y-m-d H:i:s', strtotime('now + ' . $days . ' days'))]);
+			WHMCMS\Base::redirect('', '', MODURL . '&action=logerrors&code=' . $code);
+		}
+		else if ($action === 'unbanip') {
+			$ipaddress = WHMCMS\Base::fromPost('ipaddress');
+			WHMCMS\Database\Capsule::table('tblbannedips')->where('ip', '=', $ipaddress)->delete();
+			WHMCMS\Base::redirect('', '', MODURL . '&action=logerrors&code=' . $code);
+		}
+		else if ($action === 'menu') {
+			$integrationTypes = [0 => 'None', 1 => 'Manually', 3 => 'Primary Navbar', 4 => 'Secondary Navbar'];
+			$smarty->assign('integrationtypes', $integrationTypes);
+			$smarty->assign('menuCategoryMain', menuCategoryForm('', 'main', $smarty));
+			$smarty->assign('menuCategoryOptions', menuCategoryForm('', 'options', $smarty));
+			$getCategories = WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->orderBy('categoryid', 'asc');
+
+			foreach ($getCategories->get() as $category) {
+				$category = (array) $category;
+				$getTotalMenuItems = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('categoryid', '=', $category['categoryid'])->where('topid', '=', 0)->count();
+				$category['items'] = $getTotalMenuItems;
+				$category['categoryMain'] = menuCategoryForm($category['categoryid'], 'main', $smarty);
+				$category['categoryOptions'] = menuCategoryForm($category['categoryid'], 'options', $smarty);
+				$categories[] = $category;
+			}
+
+			$smarty->assign('categories', $categories);
+			$templateFile = 'menu.tpl';
+			$BC[MODURL . '&action=menu'] = WHMCMS\Base::__('menuCategoryPageTitle');
+		}
+		else if ($action === 'doaddmenucategory') {
+			$categoryID = WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->insertGetId(['title' => WHMCMS\Base::fromPost('title'), 'css_class' => WHMCMS\Base::fromPost('css_class'), 'css_activeclass' => WHMCMS\Base::fromPost('css_activeclass'), 'css_id' => WHMCMS\Base::fromPost('css_id')]);
+
+			if (WHMCMS\Base::fromPost('installdefaultmenu') === 'primary') {
+				$installMenu = new WHMCMS\MenuInstallation($categoryID);
+				$installMenu->primaryNavbar();
+			}
+
+			if (WHMCMS\Base::fromPost('installdefaultmenu') === 'secondary') {
+				$installMenu = new WHMCMS\MenuInstallation($categoryID);
+				$installMenu->secondaryNavbar();
+			}
+
+			WHMCMS\Base::redirect(WHMCMS\Base::__('menuCategoryCreatedMessage'), 'success', MODURL . '&action=menu');
+		}
+		else if ($action === 'doupdatemenucategory') {
+			$categoryId = WHMCMS\Base::fromRequest('categoryid', 'int');
+			WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->where('categoryid', '=', $categoryId)->update(['title' => WHMCMS\Base::fromPost('title'), 'css_class' => WHMCMS\Base::fromPost('css_class'), 'css_activeclass' => WHMCMS\Base::fromPost('css_activeclass'), 'css_id' => WHMCMS\Base::fromPost('css_id')]);
+			WHMCMS\Base::redirect(WHMCMS\Base::__('menuCategoryUpdatedMessage'), 'success', MODURL . '&action=menu');
+		}
+		else if ($action === 'dodeletemenucategory') {
+			$categoryId = WHMCMS\Base::fromRequest('categoryid', 'int');
+			WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->where('categoryid', '=', $categoryId)->delete();
+			WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('categoryid', '=', $categoryId)->delete();
+			WHMCMS\Base::redirect(WHMCMS\Base::__('menuCategoryDeletedMessage'), 'success', MODURL . '&action=menu');
+		}
+		else if ($action === 'bulkmenu') {
+			$bulkaction = WHMCMS\Base::fromPost('bulkaction');
+			if ((0 < count(WHMCMS\Base::fromPost('bulkcheckbox', 'array'))) && ($bulkaction != '')) {
+				foreach (WHMCMS\Base::fromPost('bulkcheckbox', 'array') as $index => $categoryId) {
+					if ($bulkaction === 'delete') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->where('categoryid', '=', $categoryId)->delete();
+						WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('categoryid', '=', $categoryId)->delete();
+					}
+				}
+			}
+
+			WHMCMS\Base::redirect(WHMCMS\Base::__('menuCategoriesDeletedMessage'), 'success', MODURL . '&action=menu');
+		}
+		else if ($action === 'setmenuintegration') {
+			$menuId = WHMCMS\Base::fromRequest('categoryid', 'int');
+			$type = WHMCMS\Base::fromRequest('type', 'int');
+			$primaryNavbarId = WHMCMS\Base::fromInput(WHMCMS\Base::getConfig('PrimaryNavbarCategoryid'), 'int');
+			$secondaryNavbarId = WHMCMS\Base::fromInput(WHMCMS\Base::getConfig('SecondaryNavbarCategoryid'), 'int');
+			if (($type === 0) || ($type === 1)) {
+				WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->where('categoryid', '=', $menuId)->update(['integration' => $type]);
+
+				if ($primaryNavbarId === $menuId) {
+					WHMCMS\Base::setConfig('PrimaryNavbarCategoryid', 0);
+				}
+
+				if ($secondaryNavbarId === $menuId) {
+					WHMCMS\Base::setConfig('SecondaryNavbarCategoryid', 0);
+				}
+			}
+
+			if ($type === 3) {
+				WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->where('integration', '=', 3)->update(['integration' => 0]);
+				WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->where('categoryid', '=', $menuId)->update(['integration' => $type]);
+				WHMCMS\Base::setConfig('PrimaryNavbarCategoryid', $menuId);
+			}
+
+			if ($type === 4) {
+				WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->where('integration', '=', 4)->update(['integration' => 0]);
+				WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->where('categoryid', '=', $menuId)->update(['integration' => $type]);
+				WHMCMS\Base::setConfig('SecondaryNavbarCategoryid', $menuId);
+			}
+
+			WHMCMS\Base::redirect('', 'success', MODURL . '&action=menu');
+		}
+		else if ($action === 'listmenu') {
+			$categoryId = WHMCMS\Base::fromRequest('categoryid', 'int');
+			$getCategory = WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->where('categoryid', '=', $categoryId)->first();
+			$getCategory = (array) $getCategory;
+
+			if ($categoryId === 0) {
+				WHMCMS\Base::redirect('', '', MODURL . '&action=menu');
+			}
+
+			$getLevel1 = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('categoryid', '=', $categoryId)->where('topid', '=', 0)->where('parentid', '=', 0)->orderBy('reorder', 'asc');
+			$menulevel1 = [];
+
+			foreach ($getLevel1->get() as $level1) {
+				$level1 = (array) $level1;
+				$getLevel2 = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', 0)->where('parentid', '=', $level1['menuid'])->orderBy('reorder', 'asc');
+				$menulevel2 = [];
+
+				foreach ($getLevel2->get() as $level2) {
+					$level2 = (array) $level2;
+					$getLevel3 = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', 0)->where('parentid', '=', $level2['menuid'])->orderBy('reorder', 'asc');
+					$menulevel3 = [];
+
+					foreach ($getLevel3->get() as $level3) {
+						$level3 = (array) $level3;
+						$getLevel4 = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', 0)->where('parentid', '=', $level3['menuid'])->orderBy('reorder', 'asc');
+						$menulevel4 = [];
+
+						foreach ($getLevel4->get() as $level4) {
+							$level4 = (array) $level4;
+							$level4['datemodify'] = ($level4['datemodify'] == '0000-00-00 00:00:00' ? $level4['datecreate'] : $level4['datemodify']);
+							$level4['datemodify'] = fromMySQLDate($level4['datemodify'], true, false);
+							$level4['targeturl'] = WHMCMS\Menus::getItemURL($level4);
+							$level4['shorturl'] = str_replace(WHMCMS\Base::getSystemURL(), '../', $level4['targeturl']);
+
+							if (in_array(strtolower($level4['title']), ['-----', '------', 'divider'])) {
+								$level4['title'] = '------';
+							}
+
+							$level4['validurl'] = true;
+							if ((strpos($level4['targeturl'], 'http') === false) && (strpos($level4['targeturl'], 'https') === false)) {
+								$level4['validurl'] = false;
+							}
+
+							$menulevel4[] = $level4;
+						}
+
+						$level3['children'] = $menulevel4;
+						$level3['datemodify'] = ($level3['datemodify'] == '0000-00-00 00:00:00' ? $level3['datecreate'] : $level3['datemodify']);
+						$level3['datemodify'] = fromMySQLDate($level3['datemodify'], true, false);
+						$level3['targeturl'] = WHMCMS\Menus::getItemURL($level3);
+						$level3['shorturl'] = str_replace(WHMCMS\Base::getSystemURL(), '../', $level3['targeturl']);
+
+						if (in_array(strtolower($level3['title']), ['-----', '------', 'divider'])) {
+							$level3['title'] = '------';
+						}
+
+						$level3['validurl'] = true;
+						if ((strpos($level3['targeturl'], 'http') === false) && (strpos($level3['targeturl'], 'https') === false)) {
+							$level3['validurl'] = false;
+						}
+
+						$menulevel3[] = $level3;
+					}
+
+					$level2['children'] = $menulevel3;
+					$level2['datemodify'] = ($level2['datemodify'] == '0000-00-00 00:00:00' ? $level2['datecreate'] : $level2['datemodify']);
+					$level2['datemodify'] = fromMySQLDate($level2['datemodify'], true, false);
+					$level2['targeturl'] = WHMCMS\Menus::getItemURL($level2);
+					$level2['shorturl'] = str_replace(WHMCMS\Base::getSystemURL(), '../', $level2['targeturl']);
+
+					if (in_array(strtolower($level2['title']), ['-----', '------', 'divider'])) {
+						$level2['title'] = '------';
+					}
+
+					$level2['validurl'] = true;
+					if ((strpos($level2['targeturl'], 'http') === false) && (strpos($level2['targeturl'], 'https') === false)) {
+						$level2['validurl'] = false;
+					}
+
+					$menulevel2[] = $level2;
+				}
+
+				$level1['children'] = $menulevel2;
+				$level1['datemodify'] = ($level1['datemodify'] == '0000-00-00 00:00:00' ? $level1['datecreate'] : $level1['datemodify']);
+				$level1['datemodify'] = fromMySQLDate($level1['datemodify'], true, false);
+				$level1['targeturl'] = WHMCMS\Menus::getItemURL($level1);
+				$level1['shorturl'] = str_replace(WHMCMS\Base::getSystemURL(), '../', $level1['targeturl']);
+
+				if (in_array(strtolower($level1['title']), ['-----', '------', 'divider'])) {
+					$level1['title'] = '------';
+				}
+
+				$level1['validurl'] = true;
+				if ((strpos($level1['targeturl'], 'http') === false) && (strpos($level1['targeturl'], 'https') === false)) {
+					$level1['validurl'] = false;
+				}
+
+				$menu[] = $level1;
+			}
+
+			$smarty->assign('menu', $menu);
+			$templateFile = 'menu.tpl';
+			$BC[MODURL . '&action=menu'] = WHMCMS\Base::__('menuCategoryPageTitle');
+			$BC[MODURL . '&action=listmenu&categoryid=' . $categoryId] = $getCategory['title'] . ' ' . WHMCMS\Base::__('menuItemsPageTitle');
+		}
+		else if (in_array($action, ['addmenu', 'addmenudivider'])) {
+			$categoryId = WHMCMS\Base::fromRequest('categoryid', 'int');
+			$getCategory = WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->where('categoryid', '=', $categoryId)->first();
+			$getCategory = (array) $getCategory;
+
+			if ($categoryId === 0) {
+				WHMCMS\Base::redirect('', '', MODURL . '&action=menu');
+			}
+
+			$smarty->assign('menuMain', menuItemForm('', $categoryId, 'main', '', $smarty));
+			$smarty->assign('menuOptions', menuItemForm('', $categoryId, 'options', '', $smarty));
+			$smarty->assign('menuCss', menuItemForm('', $categoryId, 'css', '', $smarty));
+			$languages = WHMCMS\Base::getSystemLanguages(true);
+			$translations = [];
+
+			foreach ($languages as $language) {
+				$translation = ['language' => $language, 'form' => menuItemForm(0, $categoryId, 'translate', $language, $smarty)];
+				$translations[] = $translation;
+			}
+
+			$smarty->assign('translations', $translations);
+			$smarty->assign('icons', WHMCMS\Base::getResourcesIcons());
+			$templateFile = 'menu.tpl';
+			$BC[MODURL . '&action=menu'] = WHMCMS\Base::__('menuCategoryPageTitle');
+			$BC[MODURL . '&action=listmenu&categoryid=' . $categoryId] = $getCategory['title'] . ' ' . WHMCMS\Base::__('menuItemsPageTitle');
+			$BC[MODURL . '&action=addmenu&categoryid=' . $categoryId] = WHMCMS\Base::__('menuItemCreatePageTitle');
+			$smarty->assign('goBackURL', MODURL . '&action=listmenu&categoryid=' . $categoryId);
+		}
+		else if ($action === 'doaddmenuitem') {
+			$parentId = WHMCMS\Base::fromPost('parentid', 'int');
+			$urlType = WHMCMS\Base::fromPost('url_type');
+			$menuId = WHMCMS\Base::fromPost('categoryid', 'int');
+
+			if ($urlType === 'page') {
+				$url = WHMCMS\Base::fromPost('type_page', 'int');
+			}
+			else if ($urlType === 'faq') {
+				$url = WHMCMS\Base::fromPost('type_faq', 'int');
+			}
+			else if ($urlType === 'internal') {
+				$url = WHMCMS\Base::fromPost('type_internal');
+			}
+			else if ($urlType === 'clientarea') {
+				$url = WHMCMS\Base::fromPost('type_clientarea');
+			}
+			else if ($urlType === 'external') {
+				$url = WHMCMS\Base::fromPost('type_external');
+			}
+			else if ($urlType === 'download') {
+				$url = WHMCMS\Base::fromPost('type_download', 'int');
+			}
+			else if ($urlType === 'knowledge') {
+				$url = WHMCMS\Base::fromPost('type_knowledge', 'int');
+			}
+			else if ($urlType === 'support') {
+				$url = WHMCMS\Base::fromPost('type_support', 'int');
+			}
+
+			$getNewOrdering = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', 0)->where('parentid', '=', $parentId)->where('categoryid', '=', $menuId)->orderBy('reorder', 'desc')->take(1);
+			$ordering = 1;
+
+			if (0 < $getNewOrdering->count()) {
+				$lastItemOrdering = (array) $getNewOrdering->first();
+				$ordering = $lastItemOrdering['reorder'] + 1;
+			}
+
+			$data = ['categoryid' => $menuId, 'topid' => 0, 'parentid' => WHMCMS\Base::fromPost('parentid', 'int'), 'title' => WHMCMS\Base::fromPost('title'), 'url' => $url, 'url_type' => WHMCMS\Base::fromPost('url_type'), 'target' => WHMCMS\Base::fromPost('target'), 'reorder' => $ordering, 'enable' => WHMCMS\Base::fromPost('enable', 'int'), 'private' => WHMCMS\Base::fromPost('private', 'int'), 'css_class' => WHMCMS\Base::fromPost('css_class'), 'css_id' => WHMCMS\Base::fromPost('css_id'), 'css_hassubclass' => WHMCMS\Base::fromPost('css_hassubclass'), 'css_submenuclass' => WHMCMS\Base::fromPost('css_submenuclass'), 'css_iconclass' => WHMCMS\Base::fromPost('css_iconclass'), 'menucondition' => WHMCMS\Base::fromPost('menucondition'), 'menubadge' => WHMCMS\Base::fromPost('menubadge'), 'datecreate' => date('Y-m-d H:i:s'), 'language' => WHMCMS\Base::getSystemDefaultLanguage()];
+			$itemId = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->insertGetId($data);
+
+			foreach (WHMCMS\Base::fromPost('translate_title', 'array') as $language => $title) {
+				if (WHMCMS\Base::fromInput($title) !== '') {
+					$data = ['topid' => $itemId, 'language' => $language, 'title' => WHMCMS\Base::fromInput($title)];
+					WHMCMS\Database\Capsule::table('mod_whmcms_menu')->insert($data);
+				}
+			}
+
+			if (WHMCMS\Base::fromPost('title') === '------') {
+				WHMCMS\Base::redirect(WHMCMS\Base::__('menuItemCreatedMessage'), 'success', MODURL . '&action=updatemenudivider&menuid=' . $itemId);
+			}
+
+			WHMCMS\Base::redirect(WHMCMS\Base::__('menuItemCreatedMessage'), 'success', MODURL . '&action=updatemenu&menuid=' . $itemId);
+		}
+		else if (in_array($action, ['updatemenu', 'updatemenudivider'])) {
+			$itemId = WHMCMS\Base::fromRequest('menuid', 'int');
+			$getItem = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', $itemId)->first();
+			$getItem = (array) $getItem;
+			$smarty->assign('item', $getItem);
+			$menuId = $getItem['categoryid'];
+			$getMenu = WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->where('categoryid', '=', $menuId)->first();
+			$getMenu = (array) $getMenu;
+			$smarty->assign('menuMain', menuItemForm($itemId, $menuId, 'main', '', $smarty));
+			$smarty->assign('menuOptions', menuItemForm($itemId, $menuId, 'options', '', $smarty));
+			$smarty->assign('menuCss', menuItemForm($itemId, $menuId, 'css', '', $smarty));
+			$languages = WHMCMS\Base::getSystemLanguages(true);
+			$translations = [];
+
+			foreach ($languages as $language) {
+				$translation = ['language' => $language, 'form' => menuItemForm($itemId, $menuId, 'translate', $language, $smarty)];
+				$translations[] = $translation;
+			}
+
+			$smarty->assign('translations', $translations);
+			$smarty->assign('icons', WHMCMS\Base::getResourcesIcons());
+			$templateFile = 'menu.tpl';
+			$BC[MODURL . '&action=menu'] = WHMCMS\Base::__('menuCategoryPageTitle');
+			$BC[MODURL . '&action=listmenu&categoryid=' . $menuId] = $getMenu['title'] . ' ' . WHMCMS\Base::__('menuItemsPageTitle');
+			$BC[MODURL . '&action=addmenu&categoryid=' . $menuId] = WHMCMS\Base::__('menuItemUpdatePageTitle') . $getItem['title'];
+			$smarty->assign('goBackURL', MODURL . '&action=listmenu&categoryid=' . $menuId);
+		}
+		else if ($action === 'doupdatemenuitem') {
+			$itemId = WHMCMS\Base::fromRequest('menuid', 'int');
+			$urlType = WHMCMS\Base::fromPost('url_type');
+			$parentId = WHMCMS\Base::fromPost('parentid', 'int');
+			$categoryId = WHMCMS\Base::fromRequest('categoryid', 'int');
+			$getItem = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $itemId)->first();
+			$getItem = (array) $getItem;
+			$menuId = $getItem['categoryid'];
+			$getMenu = WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->where('categoryid', '=', $menuId)->first();
+			$getMenu = (array) $getMenu;
+			$getNewOrdering = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', 0)->where('parentid', '=', $parentId)->where('categoryid', '=', $menuId)->orderBy('reorder', 'desc')->take(1);
+			$ordering = 1;
+
+			if (0 < $getNewOrdering->count()) {
+				$lastItemOrdering = (array) $getNewOrdering->first();
+				$ordering = $lastItemOrdering['reorder'] + 1;
+			}
+
+			if ($urlType === 'page') {
+				$url = WHMCMS\Base::fromPost('type_page', 'int');
+			}
+			else if ($urlType === 'faq') {
+				$url = WHMCMS\Base::fromPost('type_faq', 'int');
+			}
+			else if ($urlType === 'internal') {
+				$url = WHMCMS\Base::fromPost('type_internal');
+			}
+			else if ($urlType === 'clientarea') {
+				$url = WHMCMS\Base::fromPost('type_clientarea');
+			}
+			else if ($urlType === 'external') {
+				$url = WHMCMS\Base::fromPost('type_external');
+			}
+			else if ($urlType === 'download') {
+				$url = WHMCMS\Base::fromPost('type_download', 'int');
+			}
+			else if ($urlType === 'knowledge') {
+				$url = WHMCMS\Base::fromPost('type_knowledge', 'int');
+			}
+			else if ($urlType === 'support') {
+				$url = WHMCMS\Base::fromPost('type_support', 'int');
+			}
+
+			$data = ['topid' => 0, 'parentid' => $parentId, 'title' => WHMCMS\Base::fromPost('title'), 'url' => WHMCMS\Base::fromInput($url), 'url_type' => WHMCMS\Base::fromPost('url_type'), 'target' => WHMCMS\Base::fromPost('target'), 'enable' => WHMCMS\Base::fromPost('enable', 'int'), 'private' => WHMCMS\Base::fromPost('private', 'int'), 'css_class' => WHMCMS\Base::fromPost('css_class'), 'css_id' => WHMCMS\Base::fromPost('css_id'), 'css_hassubclass' => WHMCMS\Base::fromPost('css_hassubclass'), 'css_submenuclass' => WHMCMS\Base::fromPost('css_submenuclass'), 'css_iconclass' => WHMCMS\Base::fromPost('css_iconclass'), 'menucondition' => WHMCMS\Base::fromPost('menucondition'), 'menubadge' => WHMCMS\Base::fromPost('menubadge'), 'datemodify' => date('Y-m-d H:i:s'), 'language' => WHMCMS\Base::getSystemDefaultLanguage()];
+
+			if ($parentId !== WHMCMS\Base::fromInput($getItem['parentid'], 'int')) {
+				$data['reorder'] = $ordering;
+				$getNextMenuItems = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', 0)->where('parentid', '=', $getItem['parentid'])->where('categoryid', '=', $getItem['categoryid'])->where('reorder', '>', $getItem['reorder'])->orderBy('reorder', 'asc');
+
+				foreach ($getNextMenuItems->get() as $item) {
+					$item = (array) $item;
+					WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $item['menuid'])->update(['reorder' => WHMCMS\Base::fromInput($item['reorder'], 'int') - 1]);
+				}
+			}
+
+			WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $itemId)->update($data);
+
+			if (0 < WHMCMS\Base::fromPost('deletetranslation', 'int')) {
+				WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', WHMCMS\Base::fromPost('deletetranslation', 'int'))->delete();
+			}
+
+			foreach (WHMCMS\Base::fromPost('translate_title', 'array') as $language => $title) {
+				if (WHMCMS\Base::fromInput($title) !== '') {
+					$data = ['topid' => $itemId, 'language' => $language, 'title' => WHMCMS\Base::fromInput($title)];
+					$getTranslation = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', $itemId)->where('language', '=', $language);
+
+					if ($getTranslation->count() == '0') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_menu')->insert($data);
+					}
+					else {
+						WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', $itemId)->where('language', '=', $language)->update($data);
+					}
+				}
+			}
+
+			if (isset($_POST['saveandreturn'])) {
+				WHMCMS\Base::redirect(WHMCMS\Base::__('menuItemUpdatedMessage'), 'success', MODURL . '&action=listmenu&categoryid=' . $categoryId);
+			}
+
+			if (WHMCMS\Base::fromPost('title') === '------') {
+				WHMCMS\Base::redirect(WHMCMS\Base::__('menuItemUpdatedMessage'), 'success', MODURL . '&action=updatemenudivider&menuid=' . $itemId);
+			}
+
+			WHMCMS\Base::redirect(WHMCMS\Base::__('menuItemUpdatedMessage'), 'success', MODURL . '&action=updatemenu&menuid=' . $itemId);
+		}
+		else if ($action === 'menuitemsordering') {
+			$orderlevel1 = 1;
+			$orderlevel2 = 1;
+			$orderlevel3 = 1;
+			$orderlevel4 = 1;
+
+			foreach (WHMCMS\Base::fromPost('items', 'array') as $index => $level1) {
+				WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', WHMCMS\Base::fromInput($level1['id'], 'int'))->update(['parentid' => 0, 'reorder' => WHMCMS\Base::fromInput($orderlevel1, 'int')]);
+
+				if (WHMCMS\Base::fromInput($level1['children'], 'array')) {
+					$orderlevel2 = 1;
+
+					foreach (WHMCMS\Base::fromInput($level1['children'], 'array') as $index => $level2) {
+						WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', WHMCMS\Base::fromInput($level2['id'], 'int'))->update(['parentid' => WHMCMS\Base::fromInput($level1['id'], 'int'), 'reorder' => WHMCMS\Base::fromInput($orderlevel2, 'int')]);
+						$orderlevel2++;
+
+						if (WHMCMS\Base::fromInput($level2['children'], 'array')) {
+							$orderlevel3 = 1;
+
+							foreach (WHMCMS\Base::fromInput($level2['children'], 'array') as $index => $level3) {
+								WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', WHMCMS\Base::fromInput($level3['id'], 'int'))->update(['parentid' => WHMCMS\Base::fromInput($level2['id'], 'int'), 'reorder' => WHMCMS\Base::fromInput($orderlevel3, 'int')]);
+								$orderlevel3++;
+
+								if (WHMCMS\Base::fromInput($level3['children'], 'array')) {
+									$orderlevel4 = 1;
+
+									foreach (WHMCMS\Base::fromInput($level3['children'], 'array') as $index => $level4) {
+										WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', WHMCMS\Base::fromInput($level4['id'], 'int'))->update(['parentid' => WHMCMS\Base::fromInput($level3['id'], 'int'), 'reorder' => WHMCMS\Base::fromInput($orderlevel4, 'int')]);
+										$orderlevel4++;
+									}
+								}
+							}
+						}
+					}
+				}
+
+				$orderlevel1++;
+			}
+
+			echo json_encode(['result' => 'success']);
+			exit();
+		}
+		else if ($action === 'dodeletemenuitem') {
+			$itemId = WHMCMS\Base::fromRequest('menuid', 'int');
+			$getItem = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $itemId)->first();
+			$getItem = (array) $getItem;
+			$getLevel2 = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('parentid', '=', $itemId);
+
+			foreach ($getLevel2->get() as $level2) {
+				$level2 = (array) $level2;
+				$getLevel3 = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('parentid', '=', $level2['menuid']);
+
+				foreach ($getLevel3->get() as $level3) {
+					$level3 = (array) $level3;
+					$getLevel4 = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('parentid', '=', $level3['menuid']);
+
+					foreach ($getLevel4->get() as $level4) {
+						$level4 = (array) $level4;
+						WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $level4['menuid'])->delete();
+						WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', $level4['menuid'])->delete();
+					}
+
+					WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $level3['menuid'])->delete();
+					WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', $level3['menuid'])->delete();
+				}
+
+				WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $level2['menuid'])->delete();
+				WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', $level2['menuid'])->delete();
+			}
+
+			$getNextMenuItems = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', 0)->where('parentid', '=', $getItem['parentid'])->where('categoryid', '=', $getItem['categoryid'])->where('reorder', '>', $getItem['reorder'])->orderBy('reorder', 'asc');
+
+			foreach ($getNextMenuItems->get() as $item) {
+				$item = (array) $item;
+				WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $item['menuid'])->update(['reorder' => $item['reorder'] - 1]);
+			}
+
+			WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $itemId)->delete();
+			WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', $itemId)->delete();
+			WHMCMS\Base::redirect(WHMCMS\Base::__('menuItemDeletedMessage'), 'success', MODURL . '&action=listmenu&categoryid=' . $getItem['categoryid']);
+		}
+		else if (($action === 'disablemenuitem') || ($action === 'enablemenuitem')) {
+			$itemId = WHMCMS\Base::fromRequest('menuid', 'int');
+			$menuId = WHMCMS\Base::fromRequest('categoryid', 'int');
+
+			if ($action === 'disablemenuitem') {
+				WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $itemId)->update(['enable' => 0]);
+			}
+			else if ($action === 'enablemenuitem') {
+				WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $itemId)->update(['enable' => 1]);
+			}
+
+			if ($isAjax === true) {
+				echo json_encode(['result' => 'success']);
+				exit();
+			}
+
+			WHMCMS\Base::redirect('', '', MODURL . '&action=listmenu&categoryid=' . $menuId);
+		}
+		else if ($action == 'bulkmenuitems') {
+			$menuId = WHMCMS\Base::fromRequest('categoryid', 'int');
+			$bulkaction = WHMCMS\Base::fromPost('bulkaction');
+			if ((0 < count(WHMCMS\Base::fromPost('bulkcheckbox', 'array'))) && ($bulkaction !== '')) {
+				foreach (WHMCMS\Base::fromPost('bulkcheckbox', 'array') as $index => $itemId) {
+					if ($bulkaction === 'publish') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $itemId)->update(['enable' => 1]);
+					}
+					else if ($bulkaction === 'unpublish') {
+						WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $itemId)->update(['enable' => 0]);
+					}
+					else if ($bulkaction === 'delete') {
+						$getItem = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $itemId)->first();
+						$getItem = (array) $getItem;
+						$getLevel2 = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('parentid', '=', $itemId);
+
+						foreach ($getLevel2->get() as $level2) {
+							$level2 = (array) $level2;
+							$getLevel3 = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('parentid', '=', $level2['menuid']);
+
+							foreach ($getLevel3->get() as $level3) {
+								$level3 = (array) $level3;
+								$getLevel4 = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('parentid', '=', $level3['menuid']);
+
+								foreach ($getLevel4->get() as $level4) {
+									$level4 = (array) $level4;
+									WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $level4['menuid']);
+									WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', $level4['menuid']);
+								}
+
+								WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $level3['menuid']);
+								WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', $level3['menuid']);
+							}
+
+							WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $level2['menuid']);
+							WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', $level2['menuid']);
+						}
+
+						$getNextMenuItems = WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', 0)->where('parentid', '=', $getItem['parentid'])->where('categoryid', '=', $getItem['categoryid'])->where('reorder', '>', $getItem['reorder'])->orderBy('reorder', 'asc');
+
+						foreach ($getNextMenuItems->get() as $item) {
+							$item = (array) $item;
+							WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $item['menuid'])->update(['reorder' => $item['reorder'] - 1]);
+						}
+
+						WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('menuid', '=', $itemId)->delete();
+						WHMCMS\Database\Capsule::table('mod_whmcms_menu')->where('topid', '=', $itemId)->delete();
+					}
+				}
+			}
+
+			WHMCMS\Base::redirect('', '', MODURL . '&action=listmenu&categoryid=' . $menuId);
+		}
+		else if ($action === 'customize') {
+			$htaccessCode = [];
+			$htaccessCode[] = '# WHMCMS Code Started';
+			$htaccessCode[] = WHMCMS\Base::generateRewriteRules();
+			$htaccessCode[] = '# WHMCMS Code Ended';
+			$cssForm = createForm([
+				['Fieldname' => 'customize_css', 'FriendlyName' => '', 'Type' => 'textarea', 'Value' => WHMCMS\Base::getConfig('customize_css'), 'Rows' => 20, 'Cols' => 100, 'Class' => 'span10 css_editor', 'id' => 'css_editortext', 'Description' => '<pre id="css_editor" class="css_editor">' . WHMCMS\Base::getConfig('customize_css') . '</pre>']
+			]);
+			$jsForm = createForm([
+				['Fieldname' => 'customize_js', 'FriendlyName' => '', 'Type' => 'textarea', 'Value' => WHMCMS\Base::getConfig('customize_js'), 'Rows' => 20, 'Cols' => 100, 'Class' => 'span10 js_editor', 'id' => 'js_editortext', 'Description' => '<pre id="js_editor" class="css_editor">' . WHMCMS\Base::getConfig('customize_js') . '</pre>']
+			]);
+			$htaccessForm = createForm([
+				['Fieldname' => '', 'FriendlyName' => '', 'Type' => 'textarea', 'Value' => join('', $htaccessCode), 'Rows' => 20, 'Cols' => 100, 'Class' => 'span10', 'Description' => '', 'Attr' => 'readonly']
+			]);
+			$smarty->assign('cssForm', $cssForm);
+			$smarty->assign('jsForm', $jsForm);
+			$smarty->assign('htaccessForm', $htaccessForm);
+			$templateFile = 'customizations.tpl';
+			$BC[MODURL . '&action=customize'] = WHMCMS\Base::__('customizePageTitle');
+			$smarty->assign('noBreadcrumbButton', true);
+		}
+		else if ($action === 'doupdatecustomize') {
+			WHMCMS\Base::setConfig('customize_css', WHMCMS\Base::fromPost('customize_css'));
+			WHMCMS\Base::setConfig('customize_js', WHMCMS\Base::fromPost('customize_js'));
+			WHMCMS\Base::redirect(WHMCMS\Base::__('customizationUpdatedMessage'), 'success', MODURL . '&action=customize');
+		}
+		else if ($action == 'settings') {
+			$smarty->assign('generalSettings', whmcms_generalSettings());
+			$smarty->assign('portfolioSettings', whmcms_portfolioSettings());
+			$smarty->assign('errorpagesSettings', whmcms_errorpagesSettings());
+			$smarty->assign('metaSettings', whmcms_metaSettings());
+			$smarty->assign('_settings', $_settings);
+			$getMenuCategories = WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->get();
+			$menuCategories = [];
+
+			foreach ($getMenuCategories as $category) {
+				$category = (array) $category;
+				$menuCategories[] = $category;
+			}
+
+			$smarty->assign('menuCategories', $menuCategories);
+			$templateFile = 'settings.tpl';
+			$BC[MODURL . '&action=settings'] = WHMCMS\Base::__('settingsPageTitle');
+			$smarty->assign('noBreadcrumbButton', true);
+		}
+		else if ($action === 'updatesettings') {
+			if (WHMCMS\Base::fromPost('frontendfile') === '') {
+				WHMCMS\Base::setConfig('frontendfile', 'whmcms.php');
+			}
+			else {
+				WHMCMS\Base::setConfig('frontendfile', WHMCMS\Base::fromPost('frontendfile'));
+			}
+
+			WHMCMS\Base::setConfig('homepage', WHMCMS\Base::fromPost('homepage'));
+			WHMCMS\Base::setConfig('editor', WHMCMS\Base::fromPost('editor'));
+			WHMCMS\Base::setConfig('seourls', WHMCMS\Base::fromPost('seourls'));
+			WHMCMS\Base::setConfig('portfoliolayout', WHMCMS\Base::fromPost('portfoliolayout'));
+			WHMCMS\Base::setConfig('portfolioitemsinrow', WHMCMS\Base::fromPost('portfolioitemsinrow', 'int'));
+			WHMCMS\Base::setConfig('portfolioitemsinpage', WHMCMS\Base::fromPost('portfolioitemsinpage', 'int'));
+			WHMCMS\Base::setConfig('error400', WHMCMS\Base::fromPost('error400'));
+			WHMCMS\Base::setConfig('error403', WHMCMS\Base::fromPost('error403'));
+			WHMCMS\Base::setConfig('error404', WHMCMS\Base::fromPost('error404'));
+			WHMCMS\Base::setConfig('error405', WHMCMS\Base::fromPost('error405'));
+			WHMCMS\Base::setConfig('error408', WHMCMS\Base::fromPost('error408'));
+			WHMCMS\Base::setConfig('error500', WHMCMS\Base::fromPost('error500'));
+			WHMCMS\Base::setConfig('error502', WHMCMS\Base::fromPost('error502'));
+			WHMCMS\Base::setConfig('error504', WHMCMS\Base::fromPost('error504'));
+			WHMCMS\Base::setConfig('metaimage', WHMCMS\Base::fromPost('metaimage'));
+			WHMCMS\Base::setConfig('portfoliosort', WHMCMS\Base::fromPost('portfoliosort'));
+			WHMCMS\Base::setConfig('portfoliofilteroption', WHMCMS\Base::fromPost('portfoliofilteroption'));
+			WHMCMS\Base::setConfig('metaimage398', WHMCMS\Base::fromPost('metaimage398'));
+			WHMCMS\Base::setConfig('vsixtemplate', 'yes');
+			WHMCMS\Base::setConfig('UploadEnableCache', WHMCMS\Base::fromPost('UploadEnableCache'));
+			WHMCMS\Base::setConfig('UploadCachePeriod', WHMCMS\Base::fromPost('UploadCachePeriod'));
+			WHMCMS\Base::setConfig('UploadResizeWidth', WHMCMS\Base::fromPost('UploadResizeWidth'));
+			WHMCMS\Base::setConfig('UploadDirectory', WHMCMS\Base::fromPost('UploadDirectory'));
+			WHMCMS\Base::setConfig('UploadCustomDirectory', WHMCMS\Base::fromPost('UploadCustomDirectory'));
+			WHMCMS\Base::setConfig('PrimaryNavbarCategoryid', WHMCMS\Base::fromPost('PrimaryNavbarCategoryid', 'int'));
+			WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->where('integration', '=', 3)->update(['integration' => 0]);
+
+			if (0 < WHMCMS\Base::fromPost('PrimaryNavbarCategoryid', 'int')) {
+				WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->where('categoryid', '=', WHMCMS\Base::fromPost('PrimaryNavbarCategoryid', 'int'))->update(['integration' => 3]);
+			}
+
+			WHMCMS\Base::setConfig('SecondaryNavbarCategoryid', WHMCMS\Base::fromPost('SecondaryNavbarCategoryid', 'int'));
+			WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->where('integration', '=', 4)->update(['integration' => 0]);
+
+			if (0 < WHMCMS\Base::fromPost('SecondaryNavbarCategoryid', 'int')) {
+				WHMCMS\Database\Capsule::table('mod_whmcms_menucategories')->where('categoryid', '=', WHMCMS\Base::fromPost('SecondaryNavbarCategoryid', 'int'))->update(['integration' => 4]);
+			}
+
+			WHMCMS\Base::setConfig('AutoApplyRewriteRules', WHMCMS\Base::fromPost('AutoApplyRewriteRules'));
+
+			if (WHMCMS\Base::getConfig('AutoApplyRewriteRules') === 'yes') {
+				$result = WHMCMS\Base::applyRewriteRules();
+
+				if ($result['result'] === 'error') {
+					WHMCMS\Base::redirect($result['message'], 'error', MODURL . '&action=settings');
+				}
+			}
+
+			WHMCMS\Base::setConfig('FriendlyURLsMode', WHMCMS\Base::fromPost('FriendlyURLsMode'));
+			WHMCMS\Base::redirect('The New Changes has been saved successfully!', 'success', MODURL . '&action=settings');
+		}
+		else if (($action === 'support') || ($action === 'updates')) {
+			$smarty->assign('isuptodate', WHMCMS\Base::isUpToDate());
+			$templateFile = 'support.tpl';
+			$BC[MODURL . '&action=listpages'] = WHMCMS\Base::__('supportPageTitle');
+			$smarty->assign('noBreadcrumbButton', true);
+		}
+		else if ($action === 'applyrewriterules') {
+			$result = WHMCMS\Base::applyRewriteRules();
+
+			if ($result['result'] === 'error') {
+				WHMCMS\Base::redirect($result['message'], 'error', MODURL);
+			}
+
+			WHMCMS\Base::redirect('Rewrite rules applied successfully.', 'success', MODURL);
+		}
+	}
+
+	if (isset($_SESSION['whmcms_message'])) {
+		$smarty->assign('system_message', $_SESSION['whmcms_message']);
+		$smarty->assign('system_messagetype', $_SESSION['whmcms_messagetype']);
+		unset($_SESSION['whmcms_message']);
+		unset($_SESSION['whmcms_messagetype']);
+	}
+
+	$smarty->assign('breadcrumbs', $BC);
+	$smarty->display('header.tpl');
+
+	if ($templateFile) {
+		$smarty->display($templateFile);
+	}
+
+	$footer = [];
+	$footer[] = '<div style="margin-top:20px;margin-bottom:300px;">';
+	$footer[] = 'Powered by: <a href="http://www.whmcms.com/" target="_blank" style="color:#EF652A;">WHMCMS | CMS Module for WHMCS.</a>';
+	$footer[] = '</div>';
+	echo join('', $footer);
+	$smarty->display('footer.tpl');
+}
+
+define('MINIMUMFRONTENDFILEVERSION', '3.2.0');
+require_once ROOTDIR . '/modules/addons/whmcms/vendor/autoload.php';
+
+?>

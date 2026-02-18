@@ -1,0 +1,33 @@
+# Large binary files
+*.apk
+*.wpress
+*.mp4
+*.zip
+*.phar
+
+# Backups
+update_bak/
+ai1wm-backups/
+
+# Cache and temp
+.cache/
+templates_c/
+.local/
+.npm/
+
+# Shell/system files
+.bash_history
+.bashrc
+.sudo_as_admin_successful
+.ssh/
+
+# Claude session files
+.claude.json
+.claude.json.backup.*
+.claude/
+
+# Logs
+error_log
+
+# GeoIP database
+GeoLite2-Country.mmdb

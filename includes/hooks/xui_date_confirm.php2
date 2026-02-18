@@ -1,0 +1,18 @@
+<?php
+
+if (!defined('WHMCS')) {
+    die('This hook should not be run directly');
+}
+
+add_hook('ClientAreaHeadOutput', 1, function($vars) {
+    if ($_SERVER['SCRIPT_NAME'] === '/clientsservices.php') {
+        $html = '<script>
+            $(document).ready(function() {
+                // Create and append the custom text field
+                var customField = \'<div class="custom-field"><label for="xui_next_due_date">XUI Next Due Date:</label><input type="text" name="xui_next_due_date" id="xui_next_due_date"></div>\';
+                $(".module-create-invoice").append(customField);
+            });
+        </script>';
+        return $html;
+    }
+});

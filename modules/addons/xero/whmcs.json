@@ -1,0 +1,38 @@
+{
+	"schema": "1.0",
+	"type": "whmcs-addons",
+	"name": "xero",
+	"license": "proprietary",
+	"category": "finance",
+	"description": {
+		"name": "Xero",
+		"tagline": "Synchronise Contacts, Invoices, Products & Payments with Xero.",
+		"long": "Integrate WHMCS with Xero to keep your billing system and clients in sync with your accounts. w2x sends Contacts, Invoices, Payments & Products from WHMCS to Xero and is commercially supported by our team in the UK.",
+		"features": [
+			"Send WHMCS Contacts to Xero",
+            "Send WHMCS Invoices to Xero",
+            "Send WHMCS Products to Xero",
+            "Send/Receive Payments to/from Xero",
+            "Email invoices from Xero",
+            "Integrates with the WHMCS Cron Job",
+            "Supports single tax rate invoices (including VAT, VAT MOSS & GST)",
+            "Multi-currency Support",
+            "Highly configurable but easy to install",
+            "FREE on-going support",
+            "30-day money-back guarantee"
+		]
+	},
+	"logo": {
+		"filename": "logo.png"
+	},
+	"support": {
+		"homepage": "https:\/\/edgehosting.uk\/whmcs-xero-addon\/",
+		"email": "xero@edgehosting.uk",
+		"support_url": "https:\/\/my.edgehosting.uk/submitticket.php",
+		"docs_url": "https:\/\/my.edgehosting.uk\/index.php?rp=\/knowledgebase\/7\/WHMCS-Xero-Module"
+	},
+	"authors": [{
+		"name": "Edge Hosting",
+		"homepage": "https:\/\/edgehosting.uk\/"
+	}]
+}

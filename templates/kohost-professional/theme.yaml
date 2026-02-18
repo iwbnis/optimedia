@@ -1,0 +1,11 @@
+# WHMCS Kohost Professional Theme Configuration File
+
+name: "Kohost Professional"
+description: "The Default Theme for WHMCS Version 8.1.0"
+author: "ThemeTags"
+properties:
+  serverSidePagination: false # Defines client side will handle pagination
+provides:
+  bootstrap: 3.4.1
+  jquery: 1.12.4
+  fontawesome: 5.10.1

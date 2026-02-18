@@ -1,0 +1,11 @@
+Products:
+    icon: 'lu-nav__link-icon lu-zmdi lu-zmdi-view-list'
+Addons:
+    icon: 'lu-nav__link-icon lu-zmdi lu-zmdi-widgets'
+Settings:
+    icon: 'lu-nav__link-icon lu-zmdi lu-zmdi-settings'
+LoggerManager:
+    icon: 'lu-nav__link-icon lu-zmdi lu-zmdi-assignment'
+Documentation:
+    icon: 'lu-nav__link-icon lu-zmdi lu-zmdi-file-text'
+    externalUrl: "https://www.docs.modulesgarden.com/Product_Cross-Selling_For_WHMCS"

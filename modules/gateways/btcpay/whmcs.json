@@ -1,0 +1,39 @@
+{
+  "schema": "1.0",
+  "type": "ws-gateways",
+  "name": "btcpay",
+  "version": "1.0.4",
+  "license": "proprietary",
+  "category": "payments",
+  "description": {
+    "name": "BTCPay Payment Gateway",
+    "tagline": "Payment modules for WHMCS.",
+    "long": "The BTCPay Payment Gateway for WHMCS allows you to accept payment in bitcoin through your self hosted or Third-party hosted BTCPay Server software.",
+    "features": [
+      "Direct, peer-to-peer Bitcoin payments",
+	  "No Processing Fees",
+	  "No Transaction Fees ",
+	  "Enhanced privacy & security",
+	  "And More"
+    ]
+  },
+  "logo": {
+    "filename": "logo.jpg"
+  },
+  "support": {
+    "docs_url": "https:\/\/whmcsservices.community\/forumdisplay.php?fid=85",
+	"learn_more": "https:\/\/www.whmcsservices.com\/btcpay.php"
+  },
+  "authors": [
+    {
+      "name": "WHMCS Services",
+      "homepage": "https:\/\/www.whmcsservices.com\/"
+    }
+  ],
+  "keywords": [
+    "BTC",
+    "Gateway",
+    "Payment",
+    "Transaction Fee"
+  ]
+}

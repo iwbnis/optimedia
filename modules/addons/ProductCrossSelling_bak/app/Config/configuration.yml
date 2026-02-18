@@ -1,0 +1,7 @@
+version: '1.1.0'
+systemName: 'ProductCrossSelling'
+name: 'Product Cross-Selling'
+description: 'A great tool designed to widen the distribution of your products by defining cross-selling rules and offering suggested products to the ordered services.<br>For more info visit our <a href="https://www.docs.modulesgarden.com/Product_Cross-Selling_For_WHMCS" style="color: #4169E1;" target="_blank">Wiki</a>.'
+clientareaName: 'Product Cross-Selling'
+author: '<a href="http://www.modulesgarden.com" target="_blank">ModulesGarden</a>'
+moduleIcon: 'cross-selling'

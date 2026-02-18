@@ -1,0 +1,355 @@
+.header-right-listing .dropdown {
+            background-color: white;
+            min-width: 100px;
+        }
+       
+
+       .js-dropdown-list, .js-dropdown-list1, .js-dropdown-list2 {
+
+        list-style-type: none;
+
+        padding: 0;
+
+        margin: 0;
+
+        position: absolute;
+
+        z-index: 12;
+
+        background: white;
+
+        padding: 10px 10px;
+
+        display:none;
+
+        border-radius: 4px;
+
+       }
+
+
+
+
+       .header-right-listing ul {
+
+        list-style-type: none;
+
+        align-items: center;
+
+        margin: 0;
+
+        padding: 0;
+
+       }
+
+
+
+       header .navbar-expand-lg .navbar-nav .nav-link {
+
+        color: #442781;
+
+        font-size: 18px;
+
+        padding: 0 20px;
+
+       }
+
+
+
+       .header-right-listing .input-group {
+
+        align-items: center;
+
+        background: white;
+
+        box-shadow: 0 0 3px 2px #cccccc63;
+
+        padding: 3px 12px;
+
+        border-radius: 4px;
+
+       }
+
+
+
+       .header-right-listing .dropdown .js-link::after, .header-right-listing .dropdown .js-link1::after, .header-right-listing .dropdown .js-link2::after  {
+
+        content: "";
+
+        background-image: url(..//img/ar-small-down.png);
+
+        display: block;
+
+        height: 15px;
+
+        width: 15px;
+
+        background-repeat: no-repeat;
+
+        background-position: center;
+
+        background-size: 11px;
+
+        margin: 3px 0 0 3px;
+
+       }
+
+
+
+       .cart-dropdown {
+
+        position: absolute;
+
+        top: 52px;
+
+        z-index: 12;
+
+        background: white;
+
+        text-align: center;
+
+        box-shadow: 0px 0px 10px -2px rgba(49, 48, 48, 0.5);
+
+        min-width: 400px;
+
+        right: -20px;
+
+        border-radius: 6px;
+
+        padding: 10px 10px;
+
+        display:none;
+
+       }
+
+
+
+       .cart-top {
+
+        cursor: pointer;
+
+       }
+
+       .header-right-listing .dropdown .js-link, .header-right-listing .dropdown .js-link1, .header-right-listing .dropdown .js-link2 {
+
+        text-decoration: none;
+
+        color: #3B3735;
+
+        font-size: 17px;
+
+        display: flex;
+
+        align-items: center;
+
+       }
+
+
+
+       .header-right-listing .dropdown {
+
+        box-shadow: 0 0 3px 2px #cccccc63;
+
+        padding: 5px 10px;
+
+        border-radius: 3px;
+
+       }
+
+
+
+       .header-right-listing ul.js-dropdown-list {
+
+        left: -55px;
+
+        top: 43px;
+
+        padding: 0 15px 0;
+
+        box-shadow: 0px 3px 6px #00000029;
+
+        width: 181px;
+
+        border-radius: 10px;
+
+       }
+
+
+
+       .header-right-listing ul.js-dropdown-list1 {
+
+        left: -52px;
+
+        top: 43px;
+
+        padding: 0 15px 0;
+
+        box-shadow: 0px 3px 6px #00000029;
+
+        width: 181px;
+
+        border-radius: 10px;
+
+       }
+
+
+
+
+
+       .header-right-listing ul.js-dropdown-list2 {
+
+        left: -52px;
+
+        top: 43px;
+
+        padding: 0 15px 0;
+
+        box-shadow: 0px 3px 6px #00000029;
+
+        width: 181px;
+
+        border-radius: 10px;
+
+       }
+
+
+
+
+
+       .header-right-listing ul.js-dropdown-list li, .header-right-listing ul.js-dropdown-list1 li, .header-right-listing ul.js-dropdown-list2 li {
+
+        align-items: center;
+
+        margin: 0;
+
+        border-bottom: 1px solid rgba(236, 236, 236, 0.8);
+
+        padding: 6px 0;
+
+       }
+
+
+
+       .currency-selector {
+
+        border: 0;
+
+       }
+
+
+
+       .ar-down-img {
+
+        background: white;
+
+        padding: 15px 10px 9px;
+
+        position: absolute;
+
+        right: 2px;
+
+        top: 0;
+
+        display: flex;
+
+        justify-content: center;
+
+        align-items: center;
+
+       }
+
+
+
+       .header-right-listing .input-group {
+
+        align-items: center;
+
+        background: white;
+
+        box-shadow: 0 0 3px 2px #cccccc63;
+
+        padding: 5px 11px 5px 15px;
+
+        border-radius: 4px;
+
+       }
+
+       .input-group-addon.currency-symbol {
+        font-weight: 600;
+       }
+
+       .header-right-listing ul li {
+        margin: 0 12px;
+       }
+
+
+
+       .top-login-btn {
+
+        padding: 5px 14px;
+
+        border-radius: 5px;
+
+        background: linear-gradient(to right, #ef8222, #f59f53);
+
+       }
+
+
+
+       .header-right-listing ul li.cart-top span {
+
+        font-weight: 600;
+
+        line-height: 17px;
+
+        margin-left: 10px;
+
+        margin-top: 6px;
+
+       }
+
+
+
+       .header-right-listing ul li.cart-top span.cart-count {
+
+        background: red;
+
+        background: #EF8222 0% 0% no-repeat padding-box;
+
+        color: white;
+
+        height: 20px;
+
+        width: 20px;
+
+        font: normal normal 600 10px/14px Jost;
+
+        display: flex;
+
+        justify-content: center;
+
+        align-items: center;
+
+        border-radius: 50%;
+
+        margin: -20px 0 0 17px;
+
+       }
+
+
+.header-right-listing ul {
+
+    flex-flow: wrap;
+
+    align-items: flex-start;
+
+    padding: 15px 0;
+
+}
+
+
+
+.header-right-listing ul li {
+
+    margin: 12px 12px 0;
+
+}

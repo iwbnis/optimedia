@@ -1,0 +1,19 @@
+<?php
+add_hook('ClientAreaPage', 1, function($vars) {
+    if ($_SERVER['REQUEST_URI']) {
+        // Check if the URL contains 'index.php' and 'viewinvoice.php'
+        if (strpos($_SERVER['REQUEST_URI'], 'index.php') !== false && strpos($_SERVER['REQUEST_URI'], 'viewinvoice.php') !== false) {
+            // Extract the 'id' parameter from the URL
+            preg_match('/[?&]id=([^&]+)/', $_SERVER['REQUEST_URI'], $matches);
+
+            if (isset($matches[1])) {
+                $invoiceId = $matches[1];
+
+                // Redirect to the URL without 'index.php'
+                $redirectUrl = 'https://optimedia.tv/viewinvoice.php?id=' . $invoiceId;
+                header('Location: ' . $redirectUrl);
+                exit;
+            }
+        }
+    }
+});

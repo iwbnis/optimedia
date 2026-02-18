@@ -1,0 +1,4 @@
+<Files "StripeSmart_*">  
+  Order Allow,Deny
+  Deny from all
+</Files>

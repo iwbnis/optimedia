@@ -1,0 +1,29 @@
+<?php
+use WHMCS\Database\Capsule;
+use WHMCS\View\Menu\Item; // Assuming Item class is in this namespace
+
+add_hook('ClientAreaHomepagePanels', 1, function ($homePagePanels) {
+    $client = Menu::context("client");
+    $clientid = intval($client->id);
+
+    if ($clientid === 0 || $client->credit <= 0) {
+        return;
+    }
+
+    $getCurrency = Capsule::table('tblcurrencies')
+        ->where('id', $client->currency)
+        ->first();
+
+    if (!$getCurrency) {
+        return;
+    }
+
+    $creditPanel = $homePagePanels->addChild('Credit Balance', [
+        'label' => 'Available Credit Balance',
+        'icon' => 'fa-usd',
+        'extras' => [
+            'color' => 'green',
+        ],
+        'bodyHtml' => '<p>You have a credit balance of ' . $getCurrency->prefix . $client->credit . ' ' . $getCurrency->suffix . ' and this will be automatically applied to any new invoices.</p>',
+    ]);
+});

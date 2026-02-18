@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="hero-shap-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
+	 y="0px" width="612px" height="792px" viewBox="0 0 612 792" enable-background="new 0 0 612 792" xml:space="preserve">
+<g>
+	<g>
+		<path fill="#0073EC" d="M450.199,115.193L159.8,170.352c-17.75,4.144-35.683,4.835-53.801,2.076s-30.76-8.114-37.925-16.064
+			L3.202,100.058c-1.137-1.418-3.071-5.253-3.071-5.253V77.451h614.171v8.489l-69.774,49.943L450.199,115.193z"/>
+		<path opacity="0.1" fill="#FFFFFF" enable-background="new    " d="M543.562,136.888l-5.844-40.116
+			c-0.636-4.139,0.674-8.008,3.709-10.948c2.654-2.985,6.991-4.843,12.128-5.192l65.052-3.564l3.551,9.445L543.562,136.888z"/>
+		
+			<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="56.9971" y1="45.9829" x2="147.7876" y2="45.9829" gradientTransform="matrix(3.0602 0 0 3.0602 -2.0594 0.9614)">
+			<stop  offset="0" style="stop-color:#FFFFFF;stop-opacity:0"/>
+			<stop  offset="0.06" style="stop-color:#FFFFFF;stop-opacity:0.28"/>
+			<stop  offset="0.14" style="stop-color:#FFFFFF;stop-opacity:0.65"/>
+			<stop  offset="0.17" style="stop-color:#FFFFFF;stop-opacity:0.8"/>
+			<stop  offset="0.22" style="stop-color:#FFFFFF;stop-opacity:0.85"/>
+			<stop  offset="0.31" style="stop-color:#FFFFFF;stop-opacity:0.92"/>
+			<stop  offset="0.42" style="stop-color:#FFFFFF;stop-opacity:0.97"/>
+			<stop  offset="0.57" style="stop-color:#FFFFFF;stop-opacity:0.99"/>
+			<stop  offset="1" style="stop-color:#FFFFFF"/>
+		</linearGradient>
+		<path opacity="0.1" fill="url(#SVGID_1_)" enable-background="new    " d="M172.363,168.165c0,0,2.602-9.008,2.937-9.663
+			l16.679-31.379c1.785-3.262,7.15-6.229,15.178-8.394c7.307-2.218,17.056-3.483,27.253-3.536h215.79L172.363,168.165z"/>
+	</g>
+</g>
+</svg>

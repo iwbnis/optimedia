@@ -1,0 +1,22 @@
+<?php
+use WHMCS\View\Menu\Item as MenuItem;
+
+add_hook('AdminAreaClientServicesTabFields', 1, function (MenuItem $menu) {
+    // Check if the tab is the Client Services Details tab
+    if ($menu->getName() === 'Client Services Details') {
+        // Add the "XUI Next Due Date" field under the "Next Due Date" field
+        $menu->addChild('XUI Next Due Date', array(
+            'name' => 'xui_next_due_date',
+            'label' => 'XUI Next Due Date',
+            'type' => 'text',
+            'value' => function ($clientId, $serviceId) {
+                // Retrieve and return the value of the "XUI Next Due Date" for this service
+                $service = \WHMCS\Service\Service::find($serviceId);
+                if ($service) {
+                    return $service->xui_next_due_date;
+                }
+                return '';
+            },
+        ));
+    }
+});

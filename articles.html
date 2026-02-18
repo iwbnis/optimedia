@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="/templates/kohost-professional/customfiles/assets-canada/css/article-list.css"
+    />
+	<script src="/templates/kohost-professional/customfiles/assets-canada/js/favicon.js"></script>
+
+    <title>Articles</title>
+  </head>
+  <body>
+
+    <section class="layout">
+      <main role="main" class="articles-container"></main>
+      <aside>
+        <h2>Recent Articles</h2>
+        <ul class="recent-articles"></ul>
+      </aside>
+    </section>
+
+ 
+  </body>
+
+  <script src="/templates/kohost-professional/customfiles/assets-canada/js/theme.js"></script>
+  <script src="/templates/kohost-professional/customfiles/assets-canada/js/header.js"></script>
+  <script src="/templates/kohost-professional/customfiles/assets-canada/js/footer.js"></script>
+  <script src="/templates/kohost-professional/customfiles/assets-canada/js/logo.js"></script>
+
+  <script>
+  
+
+    async function getData(url) {
+      const res = await fetch(url);
+      const data = await res.text();
+
+      let parsedData = data.replace("<pre>", "");
+      parsedData = parsedData.replace("</pre>", "");
+      parsedData = JSON.parse(parsedData);
+      return parsedData;
+    }
+
+    // ------------------------
+    // ARTICLES
+    // ------------------------
+    const articlesContainer = document.querySelector(".articles-container");
+    const articleFeaturedHTML = `
+        <article class="article-featured"  id="art-articleId-">
+            <h2 class="article-title">
+                -articleTitle-
+            </h2>
+
+            <img
+                src="-articleImg-"
+                alt="greenery pic"
+                class="article-image"
+                loading="lazy"
+            />
+
+            <div class="article-body">
+                -articleDetail-
+            </div>
+
+            <a href="-articleLink-" target="_blank" class="article-read-more">Continue reading ...</a>
+        </article>
+    `;
+
+    const articleRecentHTML = `
+        <article class="article-featured"  id="art-articleId-">
+            <div class="article-recent-main">
+                <h2 class="article-title">
+                    -articleTitle-
+                </h2>
+
+                <div class="article-body">
+                    -articleDetail-
+                </div>
+
+                <a href="-articleLink-" target="_blank" class="article-read-more">Continue reading ...</a>
+            </div>
+
+            <div class="article-recent-secondary">
+                <img
+                    src="-articleImg-"
+                    alt="greenery pic"
+                    class="article-image"
+                    loading="lazy"
+                />
+            </div>
+        </article>
+    `;
+
+    function sortArticlesByDate(articles) {
+      return articles.sort((a, b) => new Date(b.datecreate) - new Date(a.datecreate));
+    }
+
+    function getTextFromHTML(html) {
+      // Create a temporary element to decode HTML entities
+      const tempElement = document.createElement("div");
+      tempElement.innerHTML = html;
+
+      // Set the innerHTML of the article container with the decoded HTML
+      return tempElement.textContent || tempElement.innerText;
+    }
+
+    async function generateArticles() {
+      //   const articlesData = data;
+      const articlesData =
+        (await getData("/whmcms_portfolio.php")) || [];
+
+      sortArticlesByDate(articlesData).forEach((article, index) => {
+        let generatedArticle = (index === 0 ? articleFeaturedHTML : articleRecentHTML).replace(
+          "-articleId-",
+          article.projectid
+        );
+        generatedArticle = generatedArticle.replace("-articleLink-", article.url);
+        generatedArticle = generatedArticle.replace("-articleImg-", article.image_url?.[0]);
+        generatedArticle = generatedArticle.replace("-articleTitle-", article.title);
+        generatedArticle = generatedArticle.replace(
+          "-articleDetail-",
+          getTextFromHTML(article.details)
+        );
+        articlesContainer.insertAdjacentHTML("beforeEnd", generatedArticle);
+      });
+    }
+
+    generateArticles();
+
+    (async () => {
+      let recentArticlesList = document.querySelector(".recent-articles");
+      try {
+        //   RECENT ARTICLES
+        let recentArticlesData = await getData("https://iptvcanada.vip/whmcms_portfolio.php");
+        let recentLinkHTML = `<li><a href="--link--" target="_blank">--title--</a></li>`;
+
+        recentArticlesData.forEach((article) => {
+          let generatedLinkHTML = recentLinkHTML.replace("--link--", article.url);
+          generatedLinkHTML = generatedLinkHTML.replace("--title--", article.title);
+          recentArticlesList.insertAdjacentHTML("beforeend", generatedLinkHTML);
+        });
+      } catch (error) {
+        recentArticlesList.innerText = error.message;
+      }
+    })();
+  </script>
+</html>

@@ -1,0 +1,31 @@
+{
+    "schema": "1.0",
+    "type": "whmcs-addons",
+    "name": "ProductCrossSelling",
+    "license": "proprietary",
+    "category": "payments",
+    "description": {
+        "name": "Product Cross-Selling",
+        "tagline": "Suggest to clients additional products based on the items already in their shopping cart.",
+		"short": "Suggest to clients additional products based on the items already in their shopping cart.",
+        "long": "Product Cross-Selling For WHMCS will let you suggest hand-picked sets of additional products, addons and services to your audience depending on the items they already have in a shopping cart. The module will allow your customers to order from the list of personalized recommendations, and even choose between the most attractive discount opportunities once integrated with Discount Center For WHMCS. At the same time, you will be empowered to define precise cross-selling rules upon which your clients will be offered distinct complementary products and addons plus comprehensively manage related as well as recommended items. The greatest value of our solution lies in the possibility to adjust the tiniest specifics of suggested products, including their unique description, custom image and background color."
+    },
+    "logo": {
+        "filename": "logo.png"
+    },
+    "support": {
+        "homepage": "https://www.modulesgarden.com/products/whmcs/product-cross-selling",
+        "learn_more": "https://www.modulesgarden.com/products/whmcs/product-cross-selling#features",
+        "support_url": "https://www.modulesgarden.com/support",
+        "docs_url": "https://www.docs.modulesgarden.com/Product_Cross-Selling_For_WHMCS"
+    },
+    "marketplace": {
+        "url": "https:\/\/marketplace.whmcs.com\/product\/1298"
+    },
+    "authors": [
+        {
+            "name": "ModulesGarden",
+            "homepage": "https:\/\/www.modulesgarden.com\/"
+        }
+    ]
+}

@@ -1,0 +1,51 @@
+<?php
+
+namespace WHMCS\Module\Addon\clientEmailVerification\Admin;
+
+/**
+ * Sample Admin Area Dispatch Handler
+ */
+class AdminDispatcher {
+
+    /**
+     * Dispatch request.
+     *
+     * @param string $action
+     * @param array $parameters
+     *
+     * @return string
+     */
+    public function dispatch($action, $parameters)
+    {
+        if (!$action) {
+            // Default to index if no action specified
+            $action = 'index';
+        }
+
+        $controller = new Controller();
+
+        // Verify requested action is valid and callable
+        if (is_callable(array($controller, $action))) {
+            return $controller->$action($parameters);
+        }
+
+        return '<p>Invalid action requested. Please go back and try again.</p>';
+    }
+    
+    /**
+     * Handle MySQL Reponse
+     */
+    public static function fromMYSQL($result){
+        $encoded = json_encode($result);
+		
+		$array = json_decode($encoded, true);
+        
+        return $array;
+    }
+    /**
+     * Redirect To URL
+     */
+    public static function redirect($url=MODURL, $delay=0){
+        echo '<META HTTP-EQUIV="Refresh" CONTENT="'.$delay.'; URL='.$url.'">';
+    }
+}

@@ -1,0 +1,31 @@
+{
+  "schema": "1.0",
+  "type": "ws-notifications",
+  "name": "emailverification",
+  "version": "6.0.8",
+  "license": "proprietary",
+  "category": "notifications",
+  "description": {
+    "name": "Email Verification Pro",
+    "tagline": "Verification Your Email.",
+    "long": "When registering a new account (without placing an order), WHMCS would normally allow the customer to do anything even without verifying their email address. With our module, after registration, they will be redirected to the page where they will have to verify their email. If the customer doesn't verify they CAN NOT access any part of their account (except Support Tickets and client detail) until they have verified their email address. If they do not verify their email address within X days, then their account will automatically be closed. Admin can also manual mark the email verification.",
+    "features": [
+      "All Page Option",
+      "Checkout Option",
+	  "And More"
+    ]
+  },
+  "logo": {
+    "filename": "logo.png"
+  },
+  "support": {
+    "docs_url": "https:\/\/whmcsservices.community\/forumdisplay.php?fid=26",
+	"learn_more": "https:\/\/www.whmcsservices.com\/emailverification.php.php"
+  },
+  "authors": [
+    {
+      "name": "WHMCS Services",
+      "homepage": "https:\/\/www.whmcsservices.com\/"
+    }
+  ]
+}

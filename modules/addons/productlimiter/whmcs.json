@@ -1,0 +1,31 @@
+{
+  "schema": "1.0",
+  "type": "whmcs-addons",
+  "name": "productlimiter",
+  "version": "1.0.1",
+  "license": "proprietary",
+  "category": "orders",
+  "description": {
+    "name": "Product Limiter",
+    "tagline": "This addon allows you to limit the purchase of an products/services for each client.",
+    "long": "Product Limiter is a addon module that gives you the ability to limit purchasing a product to specified times. When activated, once the client will try to purchase the same product again – he will receive an error message. That can be handy when giving free trial versions. This module will help you to stop free trial versions abus as the client will not be able to download more then once product.",
+    "features": [
+      "Multi-Language Support ",
+      "Supports WHMCS Blend and V4 Template ",
+      "And more"
+    ]
+  },
+  "logo": {
+    "filename": "logo.png"
+  },
+  "support": {
+    "docs_url": "https:\/\/whmcsservices.community\/forumdisplay.php?fid=152",
+	"learn_more": "https:\/\/www.whmcsservices.com\/productlimiter.php"
+  },
+  "authors": [
+    {
+      "name": "WHMCS Services",
+      "homepage": "https:\/\/www.whmcsservices.com\/"
+    }
+  ]
+}

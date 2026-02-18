@@ -1,0 +1,31 @@
+{
+  "schema": "1.0",
+  "type": "whmcs-gateways",
+  "name": "StripeSmart",
+  "license": "proprietary",
+  "category": "payments",
+  "description": {
+    "name": "Stripe Smart",
+    "tagline": "Stripe Smart Gateway",
+    "long": "Millions of companies of all sizes use Stripe online and in person to accept payments",
+    "features": [
+            "Reduced merchant account & gateway fees ",
+      "No application or setup fees",
+      "Paid fast; quick payouts",
+      "Fully integrated for payments"
+    ]
+  },
+  "logo": {
+    "filename": "logo.png"
+  },
+  "support": {
+    "homepage": "https:\/\/www.stripe.com",
+    "docs_url": "https:\/\/stripe.com\/api"
+  },
+  "authors": [
+    {
+      "name": "iBeeHost",
+      "homepage": "https:\/\/www.ibeehost.com\/"
+    }
+  ]
+}

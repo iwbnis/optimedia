@@ -1,0 +1,55 @@
+LICENSE AGREEMENT FOR OUTEREDGE UK LTD SOFTWARE
+(as of 1st November 2016)
+
+The products available for download from our web site are governed by this license agreement. By installing the software, or any update to it, you agree to the terms in this document at the time you download the setup or update file or obtain a copy on a CD or DVD.
+
+For your convenience, the software is not copy-protected. The program and its intellectual property, however, are protected by both United Kingdom Copyright Law and international copyright treaties.  This software program is licensed, not sold.
+
+This means you are free to use the software on a single computer for each licensed user at a single site, and to make archival backups as protection from disk or computer failure only.  The licensed user(s) of this program may make a second copy for his or her exclusive use on a portable computer. We ask that you not abuse this trust by making copies of either the software or the manual for use by others.
+
+Use on networks is limited to storage or installing a copy of the program on a storage device, such as a network system, used only to install or run this program on the licensed user(s) computer over an internal network; however, a user license is required for each separate user that will ‘run’ the software from the storage system.  A single user license for the program may not be shared or used concurrently on different computers or workstations.
+
+You may move the program to a different computer by uninstalling any copies from the original computer and then installing it on a replacement computer. This allows machine hardware to be upgraded or repaired however re-activation may be required.
+
+You may not transfer your license, lend, lease, or rent this software program or its components to any party other than the original licensed user(s).
+
+We will never give or sell to any third party any personal information we collect without your consent, unless required to do so by law. We respect your privacy and will protect it to the same extent we protect our most valuable information.
+
+MANDATORY ACTIVATION
+
+Activation associates the use of the software with a specific device. During activation, the software will send information about the software and the device to OuterEdge UK Ltd. This information includes the version, language and license key of the software, the Internet protocol address of the device, and information derived from the hardware configuration of the device. By using the software, you consent to the transmission of this information. Before you activate, you have the right to use the version of the software installed during the installation process with limited functionality if a demo option is provided. Your right to use the software after the demo has expired will be limited unless it is activated. This is to prevent its unlicensed use. You will not be able to continue using the software after that time if you do not activate it. Some changes to your computer components or the software may require you to reactivate the software. The software will remind you to activate it until you do.
+
+LIMITED WARRANTY
+
+This software and documentation is licensed "as is" without any warranty as to their performance, merchantability or fitness for any particular purpose. The licensee assumes the entire risk as to the quality and performance of the software. OuterEdge UK Ltd warrants that the media on which the Program is furnished will be free from any defects. Exclusive remedy in the event of a defect is expressly limited to the replacement of media. In no event shall OuterEdge UK Ltd or anyone else who has been involved in the creation, development, production, or delivery of this software be liable for any direct, incidental or consequential damages, such as, but not limited to, loss of anticipated profits, benefits, use, or data resulting from the use of this software, or arising out of any breach of warranty.
+
+This warranty is void if the software failure has resulted from abuse, accident, or misapplication. OuterEdge UK Ltd’s liability is limited to refund of the money paid for the software, and in no event will OuterEdge UK Ltd be liable for any indirect or consequential damages that may arise (including damages for loss of business profits, business information, or other pecuniary losses).
+
+Remember, you may make copies of this software for archival backup purposes only.
+
+RESTRICTIONS
+
+You may use this Product within the terms of this agreement as long as:
+
+The software serial number and user must be registered with OuterEdge UK Ltd in order to receive support or distribution rights.
+
+You may not remove any proprietary notices, labels, trademarks on the software or documentation.
+
+You may not modify, de-compile, disassemble, reverse engineer or translate the software.
+
+
+POLICY STATEMENT
+
+These are our current policies - we are free to change these at any time by posting changes to our web site. Note that the privacy statement is part of the license agreement above, and as such the terms in effect as described for the license govern privacy issues. This prevents us from changing the privacy policy except when you obtain an update or download of the product.
+
+We provide downloadable evaluation versions of our current products that have limited functionality for 30 days or 60 uses from installation, in order to enable you to make an informed decision as to the suitability of our products for your use.
+
+Upon purchase, you will receive a license key which will allow you to activate the software removing any limited functionality and providing full use of the software under the terms of this and any other applicable agreement.
+
+Support is available at additional cost either by email, through our online support system, or telephone during office hours. Support will be provided for all versions of our products as long as you are an authorized customer and we remain in business, but we may choose not to fix bugs in, revise, or update product versions we no longer sell.
+
+OuterEdge UK Ltd
+136-140 Old Shoreham Road
+BRIGHTON
+BN3 7BD
+United Kingdom

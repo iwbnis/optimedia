@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta
+      name="keywords"
+      content="iptv canada, iptv canada reddit, best iptv canada, canada iptv, iptv in canada, iptv providers canada "
+    />
+    <meta
+      name="description"
+      content="The best IPTV Canada Provider & IPTV Canada Reddit recommendation. 100% RELIABLE, NO BUFFER Canadian IPTV."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="/templates/kohost-professional/customfiles/assets-canada/css/article-detail.css"
+    />
+
+    <title>IPTV Canada | Best IPTV Providers in Canada - IPTVCanada.vip</title>
+  </head>
+
+  <body>
+    <section class="layout">
+      <main></main>
+      <aside>
+        <h2>Recent Articles</h2>
+        <ul class="recent-articles"></ul>
+      </aside>
+    </section>
+  </body>
+
+  <script src="/templates/kohost-professional/customfiles/assets-canada/js/theme.js"></script>
+  <script src="/templates/kohost-professional/customfiles/assets-canada/js/header.js"></script>
+  <script src="/templates/kohost-professional/customfiles/assets-canada/js/footer.js"></script>
+  <script src="/templates/kohost-professional/customfiles/assets-canada/js/logo.js"></script>
+
+  <script>
+    async function getData(url) {
+      const res = await fetch(url);
+      const data = await res.text();
+
+      let parsedData = data.replace("<pre>", "");
+      parsedData = parsedData.replace("</pre>", "");
+      parsedData = JSON.parse(parsedData);
+      return parsedData;
+    }
+
+    function sortArticlesByDate(articles) {
+      return articles.sort((a, b) => new Date(b.datecreate) - new Date(a.datecreate));
+    }
+
+    function getTextFromHTML(html) {
+      // Create a temporary element to decode HTML entities
+      const tempElement = document.createElement("div");
+      tempElement.innerHTML = html;
+
+      // Set the innerHTML of the article container with the decoded HTML
+      return tempElement.textContent || tempElement.innerText;
+    }
+
+    (async () => {
+      let main = document.querySelector("main");
+
+      let searchParams = new URLSearchParams(window.location.search);
+      let projectid = searchParams.get("articleid");
+
+      try {
+        let articlesData = await getData("https://test.choiceiptv.net/whmcms_portfolio.php");
+
+        let filteredArticle = articlesData.find((article) => article.projectid == projectid);
+        if (filteredArticle) {
+          const section = document.createElement("section");
+          section.innerHTML = filteredArticle.details;
+          main.innerHTML = section.innerText;
+        } else {
+          throw Error(`No Article Found`);
+        }
+      } catch (error) {
+        let h2 = document.createElement("h2");
+        h2.innerText = error.message || error;
+        main.appendChild(h2);
+      }
+
+      let recentArticlesList = document.querySelector(".recent-articles");
+      try {
+        //   RECENT ARTICLES
+        let recentArticlesData = await getData("https://iptvcanada.vip/whmcms_portfolio.php");
+        let recentLinkHTML = `<li><a href="--link--" target="_blank">--title--</a></li>`;
+
+        recentArticlesData.forEach((article) => {
+          let generatedLinkHTML = recentLinkHTML.replace("--link--", article.url);
+          generatedLinkHTML = generatedLinkHTML.replace("--title--", article.title);
+          recentArticlesList.insertAdjacentHTML("beforeend", generatedLinkHTML);
+        });
+      } catch (error) {
+        recentArticlesList.innerText = error.message;
+      }
+    })();
+  </script>
+</html>

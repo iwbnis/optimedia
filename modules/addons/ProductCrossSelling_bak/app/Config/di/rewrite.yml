@@ -1,0 +1,9 @@
+class:
+    - {old: 'ModulesGarden\\ProductCrossSelling\\Core\\Configuration\\Addon\\Config\\After',     new: 'ModulesGarden\\ProductCrossSelling\\App\\Configuration\\Addon\\Config\\After'}
+    - {old: 'ModulesGarden\\ProductCrossSelling\\Core\\Configuration\\Addon\\Activate\\After',   new: 'ModulesGarden\\ProductCrossSelling\\App\\Configuration\\Addon\\Activate\\After'}
+    - {old: 'ModulesGarden\\ProductCrossSelling\\Core\\Configuration\\Addon\\Deactivate\\After', new: 'ModulesGarden\\ProductCrossSelling\\App\\Configuration\\Addon\\Deactivate\\After'}
+    - {old: 'ModulesGarden\\ProductCrossSelling\\Core\\Configuration\\Addon\\Update\\After',     new: 'ModulesGarden\\ProductCrossSelling\\App\\Configuration\\Addon\\Update\\After'}
+    - {old: 'ModulesGarden\\ProductCrossSelling\\Core\\Configuration\\Addon\\Config\\Before',    new: 'ModulesGarden\\ProductCrossSelling\\App\\Configuration\\Addon\\Config\\Before'}
+    - {old: 'ModulesGarden\\ProductCrossSelling\\Core\\Configuration\\Addon\\Activate\\Before',  new: 'ModulesGarden\\ProductCrossSelling\\App\\Configuration\\Addon\\Activate\\Before'}
+    - {old: 'ModulesGarden\\ProductCrossSelling\\Core\\Configuration\\Addon\\Deactivate\\Before',new: 'ModulesGarden\\ProductCrossSelling\\App\\Configuration\\Addon\\Deactivate\\Before'}
+    - {old: 'ModulesGarden\\ProductCrossSelling\\Core\\Configuration\\Addon\\Update\\Before',    new: 'ModulesGarden\\ProductCrossSelling\\App\\Configuration\\Addon\\Update\\Before'}

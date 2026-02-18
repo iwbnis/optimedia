@@ -1,0 +1,27 @@
+{
+  "schema": "1.0",
+  "type": "whmcs-addons",
+  "name": "PopupModule",
+  "license": "proprietary",
+  "category": "marketing",
+  "description": {
+    "name": "Client Area Popup",
+    "tagline": "Create fully customized pop-ups in your client area, select their recipients, define time frames and exact pages to be displayed at.",
+    "long": "Client Area Popup For WHMCS is a must-have module that will let you compose customizable pop-ups visible across your client area. You will be allowed to place a series of rules applicable to the appearance, display and the target audience of each notification.\n\nPop-up recipients can be precisely defined through selecting the required user groups, languages, or even products. Together with it, you will be able to determine when exactly the message shall be available, e.g. on particular days of the week, or only if a visitor stays long enough on your website. The module will also allow you to limit the access to notifications to specific pages of client area only. Every pop-up advertisement can be presented as a text, HTML or an image, as well as animated to either fade in or slide into a desired position on your page. Additionally, you may choose from over 20 predefined styles or generate your own ones to further personalize its design. If permitted, your customers will be free to turn off each pop-up once familiar with the message or the content is simply not relevant."
+  },
+  "logo": {
+    "filename": "logoPopup.png"
+  },
+  "marketplace": {
+    "url": "https://marketplace.whmcs.com/product/2002"
+  },
+  "support": {
+    "docs_url": "https://www.docs.modulesgarden.com/Client_Area_Popup_For_WHMCS"
+  },
+  "authors": [
+    {
+      "name": "ModulesGarden",
+      "homepage": "https:\/\/www.modulesgarden.com\/"
+    }
+  ]
+}

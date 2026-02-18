@@ -1,0 +1,228 @@
+0000.000 (0) Opened log file at time: Mon, 27 Apr 2020 06:21:19 +0000 on http://iptvreseller.club
+0000.002 (0) UpdraftPlus WordPress backup plugin (https://updraftplus.com): 1.16.23 WP: 5.4 PHP: 7.3.16 (cgi-fcgi, Linux server1.us.grabshelf.com 3.10.0-962.3.2.lve1.5.33.el7.x86_64 #1 SMP Fri Mar 13 09:20:40 EDT 2020 x86_64) MySQL: 5.7.30 WPLANG: en_US Server: Apache safe_mode: 0 max_execution_time: 900 memory_limit: 256M (used: 45.4M | 50M) multisite: N openssl: OpenSSL 1.1.1f  31 Mar 2020 mcrypt: N LANG:  ZipArchive::addFile: Y
+0000.039 (0) Free space on disk containing Updraft's temporary directory: 119928.9 MB
+0000.042 (0) Tasks: Backup files: 1 (schedule: unset) Backup DB: 1 (schedule: unset)
+0000.045 (0) Semaphore (fd, wp_sohisidldsoptions) being initialised
+0000.049 (0) Requesting semaphore lock (fd) (apparently not via scheduler)
+0000.052 (0) Set semaphore last lock (fd) time to 2020-04-27 06:21:19
+0000.053 (0) Semaphore lock (fd) complete
+0000.057 (0) Backup run: resumption=0, nonce=18f1cc032397, file_nonce=18f1cc032397 begun at=1587968479 (0s ago), job type=backup
+0000.059 (0) Scheduling a resumption (1) after 300 seconds (1587968779) in case this run gets aborted
+0000.076 (0) Checking if we have a zip executable available
+0000.077 (0) Testing: /usr/bin/zip
+0000.083 (0) Output: zip warning: binziptest/test.zip not found or empty
+0000.085 (0) Output: adding: binziptest/subdir1/	(in=0) (out=0) (stored 0%)
+0000.086 (0) Output: adding: binziptest/subdir1/subdir2/	(in=0) (out=0) (stored 0%)
+0000.087 (0) Output: adding: binziptest/subdir1/subdir2/test.html	(in=131) (out=107) (deflated 18%)
+0000.088 (0) Output: total bytes=131, compressed=107 -> 18% savings
+0000.094 (0) Output: adding: binziptest/subdir1/subdir2/test2.html	(in=138) (out=113) (deflated 18%)
+0000.096 (0) Output: total bytes=269, compressed=220 -> 18% savings
+0000.107 (0) Working binary zip found: /usr/bin/zip
+0000.110 (0) Zip engine: found/will use a binary zip: /usr/bin/zip
+0000.111 (0) Creation of backups of directories: beginning
+0000.115 (0) Beginning creation of dump of plugins (split every: 400 MB)
+0000.227 (0) Total entities for the zip file: 564 directories, 4045 files (0 skipped as non-modified), 61.8 MB
+0000.235 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 100 files added (on-disk size: 0 KB)
+0000.241 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 200 files added (on-disk size: 0 KB)
+0000.246 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 300 files added (on-disk size: 0 KB)
+0000.251 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 400 files added (on-disk size: 0 KB)
+0000.256 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 500 files added (on-disk size: 0 KB)
+0000.257 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 500 files added on this batch (10.5 MB, 4045 files batched, 501 (501) added so far); re-opening (prior size: 0 KB)
+0005.693 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: size is now: 4.80 MB
+0005.702 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 600 files added (on-disk size: 4946.1 KB)
+0005.710 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 700 files added (on-disk size: 4946.1 KB)
+0005.780 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 800 files added (on-disk size: 4946.1 KB)
+0005.786 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 900 files added (on-disk size: 4946.1 KB)
+0005.792 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 1000 files added (on-disk size: 4946.1 KB)
+0005.794 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 500 files added on this batch (5.2 MB, 4045 files batched, 501 (1002) added so far); re-opening (prior size: 4946.1 KB)
+0013.695 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: size is now: 6.40 MB
+0013.704 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 1100 files added (on-disk size: 6554.4 KB)
+0013.779 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 1200 files added (on-disk size: 6554.4 KB)
+0013.786 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 1300 files added (on-disk size: 6554.4 KB)
+0013.793 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 1400 files added (on-disk size: 6554.4 KB)
+0013.801 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 1500 files added (on-disk size: 6554.4 KB)
+0013.803 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 500 files added on this batch (2.4 MB, 4045 files batched, 501 (1503) added so far); re-opening (prior size: 6554.4 KB)
+0015.779 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 1600 files added (on-disk size: 7341.6 KB)
+0015.785 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 1700 files added (on-disk size: 7341.6 KB)
+0015.790 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 1800 files added (on-disk size: 7341.6 KB)
+0015.795 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 1900 files added (on-disk size: 7341.6 KB)
+0015.877 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 2000 files added (on-disk size: 7341.6 KB)
+0015.879 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 500 files added on this batch (15.7 MB, 4045 files batched, 501 (2004) added so far); re-opening (prior size: 7341.6 KB)
+0021.290 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: size is now: 11.70 MB
+0021.297 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 2100 files added (on-disk size: 11943.6 KB)
+0021.305 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 2200 files added (on-disk size: 11943.6 KB)
+0021.380 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 2300 files added (on-disk size: 11943.6 KB)
+0021.386 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 2400 files added (on-disk size: 11943.6 KB)
+0021.393 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 2500 files added (on-disk size: 11943.6 KB)
+0021.395 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 500 files added on this batch (4.3 MB, 4045 files batched, 501 (2505) added so far); re-opening (prior size: 11943.6 KB)
+0031.002 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 2600 files added (on-disk size: 13722.3 KB)
+0031.008 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 2700 files added (on-disk size: 13722.3 KB)
+0031.013 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 2800 files added (on-disk size: 13722.3 KB)
+0031.019 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 2900 files added (on-disk size: 13722.3 KB)
+0031.024 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 3000 files added (on-disk size: 13722.3 KB)
+0031.026 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 500 files added on this batch (5.9 MB, 4045 files batched, 501 (3006) added so far); re-opening (prior size: 13722.3 KB)
+0039.300 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 3100 files added (on-disk size: 15188.6 KB)
+0039.375 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 3200 files added (on-disk size: 15188.6 KB)
+0039.381 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 3300 files added (on-disk size: 15188.6 KB)
+0039.386 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 3400 files added (on-disk size: 15188.6 KB)
+0039.391 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 3500 files added (on-disk size: 15188.6 KB)
+0039.393 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 500 files added on this batch (6.2 MB, 4045 files batched, 501 (3507) added so far); re-opening (prior size: 15188.6 KB)
+0048.201 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 3600 files added (on-disk size: 17206.5 KB)
+0048.279 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 3700 files added (on-disk size: 17206.5 KB)
+0048.286 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 3800 files added (on-disk size: 17206.5 KB)
+0048.291 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 3900 files added (on-disk size: 17206.5 KB)
+0048.298 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: 4000 files added (on-disk size: 17206.5 KB)
+0048.300 (0) Adding batch to zip file (UpdraftPlus_BinZip): over 500 files added on this batch (11.1 MB, 4045 files batched, 501 (4008) added so far); re-opening (prior size: 17206.5 KB)
+0066.101 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip.tmp: size is now: 21.20 MB
+0073.099 (0) Created plugins zip (0) - 21785.8 KB in 72.9 s (298.6 KB/s) (sha1: f87cf769c00bee4b6d11f88a594d2109a9de6c46, sha256: a8601194c3ac9058c2577718d71510ec50505d2e7ea1eb15b1da7bdbf0d78e90)
+0073.175 (0) Beginning creation of dump of themes (split every: 400 MB)
+0073.375 (0) Total entities for the zip file: 74 directories, 373 files (0 skipped as non-modified), 7 MB
+0073.381 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-themes.zip.tmp: 100 files added (on-disk size: 0 KB)
+0073.389 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-themes.zip.tmp: 200 files added (on-disk size: 0 KB)
+0073.397 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-themes.zip.tmp: 300 files added (on-disk size: 0 KB)
+0074.502 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-themes.zip.tmp: size is now: 3.90 MB
+0074.587 (0) Created themes zip (0) - 3982.5 KB in 1.3 s (3074.7 KB/s) (sha1: e172b2ac9fe093fd20cda9768f46900ad8174946, sha256: 8018dd231cd8831e03839b419994598c2577f27d90019457e7ae185516804301)
+0074.591 (0) Exclusion option setting (uploads): backup*,*backups,backwpup*,wp-clone,snapshots
+0074.592 (0) Looking for candidates to backup in: /home/iptvreseller556/public_html/wp-content/uploads
+0074.593 (0) finding files: 2020: adding to list (1)
+0074.594 (0) finding files: wpforms: adding to list (2)
+0074.595 (0) Beginning creation of dump of uploads (split every: 400 MB)
+0074.686 (0) Total entities for the zip file: 5 directories, 499 files (0 skipped as non-modified), 15.3 MB
+0074.692 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-uploads.zip.tmp: 100 files added (on-disk size: 0 KB)
+0074.697 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-uploads.zip.tmp: 200 files added (on-disk size: 0 KB)
+0074.702 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-uploads.zip.tmp: 300 files added (on-disk size: 0 KB)
+0074.707 (0) Zip: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-uploads.zip.tmp: 400 files added (on-disk size: 0 KB)
+0092.464 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-uploads.zip.tmp: size is now: 15.40 MB
+0092.682 (0) Created uploads zip (0) - 15784.7 KB in 18 s (876.7 KB/s) (sha1: 686dd2017705d9eb78101dbf93c76ca8893c0604, sha256: d0b6f19d2e0fe6fb647bcdfafc350e9400bcb86dfd4764445231c297f94e6884)
+0092.686 (0) Beginning backup of other directories found in the content directory (index: 0)
+0092.687 (0) Exclusion option setting (others): upgrade,cache,updraft,backup*,*backups,mysql.sql,debug.log
+0092.688 (0) Looking for candidates to backup in: /home/iptvreseller556/public_html/wp-content
+0092.690 (0) finding files: uploads: skipping: this is the uploads directory
+0092.691 (0) finding files: index.php: adding to list (1)
+0092.692 (0) finding files: plugins: skipping: this is the plugins directory
+0092.693 (0) finding files: updraft: skipping: this is the updraft directory
+0092.694 (0) finding files: upgrade: skipping: excluded by options
+0092.695 (0) finding files: themes: skipping: this is the themes directory
+0092.736 (0) Total entities for the zip file: 0 directories, 1 files (0 skipped as non-modified), 0 MB
+0092.743 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-others.zip.tmp: size is now: 0.00 MB
+0092.749 (0) Created others zip (0) - 0.2 KB in 0 s (12.2 KB/s) (sha1: 4593492f20c11562d3eea26f0f427c7d6936b1d9, sha256: 7f4c5455b1a7aee4421e3b156df2ef9e73fe54c1b9f8b0b57f0ce34e0e5cf015)
+0092.754 (0) Saving backup status to database (elements: 8)
+0092.756 (0) Beginning creation of database dump (WordPress DB)
+0092.758 (0) Testing potential mysqldump binary: /usr/bin/mysqldump
+0092.768 (0) Binary mysqldump: error (code: 2)
+0092.770 (0) Testing potential mysqldump binary: /bin/mysqldump
+0092.779 (0) Binary mysqldump: error (code: 2)
+0092.785 (0) Table wp_sohisidldsoptions: Total expected rows (approximate): 251
+0092.822 (0) Table wp_sohisidldsoptions: Total rows added: 252 in 0.04 seconds
+0092.824 (0) Table wp_sohisidldsoptions: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsoptions.table.gz - 204.7 KB)
+0092.827 (0) Table wp_sohisidldsusers: Total expected rows (approximate): 0
+0092.829 (0) Table wp_sohisidldsusers: Total rows added: 2 in 0.00 seconds
+0092.830 (0) Table wp_sohisidldsusers: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsusers.table.gz - 0.6 KB)
+0092.834 (0) Table wp_sohisidldsusermeta: Total expected rows (approximate): 79
+0092.836 (0) Table wp_sohisidldsusermeta: Total rows added: 79 in 0.00 seconds
+0092.837 (0) Table wp_sohisidldsusermeta: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsusermeta.table.gz - 1.9 KB)
+0092.841 (0) Table wp_sohisidldscommentmeta: Total expected rows (approximate): 0
+0092.843 (0) Table wp_sohisidldscommentmeta: Total rows added: 0 in 0.00 seconds
+0092.845 (0) Table wp_sohisidldscommentmeta: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldscommentmeta.table.gz - 0.4 KB)
+0092.848 (0) Table wp_sohisidldscomments: Total expected rows (approximate): 0
+0092.850 (0) Table wp_sohisidldscomments: Total rows added: 1 in 0.00 seconds
+0092.851 (0) Table wp_sohisidldscomments: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldscomments.table.gz - 0.7 KB)
+0092.854 (0) Table wp_sohisidldslinks: Total expected rows (approximate): 0
+0092.856 (0) Table wp_sohisidldslinks: Total rows added: 0 in 0.00 seconds
+0092.857 (0) Table wp_sohisidldslinks: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldslinks.table.gz - 0.5 KB)
+0092.861 (0) Table wp_sohisidldspostmeta: Total expected rows (approximate): 853
+0095.425 (0) Table wp_sohisidldspostmeta: Total rows added: 831 in 2.56 seconds
+0095.427 (0) Table wp_sohisidldspostmeta: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldspostmeta.table.gz - 813.5 KB)
+0095.477 (0) Table wp_sohisidldsposts: Total expected rows (approximate): 202
+0095.503 (0) Table wp_sohisidldsposts: Total rows added: 225 in 0.03 seconds
+0095.505 (0) Table wp_sohisidldsposts: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsposts.table.gz - 88.7 KB)
+0095.510 (0) Table wp_sohisidldsterm_relationships: Total expected rows (approximate): 187
+0095.512 (0) Table wp_sohisidldsterm_relationships: Total rows added: 186 in 0.00 seconds
+0095.513 (0) Table wp_sohisidldsterm_relationships: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsterm_relationships.table.gz - 0.8 KB)
+0095.518 (0) Table wp_sohisidldsterm_taxonomy: Total expected rows (approximate): 10
+0095.520 (0) Table wp_sohisidldsterm_taxonomy: Total rows added: 10 in 0.00 seconds
+0095.521 (0) Table wp_sohisidldsterm_taxonomy: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsterm_taxonomy.table.gz - 0.5 KB)
+0095.525 (0) Table wp_sohisidldstermmeta: Total expected rows (approximate): 0
+0095.527 (0) Table wp_sohisidldstermmeta: Total rows added: 0 in 0.00 seconds
+0095.528 (0) Table wp_sohisidldstermmeta: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldstermmeta.table.gz - 0.4 KB)
+0095.532 (0) Table wp_sohisidldsterms: Total expected rows (approximate): 10
+0095.534 (0) Table wp_sohisidldsterms: Total rows added: 10 in 0.00 seconds
+0095.535 (0) Table wp_sohisidldsterms: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsterms.table.gz - 0.6 KB)
+0095.539 (0) Table wp_sohisidldsactionscheduler_actions: Total expected rows (approximate): 3
+0095.541 (0) Table wp_sohisidldsactionscheduler_actions: Total rows added: 3 in 0.00 seconds
+0095.542 (0) Table wp_sohisidldsactionscheduler_actions: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsactionscheduler_actions.table.gz - 0.8 KB)
+0095.579 (0) Table wp_sohisidldsactionscheduler_claims: Total expected rows (approximate): 0
+0095.580 (0) Table wp_sohisidldsactionscheduler_claims: Total rows added: 0 in 0.00 seconds
+0095.582 (0) Table wp_sohisidldsactionscheduler_claims: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsactionscheduler_claims.table.gz - 0.4 KB)
+0095.586 (0) Table wp_sohisidldsactionscheduler_groups: Total expected rows (approximate): 2
+0095.588 (0) Table wp_sohisidldsactionscheduler_groups: Total rows added: 2 in 0.00 seconds
+0095.589 (0) Table wp_sohisidldsactionscheduler_groups: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsactionscheduler_groups.table.gz - 0.4 KB)
+0095.593 (0) Table wp_sohisidldsactionscheduler_logs: Total expected rows (approximate): 7
+0095.595 (0) Table wp_sohisidldsactionscheduler_logs: Total rows added: 8 in 0.00 seconds
+0095.597 (0) Table wp_sohisidldsactionscheduler_logs: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsactionscheduler_logs.table.gz - 0.5 KB)
+0095.600 (0) Table wp_sohisidldswpforms_entries: Total expected rows (approximate): 0
+0095.602 (0) Table wp_sohisidldswpforms_entries: Total rows added: 0 in 0.00 seconds
+0095.603 (0) Table wp_sohisidldswpforms_entries: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldswpforms_entries.table.gz - 0.4 KB)
+0095.607 (0) Table wp_sohisidldswpforms_entry_fields: Total expected rows (approximate): 0
+0095.609 (0) Table wp_sohisidldswpforms_entry_fields: Total rows added: 0 in 0.00 seconds
+0095.610 (0) Table wp_sohisidldswpforms_entry_fields: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldswpforms_entry_fields.table.gz - 0.4 KB)
+0095.614 (0) Table wp_sohisidldswpforms_entry_meta: Total expected rows (approximate): 0
+0095.615 (0) Table wp_sohisidldswpforms_entry_meta: Total rows added: 0 in 0.00 seconds
+0095.617 (0) Table wp_sohisidldswpforms_entry_meta: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldswpforms_entry_meta.table.gz - 0.4 KB)
+0095.620 (0) Table wp_sohisidldswpforms_tasks_meta: Total expected rows (approximate): 0
+0095.622 (0) Table wp_sohisidldswpforms_tasks_meta: Total rows added: 1 in 0.00 seconds
+0095.623 (0) Table wp_sohisidldswpforms_tasks_meta: finishing file (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldswpforms_tasks_meta.table.gz - 0.4 KB)
+0095.626 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsoptions.table.gz (1/20): adding to final database dump
+0095.689 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsusers.table.gz (2/20): adding to final database dump
+0095.691 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsusermeta.table.gz (3/20): adding to final database dump
+0095.692 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldscommentmeta.table.gz (4/20): adding to final database dump
+0095.694 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldscomments.table.gz (5/20): adding to final database dump
+0095.695 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldslinks.table.gz (6/20): adding to final database dump
+0095.696 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldspostmeta.table.gz (7/20): adding to final database dump
+0095.877 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsposts.table.gz (8/20): adding to final database dump
+0095.900 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsterm_relationships.table.gz (9/20): adding to final database dump
+0095.902 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsterm_taxonomy.table.gz (10/20): adding to final database dump
+0095.904 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldstermmeta.table.gz (11/20): adding to final database dump
+0095.905 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsterms.table.gz (12/20): adding to final database dump
+0095.906 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsactionscheduler_actions.table.gz (13/20): adding to final database dump
+0095.907 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsactionscheduler_claims.table.gz (14/20): adding to final database dump
+0095.908 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsactionscheduler_groups.table.gz (15/20): adding to final database dump
+0095.909 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldsactionscheduler_logs.table.gz (16/20): adding to final database dump
+0095.911 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldswpforms_entries.table.gz (17/20): adding to final database dump
+0095.912 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldswpforms_entry_fields.table.gz (18/20): adding to final database dump
+0095.913 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldswpforms_entry_meta.table.gz (19/20): adding to final database dump
+0095.914 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db-table-wp_sohisidldswpforms_tasks_meta.table.gz (20/20): adding to final database dump
+0095.916 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db.gz: finished writing out complete database file (1096 KB)
+0095.933 (0) Total database tables backed up: 20 (backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db.gz, size: 1139031, sha1: ce7452647a4093a1ccfbbcd37c8fcb48fcba4301, sha256: a221ebadd09483662a9bfc3b2c1e05399d925cd26fbdc4b3545a0caa5b19d77f)
+0095.978 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip: plugins: This file has not yet been successfully uploaded: will queue
+0095.979 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-themes.zip: themes: This file has not yet been successfully uploaded: will queue
+0095.980 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-uploads.zip: uploads: This file has not yet been successfully uploaded: will queue
+0095.981 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-others.zip: others: This file has not yet been successfully uploaded: will queue
+0095.982 (0) backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db.gz: db: This file has not yet been successfully uploaded: will queue
+0095.983 (0) Saving backup history. Total backup size: 41.7 MB
+0095.985 (0) Requesting upload of the files that have not yet been successfully uploaded (5)
+0095.989 (0) Cloud backup selection (1/1): none with instance (1/1) (last)
+0095.990 (0) No remote despatch: user chose no remote backup service
+0095.991 (0) Recording as successfully uploaded: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-plugins.zip
+0095.994 (0) Recording as successfully uploaded: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-themes.zip
+0095.996 (0) Recording as successfully uploaded: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-uploads.zip
+0095.999 (0) Recording as successfully uploaded: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-others.zip
+0096.001 (0) Recording as successfully uploaded: backup_2020-04-27-0621_IPTV_Reseller_Club_18f1cc032397-db.gz
+0096.006 (0) Retain: beginning examination of existing backup sets; user setting: retain_files=2, retain_db=2
+0096.007 (0) Number of backup sets in history: 1; groups (db): 1
+0096.008 (0) Examining (for databases) backup set with group_id=0, nonce=18f1cc032397, datestamp=1587968479 (Apr 27 2020 06:21:19)
+0096.009 (0) This backup set is the backup set just made, so will not be deleted.
+0096.009 (0) Number of backup sets in history: 1; groups (files): 1
+0096.010 (0) Examining (for files) backup set with nonce=18f1cc032397, datestamp=1587968479 (Apr 27 2020 06:21:19)
+0096.010 (0) This backup set is the backup set just made, so will not be deleted.
+0096.011 (0) This backup set is the backup set just made, so will not be deleted.
+0096.011 (0) This backup set is the backup set just made, so will not be deleted.
+0096.011 (0) This backup set is the backup set just made, so will not be deleted.
+0096.012 (0) This backup set remains non-empty (f=1/d=1); will retain in history
+0096.012 (0) Retain: saving new backup history (sets now: 1) and finishing retain operation
+0096.015 (0) Resume backup (18f1cc032397, 0): finish run
+0096.018 (0) Decremented the semaphore (fd) by 1
+0096.020 (0) Semaphore (fd) unlocked
+0096.021 (0) There were no errors in the uploads, so the 'resume' event (1) is being unscheduled
+0096.025 (0) No email will/can be sent - the user has not configured an email address.
+0096.026 (0) The backup apparently succeeded and is now complete

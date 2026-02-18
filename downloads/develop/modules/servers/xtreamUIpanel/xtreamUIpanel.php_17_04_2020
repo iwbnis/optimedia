@@ -1,0 +1,1577 @@
+<?php
+/**
+*
+* @ This file is created by http://DeZender.Net
+* @ deZender (PHP7 Decoder for ionCube Encoder)
+*
+* @ Version			:	4.0.10.0
+* @ Author			:	DeZender
+* @ Release on		:	09.04.2020
+* @ Official site	:	http://DeZender.Net
+*
+*/
+
+function xtreamUIpanel_MetaData()
+{
+	return ['DisplayName' => 'xtreamUIpanel', 'APIVersion' => '1.0', 'RequiresServer' => true];
+}
+
+function xtreamUIpanel_ConfigOptions()
+{
+	$licenseinfo = WSxtreamUIResellerCheckLicenseByKey();
+
+	if ($licenseinfo['status'] == 'Active') {
+		$moduledetails = Illuminate\Database\Capsule\Manager::table('tbladdonmodules')->where('module', '=', 'xtreamUIdashboard')->where('setting', '=', 'version')->get();
+
+		if (empty($moduledetails)) {
+			return [
+				'serverstatus' => ['FriendlyName' => 'Module Status', 'Description' => '<span style=\'color:red;\'>Addon Module is not Activated Please Active it from Admin Area > Setup > Addon Modules > Xtream Dashboard<span>', 'Size' => 80]
+			];
+		}
+
+		$moduledetails = Illuminate\Database\Capsule\Manager::table('tbladdonmodules')->where('module', '=', 'xtreamUIdashboard')->where('setting', '=', 'version')->get();
+
+		if (empty($moduledetails)) {
+			return [
+				'serverstatus' => ['FriendlyName' => 'Module Status', 'Description' => '<span style=\'color:red;\'>Addon Module is not Activated Please Active it from Admin Area > Setup > Addon Modules > Xtream Dashboard<span>', 'Size' => 80]
+			];
+		}
+
+		$checkServerAttached = Illuminate\Database\Capsule\Manager::table('tblproducts')->where('id', '=', $_REQUEST['id'])->get();
+		$ProductServer = (isset($checkServerAttached[0]->servertype) && !empty($checkServerAttached[0]->servertype) ? $checkServerAttached[0]->servertype : '');
+
+		if ($ProductServer != 'xtreamUIpanel') {
+			return [
+				'serverstatus' => ['FriendlyName' => 'Server Status', 'Description' => '<span style=\'color:red;\'>Please click on Save changes to make settings.<span>', 'Size' => 80]
+			];
+		}
+
+		$moduleversion = $moduledetails[0]->value;
+		$Productid = (isset($_REQUEST['id']) && !empty($_REQUEST['id']) ? $_REQUEST['id'] : '');
+		$productdetailsare = Illuminate\Database\Capsule\Manager::table('tblproducts')->where('id', $Productid)->get();
+		$resellerpassword = $productdetailsare[0]->configoption11;
+		$linetypesaved = $productdetailsare[0]->configoption3;
+		$rspassinput = '<input type="hidden" id="passwordval" value="' . $resellerpassword . '">';
+		$description = '<div class="col-sm-12" >';
+		$description .= '<div class="col-sm-8">';
+		$description .= 'Module Version v' . $moduleversion;
+		$description .= '</div>';
+		$description .= '<div class="col-sm-4" style="margin-top: -5px;margin-left: -25px;">';
+		$description .= '<div class="progress" style="margin-bottom: 0px; margin-top:5px">';
+		$description .= '<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 100%">';
+		$description .= 'Up to date!</div></div></div></div><br><br>';
+		$description .= '<div style="padding-left: 26px;" id="creditdDataContainer" class="col-sm-12">';
+		$description .= 'Loading Credits...';
+		$description .= '</div><input type="hidden" id="ladedonce" value="">';
+		return [
+			'Module Version <div id="creditdDataContainer1"><br><br>Remaining credits</div>' => ['Description' => $description],
+			'Product'                                                                        => [
+				'Type'        => 'dropdown',
+				'Options'     => ['streamlineonly' => 'Streaming Line', 'magdevice' => 'MAG Device'],
+				'Description' => 'What type is this product?',
+				'Size'        => 80
+			],
+			'Select Line Type'                                                               => [
+				'Type'        => 'dropdown',
+				'Options'     => ['' => ''],
+				'Description' => '<input type="hidden" id="savedlineis" value="' . $linetypesaved . '"><span id="loadinglinetype" style="display:none;">Loading Data...</span><span id="errorline" style="display:none;color:red;">* Line Type is required</span>'
+			],
+			'Select Package'                                                                 => ['Name' => 'addonpackages', 'Type' => 'text', 'Size' => '20', 'Default' => '0', 'Description' => '<br /><a id="load-package-addon" onclick="tariffPlanForPcakage()" href="javascript:;" class="load-configuration" >Assign package to this product here </a>'],
+			'M3U link'                                                                       => ['Type' => 'yesno', 'Description' => 'Tick to Show M3U link in clientarea?'],
+			'Watch Streams!'                                                                 => ['Type' => 'yesno', 'Default' => 'yes', 'Description' => 'Tick to show Xtream Codesâ€™s client area link for watching streams online.'],
+			'MAG Portal link'                                                                => ['Type' => 'yesno', 'Default' => 'yes', 'Description' => 'Show MAG Portal link in Client Area'],
+			'Other Device Section'                                                           => ['Type' => 'yesno', 'Description' => 'Tick to show <b><a style="text-decoration:underline" target="_blank" href="https://drive.google.com/file/d/0Bxdm-R-xZmjYX2hfa0RPNDNHaGM/view?usp=drivesdk">Other Device Section</a></b> on the Client Area.', 'Default' => 'on'],
+			'xtreamUI Panel URL'                                                             => ['Type' => 'text', 'Size' => '20', 'Default' => '1', 'Description' => 'Enter Your xtreamUI Reseller IPTV Panel Admin URL'],
+			'xtreamUI Reseller Username'                                                     => ['Type' => 'text', 'Size' => '20', 'Default' => '1', 'Description' => 'Enter your xtreamUI Reseller IPTV Panel Admin Username (xtreamUI Reseller panel Admin username)'],
+			'xtreamUI Reseller Password'                                                     => ['Type' => 'password', 'Size' => '20', 'Default' => '1', 'Description' => 'Enter your xtreamUI Reseller IPTV Panel Admin Password (xtreamUI Reseller panel Admin Password)' . $rspassinput],
+			'MAG Portal'                                                                     => ['Type' => 'text', 'Size' => '20', 'Default' => '1', 'Description' => 'Enter Your Mag Portal URL eg. http://yourdns:port'],
+			'Resseller connection'                                                           => ['Description' => '<a id="TestConnectionBTN" href="javascript:;" onclick="testconnectionfunction()" class="testconbtn btn btn-danger">Test connection </a><span id="conf-dialog-custom-field2"></span><span style="display:none" id="loader_div">Testing Connection...</span>', 'Size' => 80],
+			''                                                                               => ['Description' => '<center><a id="load-storm-tariff-custom-field" href="javascript:;" onclick="customfield()" class="load-configuration-custom-field">Click  here to create required custom fields </a></center>', 'Size' => 80],
+			'Is Captcha Enabled'                                                             => ['Type' => 'yesno', 'Description' => 'Tick If captcha is enabled.'],
+			'ResellerID'                                                                     => ['Type' => 'text', 'Size' => '20', 'Description' => '', 'Default' => '1'],
+			'Is Password Editable'                                                           => ['Type' => 'yesno', 'Description' => 'Tick If Password is editable.', 'Default' => 'on'],
+			'Is Username Editable'                                                           => ['Type' => 'yesno', 'Description' => 'Tick If Username is editable.', 'Default' => 'on']
+		];
+	}
+
+	return [
+		'licenseKeyStatus' => ['FriendlyName' => 'License Key Status', 'Description' => '<span style=\'color:red;\'>Invalid or Expired license key.<span>', 'Size' => 80]
+	];
+}
+
+function xtreamUIpanel_CreateAccount(array $params)
+{
+	$licenseinfo = WSxtreamUIResellerCheckLicenseByKey();
+
+	if ($licenseinfo['status'] != 'Active') {
+		return 'Invalid or expired license key. - Please check Xtream Dashboard addon configuration';
+	}
+
+	$currentFileName = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
+	$trialconditionalarray = ['Yes', 'No'];
+	$xc_url = $params['configoption9'];
+	$xc_username = $params['configoption10'];
+	$xc_password = $params['configoption11'];
+	$package_id = $params['configoption4'];
+	$reselleridcms = $params['configoption16'];
+	$explodePackageID = explode('|', $package_id);
+	$package_id = $explodePackageID[0];
+	$is_trial = $params['configoption3'];
+	$ispasswordenable = (isset($params['configoption17']) && !empty($params['configoption17']) ? $params['configoption17'] : '');
+	$isusernameenable = (isset($params['configoption18']) && !empty($params['configoption18']) ? $params['configoption18'] : '');
+	$detailsarray = ['username' => $xc_username, 'password' => $xc_password];
+
+	if ($params['configoption2'] == 'streamlineonly') {
+		$username = $params['username'];
+		$password = $params['password'];
+
+		if (empty($username)) {
+			if (isset($params['customfields']['Username']) && !empty($params['customfields']['Username'])) {
+				$username = $params['customfields']['Username'];
+			}
+			else {
+				$username = xtreamUIpanel_generate_ran();
+			}
+
+			Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', $params['serviceid'])->update(['username' => $username]);
+		}
+		$PasswordIs = (isset($params['password']) && !empty($params['password']) ? $params['password'] : '');
+		if (isset($params['customfields']['Password']) && !empty($params['customfields']['Password'])) {
+			$PasswordIs = $params['customfields']['Password'];
+		}
+		if (isset($PasswordIs) && !empty($PasswordIs)) {
+			$PasswordIs = $PasswordIs;
+		}
+		else {
+			$PasswordIs = xtreamUIpanel_generate_ran();
+		}
+
+		$params['username'] = $username;
+		$params['password'] = $password;
+		$tblhostingdetails = Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', '=', $params['serviceid'])->get();
+		$serviceid = $tblhostingdetails[0]->id;
+		$reseller_notes = 'WHMCS:' . $serviceid;
+		$UsernameToCheck = $username;
+
+		if ($ispasswordenable == '') {
+			$PasswordIs = '';
+		}
+
+		if ($isusernameenable == '') {
+			$username = '';
+		}
+
+		$post_data = ['username' => $username, 'package' => $package_id, 'reseller_notes' => $reseller_notes, 'password' => $PasswordIs, 'max_connections' => '1', 'member_id' => $reselleridcms, 'exp_date' => '', 'reseller_notes' => $reseller_notes, 'submit_user' => 'Purchase', 'post' => '1'];
+
+		if ($is_trial == 'trial') {
+			$post_data['trial'] = '1';
+		}
+
+		$api_result = xtreamUIpanelAPICall('user_reseller.php', $post_data, 'add_user', $xc_url, $detailsarray, 'on', $UsernameToCheck);
+		logModuleCall('xtreamUIpanel', __FUNCTION__, $post_data, $api_result);
+
+		if (!empty($api_result)) {
+			if (!empty($api_result['status']) && ($api_result['status'] == 'error')) {
+				return $api_result['response'];
+			}
+			if (!empty($api_result['status']) && ($api_result['status'] == 'success')) {
+				if (isset($api_result['password']) && !empty($api_result['password'])) {
+					$PasswordIs = $api_result['password'];
+				}
+				if (isset($api_result['username']) && !empty($api_result['username'])) {
+					$usernametoupdate = $api_result['username'];
+					Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', $params['serviceid'])->update(['username' => $usernametoupdate]);
+				}
+
+				$command = 'EncryptPassword';
+				$postData = ['password2' => $PasswordIs];
+				$results = localAPI($command, $postData);
+
+				if ($results['result'] == 'success') {
+					Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', $params['serviceid'])->update(['password' => $results['password']]);
+				}
+
+				return 'success';
+			}
+		}
+		else {
+			return 'No Response from the server! Please check the logs for more details';
+		}
+	}
+
+	if ($params['configoption2'] == 'magdevice') {
+		$tblhostingdetails = Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', '=', $params['serviceid'])->get();
+		$serviceid = $tblhostingdetails[0]->id;
+		$reseller_notes = 'WHMCS:' . $serviceid;
+		$MagAddress = (isset($params['customfields']['MAG Address']) && !empty($params['customfields']['MAG Address']) ? $params['customfields']['MAG Address'] : '');
+		$post_data = ['package' => $package_id, 'reseller_notes' => $reseller_notes, 'max_connections' => '1', 'member_id' => $reselleridcms, 'exp_date' => '', 'submit_user' => 'Purchase', 'is_mag' => 'on', 'mac_address_mag' => $MagAddress, 'post' => '1'];
+
+		if ($is_trial == 'trial') {
+			$post_data['trial'] = '1';
+		}
+
+		$api_result = xtreamUIpanelAPICall('user_reseller.php', $post_data, 'add_user', $xc_url, $detailsarray, 'on');
+		logModuleCall('xtreamUIpanel', __FUNCTION__, $post_data, $api_result);
+
+		if (!empty($api_result)) {
+			if (!empty($api_result['status']) && ($api_result['status'] == 'error')) {
+				return $api_result['response'];
+			}
+			if (!empty($api_result['status']) && ($api_result['status'] == 'success')) {
+				$command = 'EncryptPassword';
+				$postData = ['password2' => $PasswordIs];
+				$results = localAPI($command, $postData);
+
+				if ($results['result'] == 'success') {
+					Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', $params['serviceid'])->update(['password' => $results['password']]);
+				}
+
+				return 'success';
+			}
+		}
+		else {
+			return 'No Response from the server! Please check the logs for more details';
+		}
+	}
+}
+
+function xtreamUIpanel_SuspendAccount(array $params)
+{
+	$licenseinfo = WSxtreamUIResellerCheckLicenseByKey();
+
+	if ($licenseinfo['status'] != 'Active') {
+		return 'Invalid or expired license key. - Please check Xtream Dashboard addon configuration';
+	}
+
+	$currentFileName = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
+	$trialconditionalarray = ['Yes', 'No'];
+	$PasswordIs = (isset($params['password']) && !empty($params['password']) ? $params['password'] : '');
+	if (isset($params['customfields']['Password']) && !empty($params['customfields']['Password'])) {
+		$PasswordIs = $params['customfields']['Password'];
+	}
+	if (isset($PasswordIs) && !empty($PasswordIs)) {
+		$PasswordIs = $PasswordIs;
+	}
+	else {
+		$PasswordIs = xtreamUIpanel_generate_ran();
+	}
+
+	$xc_url = $params['configoption9'];
+	$xc_username = $params['configoption10'];
+	$xc_password = $params['configoption11'];
+	$package_id = $params['configoption4'];
+	$explodePackageID = explode('|', $package_id);
+	$package_id = $explodePackageID[0];
+	$detailsarray = ['username' => $xc_username, 'password' => $xc_password];
+
+	if ($params['configoption2'] == 'streamlineonly') {
+		$username = $params['username'];
+		$password = $params['password'];
+
+		if (empty($username)) {
+			if (isset($params['customfields']['Username']) && !empty($params['customfields']['Username'])) {
+				$username = $params['customfields']['Username'];
+			}
+			else {
+				$username = xtreamUIpanel_generate_ran();
+			}
+
+			Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', $params['serviceid'])->update(['username' => $username]);
+		}
+
+		$params['username'] = $username;
+		$params['password'] = $password;
+		$tblhostingdetails = Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', '=', $params['serviceid'])->get();
+		$serviceid = $tblhostingdetails[0]->id;
+		$reseller_notes = 'WHMCS:' . $serviceid;
+		$post_data = ['username' => $username, 'package' => $package_id, 'password' => $PasswordIs];
+		$api_result = xtreamUIpanelAPICall('table_search.php', $post_data, 'disable', $xc_url, $detailsarray, 'on');
+		logModuleCall('xtreamUIpanel', __FUNCTION__, $post_data, $api_result);
+
+		if (!empty($api_result)) {
+			if (!empty($api_result['status']) && ($api_result['status'] == 'error')) {
+				return $api_result['response'];
+			}
+			if (!empty($api_result['status']) && ($api_result['status'] == 'success')) {
+				return 'success';
+			}
+		}
+		else {
+			return 'No Response from the server! Please check the logs for more details';
+		}
+	}
+
+	if ($params['configoption2'] == 'magdevice') {
+		$MagAddress = (isset($params['customfields']['MAG Address']) && !empty($params['customfields']['MAG Address']) ? $params['customfields']['MAG Address'] : '');
+		$tblhostingdetails = Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', '=', $params['serviceid'])->get();
+		$serviceid = $tblhostingdetails[0]->id;
+		$reseller_notes = 'WHMCS:' . $serviceid;
+		$post_data = ['mag_address' => $MagAddress, 'package' => $package_id];
+		$api_result = xtreamUIpanelAPICall('table_search.php', $post_data, 'disable', $xc_url, $detailsarray, 'on');
+		logModuleCall('xtreamUIpanel', __FUNCTION__, $post_data, $api_result);
+
+		if (!empty($api_result)) {
+			if (!empty($api_result['status']) && ($api_result['status'] == 'error')) {
+				return $api_result['response'];
+			}
+			if (!empty($api_result['status']) && ($api_result['status'] == 'success')) {
+				return 'success';
+			}
+		}
+		else {
+			return 'No Response from the server! Please check the logs for more details';
+		}
+	}
+}
+
+function xtreamUIpanel_UnsuspendAccount(array $params)
+{
+	$licenseinfo = WSxtreamUIResellerCheckLicenseByKey();
+
+	if ($licenseinfo['status'] != 'Active') {
+		return 'Invalid or expired license key. - Please check Xtream Dashboard addon configuration';
+	}
+
+	$currentFileName = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
+	$trialconditionalarray = ['Yes', 'No'];
+	$PasswordIs = (isset($params['password']) && !empty($params['password']) ? $params['password'] : '');
+	if (isset($params['customfields']['Password']) && !empty($params['customfields']['Password'])) {
+		$PasswordIs = $params['customfields']['Password'];
+	}
+	if (isset($PasswordIs) && !empty($PasswordIs)) {
+		$PasswordIs = $PasswordIs;
+	}
+	else {
+		$PasswordIs = xtreamUIpanel_generate_ran();
+	}
+
+	$xc_url = $params['configoption9'];
+	$xc_username = $params['configoption10'];
+	$xc_password = $params['configoption11'];
+	$package_id = $params['configoption4'];
+	$explodePackageID = explode('|', $package_id);
+	$package_id = $explodePackageID[0];
+	$detailsarray = ['username' => $xc_username, 'password' => $xc_password];
+
+	if ($params['configoption2'] == 'streamlineonly') {
+		$username = $params['username'];
+		$password = $params['password'];
+
+		if (empty($username)) {
+			if (isset($params['customfields']['Username']) && !empty($params['customfields']['Username'])) {
+				$username = $params['customfields']['Username'];
+			}
+			else {
+				$username = xtreamUIpanel_generate_ran();
+			}
+
+			Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', $params['serviceid'])->update(['username' => $username]);
+		}
+
+		$params['username'] = $username;
+		$params['password'] = $password;
+		$tblhostingdetails = Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', '=', $params['serviceid'])->get();
+		$serviceid = $tblhostingdetails[0]->id;
+		$reseller_notes = 'WHMCS:' . $serviceid;
+		$post_data = ['username' => $username, 'package' => $package_id, 'password' => $PasswordIs];
+		$api_result = xtreamUIpanelAPICall('table_search.php', $post_data, 'enable', $xc_url, $detailsarray, 'on');
+		logModuleCall('xtreamUIpanel', __FUNCTION__, $post_data, $api_result);
+
+		if (!empty($api_result)) {
+			if (!empty($api_result['status']) && ($api_result['status'] == 'error')) {
+				return $api_result['response'];
+			}
+			if (!empty($api_result['status']) && ($api_result['status'] == 'success')) {
+				return 'success';
+			}
+		}
+		else {
+			return 'No Response from the server! Please check the logs for more details';
+		}
+	}
+
+	if ($params['configoption2'] == 'magdevice') {
+		$MagAddress = (isset($params['customfields']['MAG Address']) && !empty($params['customfields']['MAG Address']) ? $params['customfields']['MAG Address'] : '');
+		$tblhostingdetails = Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', '=', $params['serviceid'])->get();
+		$serviceid = $tblhostingdetails[0]->id;
+		$reseller_notes = 'WHMCS:' . $serviceid;
+		$post_data = ['mag_address' => $MagAddress, 'package' => $package_id];
+		$api_result = xtreamUIpanelAPICall('table_search.php', $post_data, 'enable', $xc_url, $detailsarray, 'on');
+		logModuleCall('xtreamUIpanel', __FUNCTION__, $post_data, $api_result);
+
+		if (!empty($api_result)) {
+			if (!empty($api_result['status']) && ($api_result['status'] == 'error')) {
+				return $api_result['response'];
+			}
+			if (!empty($api_result['status']) && ($api_result['status'] == 'success')) {
+				return 'success';
+			}
+		}
+		else {
+			return 'No Response from the server! Please check the logs for more details';
+		}
+	}
+}
+
+function xtreamUIpanel_TerminateAccount(array $params)
+{
+	$licenseinfo = WSxtreamUIResellerCheckLicenseByKey();
+
+	if ($licenseinfo['status'] != 'Active') {
+		return 'Invalid or expired license key. - Please check Xtream Dashboard addon configuration';
+	}
+
+	$currentFileName = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
+	$trialconditionalarray = ['Yes', 'No'];
+	$PasswordIs = (isset($params['password']) && !empty($params['password']) ? $params['password'] : '');
+	if (isset($params['customfields']['Password']) && !empty($params['customfields']['Password'])) {
+		$PasswordIs = $params['customfields']['Password'];
+	}
+	if (isset($PasswordIs) && !empty($PasswordIs)) {
+		$PasswordIs = $PasswordIs;
+	}
+	else {
+		$PasswordIs = xtreamUIpanel_generate_ran();
+	}
+
+	$xc_url = $params['configoption9'];
+	$xc_username = $params['configoption10'];
+	$xc_password = $params['configoption11'];
+	$package_id = $params['configoption4'];
+	$explodePackageID = explode('|', $package_id);
+	$package_id = $explodePackageID[0];
+	$detailsarray = ['username' => $xc_username, 'password' => $xc_password];
+
+	if ($params['configoption2'] == 'streamlineonly') {
+		$username = $params['username'];
+		$password = $params['password'];
+
+		if (empty($username)) {
+			if (isset($params['customfields']['Username']) && !empty($params['customfields']['Username'])) {
+				$username = $params['customfields']['Username'];
+			}
+			else {
+				$username = xtreamUIpanel_generate_ran();
+			}
+
+			Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', $params['serviceid'])->update(['username' => $username]);
+		}
+
+		$params['username'] = $username;
+		$params['password'] = $password;
+		$tblhostingdetails = Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', '=', $params['serviceid'])->get();
+		$serviceid = $tblhostingdetails[0]->id;
+		$reseller_notes = 'WHMCS:' . $serviceid;
+		$post_data = ['username' => $username, 'package' => $package_id, 'password' => $PasswordIs];
+		$api_result = xtreamUIpanelAPICall('table_search.php', $post_data, 'delete', $xc_url, $detailsarray, 'on');
+		logModuleCall('xtreamUIpanel', __FUNCTION__, $post_data, $api_result);
+
+		if (!empty($api_result)) {
+			if (!empty($api_result['status']) && ($api_result['status'] == 'error')) {
+				return $api_result['response'];
+			}
+			if (!empty($api_result['status']) && ($api_result['status'] == 'success')) {
+				return 'success';
+			}
+		}
+		else {
+			return 'No Response from the server! Please check the logs for more details';
+		}
+	}
+
+	if ($params['configoption2'] == 'magdevice') {
+		$MagAddress = (isset($params['customfields']['MAG Address']) && !empty($params['customfields']['MAG Address']) ? $params['customfields']['MAG Address'] : '');
+		$tblhostingdetails = Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', '=', $params['serviceid'])->get();
+		$serviceid = $tblhostingdetails[0]->id;
+		$reseller_notes = 'WHMCS:' . $serviceid;
+		$post_data = ['mag_address' => $MagAddress, 'package' => $package_id];
+		$api_result = xtreamUIpanelAPICall('table_search.php', $post_data, 'delete', $xc_url, $detailsarray, 'on');
+		logModuleCall('xtreamUIpanel', __FUNCTION__, $post_data, $api_result);
+
+		if (!empty($api_result)) {
+			if (!empty($api_result['status']) && ($api_result['status'] == 'error')) {
+				return $api_result['response'];
+			}
+			if (!empty($api_result['status']) && ($api_result['status'] == 'success')) {
+				return 'success';
+			}
+		}
+		else {
+			return 'No Response from the server! Please check the logs for more details';
+		}
+	}
+}
+
+function xtreamUIpanel_Renew(array $params)
+{
+	$currentFileName = basename($_SERVER['REQUEST_URI'], '?' . $_SERVER['QUERY_STRING']);
+	$trialconditionalarray = ['Yes', 'No'];
+	$xc_url = $params['configoption9'];
+	$xc_username = $params['configoption10'];
+	$xc_password = $params['configoption11'];
+	$package_id = $params['configoption4'];
+	$reselleridcms = $params['configoption16'];
+	$explodePackageID = explode('|', $package_id);
+	$package_id = $explodePackageID[0];
+	$is_trial = $params['configoption3'];
+	$detailsarray = ['username' => $xc_username, 'password' => $xc_password];
+
+	if ($params['configoption2'] == 'streamlineonly') {
+		$username = $params['username'];
+		$password = $params['password'];
+
+		if (empty($username)) {
+			if (isset($params['customfields']['Username']) && !empty($params['customfields']['Username'])) {
+				$username = $params['customfields']['Username'];
+			}
+			else {
+				$username = xtreamUIpanel_generate_ran();
+			}
+
+			Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', $params['serviceid'])->update(['username' => $username]);
+		}
+		$PasswordIs = (isset($params['password']) && !empty($params['password']) ? $params['password'] : '');
+		if (isset($params['customfields']['Password']) && !empty($params['customfields']['Password'])) {
+			$PasswordIs = $params['customfields']['Password'];
+		}
+		if (isset($PasswordIs) && !empty($PasswordIs)) {
+			$PasswordIs = $PasswordIs;
+		}
+		else {
+			$PasswordIs = xtreamUIpanel_generate_ran();
+		}
+
+		$params['username'] = $username;
+		$params['password'] = $password;
+		$tblhostingdetails = Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', '=', $params['serviceid'])->get();
+		$serviceid = $tblhostingdetails[0]->id;
+		$reseller_notes = 'WHMCS:' . $serviceid;
+		$post_data = ['username' => $username, 'package' => $package_id, 'reseller_notes' => $reseller_notes, 'password' => $PasswordIs, 'max_connections' => '1', 'member_id' => $reselleridcms, 'exp_date' => '', 'reseller_notes' => $reseller_notes, 'submit_user' => 'Purchase', 'post' => '1'];
+
+		if ($is_trial == 'trial') {
+			$post_data['trial'] = '1';
+		}
+
+		$api_result = xtreamUIpanelAPICall('table_search.php', $post_data, 'extend', $xc_url, $detailsarray, 'on');
+		logModuleCall('xtreamUIpanel', __FUNCTION__, $post_data, $api_result);
+
+		if (!empty($api_result)) {
+			if (!empty($api_result['status']) && ($api_result['status'] == 'error')) {
+				return $api_result['response'];
+			}
+			if (!empty($api_result['status']) && ($api_result['status'] == 'success')) {
+				$command = 'EncryptPassword';
+				$postData = ['password2' => $PasswordIs];
+				$results = localAPI($command, $postData);
+
+				if ($results['result'] == 'success') {
+					Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', $params['serviceid'])->update(['password' => $results['password']]);
+				}
+
+				return 'success';
+			}
+		}
+		else {
+			return 'No Response from the server! Please check the logs for more details';
+		}
+	}
+
+	if ($params['configoption2'] == 'magdevice') {
+		$tblhostingdetails = Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', '=', $params['serviceid'])->get();
+		$serviceid = $tblhostingdetails[0]->id;
+		$reseller_notes = 'WHMCS:' . $serviceid;
+		$MagAddress = (isset($params['customfields']['MAG Address']) && !empty($params['customfields']['MAG Address']) ? $params['customfields']['MAG Address'] : '');
+		$post_data = ['package' => $package_id, 'reseller_notes' => $reseller_notes, 'max_connections' => '1', 'member_id' => $reselleridcms, 'exp_date' => '', 'submit_user' => 'Purchase', 'is_mag' => 'on', 'mac_address_mag' => $MagAddress, 'mag_address' => $MagAddress, 'post' => '1'];
+
+		if ($is_trial == 'trial') {
+			$post_data['trial'] = '1';
+		}
+
+		$api_result = xtreamUIpanelAPICall('table_search.php', $post_data, 'extend', $xc_url, $detailsarray, 'on');
+		logModuleCall('xtreamUIpanel', __FUNCTION__, $post_data, $api_result);
+
+		if (!empty($api_result)) {
+			if (!empty($api_result['status']) && ($api_result['status'] == 'error')) {
+				return $api_result['response'];
+			}
+			if (!empty($api_result['status']) && ($api_result['status'] == 'success')) {
+				$command = 'EncryptPassword';
+				$postData = ['password2' => $PasswordIs];
+				$results = localAPI($command, $postData);
+
+				if ($results['result'] == 'success') {
+					Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', $params['serviceid'])->update(['password' => $results['password']]);
+				}
+
+				return 'success';
+			}
+		}
+		else {
+			return 'No Response from the server! Please check the logs for more details';
+		}
+	}
+}
+
+function xtreamUIpanelAPICall($request_url, $post_data, $action, $adminurl = '', $admindetails = [], $passwordedit = '', $UsernameToCheck = '')
+{
+	$cookie_path = dirname(__FILE__) . '/cookie.txt';
+	$ch = curl_init($adminurl);
+	curl_setopt($ch, CURLOPT_URL, $adminurl . 'login.php');
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_POST, 1);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $admindetails);
+	curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_path);
+	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+	$login_html = curl_exec($ch);
+	$dom = new DOMDocument();
+	@$dom->loadHTML($login_html);
+	$tags = $dom->getElementsByTagName('a');
+	$loggedin = 0;
+
+	for ($i = 0; $i < $tags->length; $i++) {
+		$grab = $tags->item($i);
+
+		foreach ($grab->attributes as $attr) {
+			if ($attr->value == './logout.php') {
+				$loggedin = 1;
+			}
+		}
+	}
+
+	if ($loggedin) {
+		if ($action == 'GetLineType') {
+			$ResesllerId = '';
+			$alreadysaved = $post_data['savedlineis'];
+			curl_setopt($ch, CURLOPT_URL, $adminurl . $request_url);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_path);
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+			$user_details_html = curl_exec($ch);
+			$dom = new DOMDocument();
+			@$dom->loadHTML($user_details_html);
+			$tags = $dom->getElementsByTagName('a');
+
+			if (!empty($tags)) {
+				foreach ($tags as $gettingis) {
+					$textanchor = trim($gettingis->textContent);
+
+					if (preg_match('#[0-9]#', $textanchor)) {
+						$credit = $textanchor;
+					}
+				}
+			}
+
+			$optionTags = $dom->getElementsByTagName('option');
+
+			for ($i = 0; $i < $optionTags->length; $i++) {
+				if (trim($optionTags->item($i)->nodeValue) == $admindetails['username']) {
+					$ResesllerId = $optionTags->item($i)->getAttribute('value');
+				}
+			}
+
+			$TrialSelected = ($alreadysaved == 'trial' ? 'selected=\'selected\'' : '');
+			$OfficalSelected = ($alreadysaved == 'official' ? 'selected=\'selected\'' : '');
+			$linetype = '<option value="">--</option>';
+			$linetype .= '<option value="official" ' . $OfficalSelected . '>Official Use</option>';
+			$linetype .= '<option value="trial" ' . $TrialSelected . '>Trial</option>';
+			return ['credits' => $credit, 'linetype' => $linetype, 'reseller_id' => $ResesllerId];
+		}
+		else if ($action == 'extend') {
+			if (isset($post_data['username']) && !empty($post_data['username'])) {
+				$Searchfor = 'users';
+				$usernameTosearch = $post_data['username'];
+			}
+			else if (isset($post_data['mag_address']) && !empty($post_data['mag_address'])) {
+				$Searchfor = 'mags';
+				$usernameTosearch = $post_data['mag_address'];
+			}
+
+			$message = [];
+			$nUrl = $adminurl . $request_url . '?';
+			$NewPostData = [];
+			$NewPostData['draw'] = 1;
+
+			for ($i = 0; $i <= 11; $i++) {
+				$NewPostData['columns[' . $i . '][data]'] = $i;
+				$NewPostData['columns[' . $i . '][name]'] = '';
+				$NewPostData['columns[' . $i . '][searchable]'] = 'true';
+				$NewPostData['columns[' . $i . '][orderable]'] = 'true';
+				$NewPostData['columns[' . $i . '][search][value]'] = '';
+				$NewPostData['columns[' . $i . '][search][regex]'] = '';
+			}
+
+			$NewPostData['order[0][column]'] = 0;
+			$NewPostData['order[0][dir]'] = 'desc';
+			$NewPostData['start'] = 0;
+			$NewPostData['length'] = 25;
+			$NewPostData['search[value]'] = $usernameTosearch;
+			$NewPostData['search[regex]'] = 'false';
+			$NewPostData['id'] = $Searchfor;
+			$NewPostData['filter'] = '';
+			$NewPostData['reseller'] = '';
+			$NewPostData['_'] = WSxtreamUI_milliseconds();
+			$FinalData = $nUrl . http_build_query($NewPostData);
+			curl_setopt($ch, CURLOPT_URL, $FinalData);
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $NewPostData);
+			curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_path);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+			$checkresponse = curl_exec($ch);
+			$ara = json_decode($checkresponse, true);
+			$userid = '';
+			if (isset($ara['data'][0][0]) && !empty($ara['data'][0][0])) {
+				$userid = $ara['data'][0][0];
+				$PrevioudNextDueDate = $ara['data'][0][7];
+			}
+			if (($userid == '') || !is_numeric($userid)) {
+				if (isset($ara['data']) && !empty($ara['data'])) {
+					foreach ($ara['data'] as $newarray) {
+						foreach ($newarray as $record) {
+							preg_match('/href=["\']?([^"\'>]+)["\']?/', $record, $match);
+						}
+					}
+				}
+
+				$info = parse_url($match[1]);
+				parse_str($info['query'], $values);
+				$userid = (isset($values['id']) && !empty($values['id']) ? $values['id'] : '');
+			}
+
+			if ($userid != '') {
+				$editlineline = $adminurl . 'user_reseller.php?id=' . $userid;
+				$post_data['edit'] = $userid;
+				$message = [];
+				curl_setopt($ch, CURLOPT_URL, $editlineline);
+				curl_setopt($ch, CURLOPT_POST, 1);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+				curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_path);
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+				curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+				$adduserfun = curl_exec($ch);
+				$FinalData = $FinalData;
+				curl_setopt($ch, CURLOPT_URL, $FinalData);
+				curl_setopt($ch, CURLOPT_POST, 1);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $NewPostData);
+				curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_path);
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+				curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+				$checkresponse = curl_exec($ch);
+				$ara2 = json_decode($checkresponse, true);
+				if (isset($ara2['data'][0][0]) && !empty($ara2['data'][0][0])) {
+					$userid = $ara2['data'][0][0];
+					$newDateis = $ara2['data'][0][7];
+					$old_date = strtotime($PrevioudNextDueDate);
+					$new_date = strtotime($newDateis);
+
+					if ($old_date < $new_date) {
+						$message['status'] = 'success';
+						$message['response'] = 'Line extended Successfully';
+						return $message;
+					}
+
+					$message['status'] = 'error';
+					$message['response'] = 'Unable Line extended';
+					return $message;
+				}
+
+				$message['status'] = 'error';
+				$message['response'] = 'Something Went Wrong';
+				return $message;
+			}
+
+			return 'Something went wrong..';
+		}
+		else {
+			if ($action == 'packages') {
+				$packages = [];
+				curl_setopt($ch, CURLOPT_URL, $adminurl . $request_url);
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+				curl_setopt($ch, CURLOPT_POST, 1);
+				curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_path);
+				curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+				$user_details_html = curl_exec($ch);
+				$dom = new DOMDocument();
+				@$dom->loadHTML($user_details_html);
+				$select = $dom->getElementsByTagName('select');
+
+				for ($i = 0; $i < $select->length; $i++) {
+					$selectgrab = $select->item($i);
+
+					if ($selectgrab->getAttribute('name') == 'package') {
+						$optionTags = $selectgrab->getElementsByTagName('option');
+
+						if (0 < $optionTags->length) {
+							for ($i = 0; $i < $optionTags->length; $i++) {
+								if (trim($optionTags->item($i)->nodeValue) != $admindetails['username']) {
+									$packages[$optionTags->item($i)->getAttribute('value')] = $optionTags->item($i)->nodeValue;
+								}
+							}
+
+							continue;
+						}
+
+						$packages = '';
+					}
+				}
+
+				return $packages;
+			}
+
+			if ($action == 'add_user') {
+				if (true) {
+					$Searchfor = (isset($post_data['mac_address_mag']) ? 'mags' : 'users');
+					$toSearchNow = (isset($post_data['mac_address_mag']) ? $post_data['mac_address_mag'] : $UsernameToCheck);
+					$message = [];
+					$nUrl = $adminurl . 'table_search.php?';
+					$NewPostData = [];
+					$NewPostData['draw'] = 1;
+
+					for ($i = 0; $i <= 11; $i++) {
+						$NewPostData['columns[' . $i . '][data]'] = $i;
+						$NewPostData['columns[' . $i . '][name]'] = '';
+						$NewPostData['columns[' . $i . '][searchable]'] = 'true';
+						$NewPostData['columns[' . $i . '][orderable]'] = 'true';
+						$NewPostData['columns[' . $i . '][search][value]'] = '';
+						$NewPostData['columns[' . $i . '][search][regex]'] = '';
+					}
+
+					$NewPostData['order[0][column]'] = 0;
+					$NewPostData['order[0][dir]'] = 'desc';
+					$NewPostData['start'] = 0;
+					$NewPostData['length'] = 25;
+					$NewPostData['search[value]'] = $toSearchNow;
+					$NewPostData['search[regex]'] = 'false';
+					$NewPostData['id'] = $Searchfor;
+					$NewPostData['filter'] = '';
+					$NewPostData['reseller'] = '';
+					$NewPostData['_'] = WSxtreamUI_milliseconds();
+					$FinalData = $nUrl . http_build_query($NewPostData);
+					curl_setopt($ch, CURLOPT_URL, $FinalData);
+					curl_setopt($ch, CURLOPT_POST, 1);
+					curl_setopt($ch, CURLOPT_POSTFIELDS, $NewPostData);
+					curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_path);
+					curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+					curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+					$checkresponse = curl_exec($ch);
+					$ara = json_decode($checkresponse, true);
+					$userid = '';
+					if (isset($ara['data'][0][0]) && !empty($ara['data'][0][0])) {
+						$message['status'] = 'error';
+						$message['response'] = 'Username already in use..';
+
+						if ($Searchfor == 'mags') {
+							$message['response'] = 'MAC address already in use..';
+						}
+
+						return $message;
+					}
+				}
+
+				$checkusername = (isset($post_data['username']) ? $post_data['username'] : '');
+				$checkpass = (isset($post_data['password']) ? $post_data['password'] : '');
+				$mac_address_magch = (isset($post_data['mac_address_mag']) ? $post_data['mac_address_mag'] : '');
+				$message = [];
+				curl_setopt($ch, CURLOPT_URL, $adminurl . $request_url);
+				curl_setopt($ch, CURLOPT_POST, 1);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+				curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_path);
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+				curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+				$adduserfun = curl_exec($ch);
+				$dom = new DOMDocument();
+				@$dom->loadHTML($adduserfun);
+				$xpath = new DOMXpath($dom);
+				$result = $xpath->query('//div[contains(@class, "alert-success")]');
+
+				for ($i = 0; $i < $result->length; $i++) {
+					$message['status'] = 'success';
+					$message['response'] = trim(strip_tags($result->item($i)->nodeValue));
+				}
+
+				if ($checkusername != '') {
+					$usernameTosearch = $checkusername;
+				}
+				else {
+					$usernameTosearch = $post_data['reseller_notes'];
+				}
+
+				$Searchfor = 'users';
+
+				if ($mac_address_magch != '') {
+					$usernameTosearch = $mac_address_magch;
+					$Searchfor = 'mags';
+				}
+
+				$message = [];
+				$nUrl = $adminurl . 'table_search.php?';
+				$NewPostData = [];
+				$NewPostData['draw'] = 1;
+
+				for ($i = 0; $i <= 11; $i++) {
+					$NewPostData['columns[' . $i . '][data]'] = $i;
+					$NewPostData['columns[' . $i . '][name]'] = '';
+					$NewPostData['columns[' . $i . '][searchable]'] = 'true';
+					$NewPostData['columns[' . $i . '][orderable]'] = 'true';
+					$NewPostData['columns[' . $i . '][search][value]'] = '';
+					$NewPostData['columns[' . $i . '][search][regex]'] = '';
+				}
+
+				$NewPostData['order[0][column]'] = 0;
+				$NewPostData['order[0][dir]'] = 'desc';
+				$NewPostData['start'] = 0;
+				$NewPostData['length'] = 25;
+				$NewPostData['search[value]'] = $usernameTosearch;
+				$NewPostData['search[regex]'] = 'false';
+				$NewPostData['id'] = $Searchfor;
+				$NewPostData['filter'] = '';
+				$NewPostData['reseller'] = '';
+				$NewPostData['_'] = WSxtreamUI_milliseconds();
+				$FinalData = $nUrl . http_build_query($NewPostData);
+				curl_setopt($ch, CURLOPT_URL, $FinalData);
+				curl_setopt($ch, CURLOPT_POST, 1);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $NewPostData);
+				curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_path);
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+				curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+				$checkresponse = curl_exec($ch);
+				$ara = json_decode($checkresponse, true);
+				$userid = '';
+				if (isset($ara['data'][0][0]) && !empty($ara['data'][0][0])) {
+					$message['status'] = 'success';
+					$message['response'] = 'User created Successfully';
+
+					if ($mac_address_magch == '') {
+						$message['password'] = $ara['data'][0][2];
+						$message['username'] = $ara['data'][0][1];
+					}
+
+					return $message;
+				}
+
+				$message['status'] = 'error';
+				$message['response'] = 'something went wrong';
+				$message['fail_reason'] = 'Please check product configuration';
+				return $message;
+			}
+			if (($action == 'disable') || ($action == 'enable') || ($action == 'delete')) {
+				if (isset($post_data['username']) && !empty($post_data['username'])) {
+					$Searchfor = 'users';
+					$usernameTosearch = $post_data['username'];
+				}
+				else if (isset($post_data['mag_address']) && !empty($post_data['mag_address'])) {
+					$Searchfor = 'mags';
+					$usernameTosearch = $post_data['mag_address'];
+				}
+
+				$message = [];
+				$nUrl = $adminurl . $request_url . '?';
+				$NewPostData = [];
+				$NewPostData['draw'] = 1;
+
+				for ($i = 0; $i <= 11; $i++) {
+					$NewPostData['columns[' . $i . '][data]'] = $i;
+					$NewPostData['columns[' . $i . '][name]'] = '';
+					$NewPostData['columns[' . $i . '][searchable]'] = 'true';
+					$NewPostData['columns[' . $i . '][orderable]'] = 'true';
+					$NewPostData['columns[' . $i . '][search][value]'] = '';
+					$NewPostData['columns[' . $i . '][search][regex]'] = '';
+				}
+
+				$NewPostData['order[0][column]'] = 0;
+				$NewPostData['order[0][dir]'] = 'desc';
+				$NewPostData['start'] = 0;
+				$NewPostData['length'] = 25;
+				$NewPostData['search[value]'] = $usernameTosearch;
+				$NewPostData['search[regex]'] = 'false';
+				$NewPostData['id'] = $Searchfor;
+				$NewPostData['filter'] = '';
+				$NewPostData['reseller'] = '';
+				$NewPostData['_'] = WSxtreamUI_milliseconds();
+				$FinalData = $nUrl . http_build_query($NewPostData);
+				curl_setopt($ch, CURLOPT_URL, $FinalData);
+				curl_setopt($ch, CURLOPT_POST, 1);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $NewPostData);
+				curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_path);
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+				curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+				$checkresponse = curl_exec($ch);
+				$ara = json_decode($checkresponse, true);
+				$userid = '';
+				if (isset($ara['data'][0][0]) && !empty($ara['data'][0][0])) {
+					$userid = $ara['data'][0][0];
+				}
+				if (($userid == '') || !is_numeric($userid)) {
+					if (isset($ara['data']) && !empty($ara['data'])) {
+						foreach ($ara['data'] as $newarray) {
+							foreach ($newarray as $record) {
+								preg_match('/href=["\']?([^"\'>]+)["\']?/', $record, $match);
+							}
+						}
+					}
+
+					$info = parse_url($match[1]);
+					parse_str($info['query'], $values);
+					$userid = (isset($values['id']) && !empty($values['id']) ? $values['id'] : '');
+				}
+
+				$linktarget = $action;
+				$lastrequest = $adminurl . 'api.php?action=user&sub=' . $linktarget . '&user_id=' . $userid;
+				curl_setopt($ch, CURLOPT_URL, $lastrequest);
+				curl_setopt($ch, CURLOPT_POST, 1);
+				curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_path);
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+				curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+				$checkresponse = curl_exec($ch);
+				$lastara = json_decode($checkresponse, true);
+				if (isset($lastara['result']) && ($lastara['result'] == 1)) {
+					$message['status'] = 'success';
+					$message['response'] = 'Opertation Successfully Completed';
+					return $message;
+				}
+
+				$message['status'] = 'error';
+				$message['response'] = 'Something went wrong';
+				return $message;
+			}
+		}
+	}
+}
+
+function xtreamUIRandomString($length)
+{
+	$key = '';
+	$keys = array_merge(range(0, 9), range('a', 'z'));
+
+	for ($i = 0; $i < $length; $i++) {
+		$key .= $keys[array_rand($keys)];
+	}
+
+	return $key;
+}
+
+function xtreamUIpanel_ClientArea(array $params)
+{
+	$checkcaptcha = (isset($params['configoption15']) ? $params['configoption15'] : '');
+	$checkcaptcha = '';
+	$selectedtrail = $selectedoffical = '';
+
+	if ($checkcaptcha == 'on') {
+		$adminlink = (isset($params['configoption9']) ? $params['configoption9'] : '');
+		$bar = '/';
+
+		if (substr($adminlink, -1) == '/') {
+			$bar = '';
+		}
+
+		$adminlink = $adminlink . $bar;
+		$URL = $adminlink . 'index.php';
+		$cookie_path = dirname(__FILE__) . '/cookie.txt';
+		$ch = curl_init($URL);
+		curl_setopt($ch, CURLOPT_URL, $URL);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_path);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+		$ret1 = curl_exec($ch);
+		$dom = new DOMDocument();
+		@$dom->loadHTML($ret1);
+		$tags = $dom->getElementsByTagName('div');
+
+		for ($i = 0; $i < $tags->length; $i++) {
+			$grab = $tags->item($i);
+
+			if ($grab->hasAttribute('data-sitekey')) {
+				$sitekey = $grab->getAttribute('data-sitekey');
+				break;
+			}
+		}
+	}
+
+	$portal_url = $params['configoption12'];
+	$response = '';
+	$access_outputdata = [];
+	$xtreamConfig = Illuminate\Database\Capsule\Manager::table('mod_xtreamUIdashboardconfig')->get();
+	$returndata = [];
+	if (isset($xtreamConfig) && !empty($xtreamConfig)) {
+		foreach ($xtreamConfig as $config) {
+			$returndata[$config->setting] = $config->value;
+		}
+	}
+
+	$removecustomfields = [$returndata['custom_field_mag'], 'Username', 'Password'];
+	$customfieldfrontend = $params['customfields'];
+
+	foreach ($removecustomfields as $removefield) {
+		unset($customfieldfrontend[$removefield]);
+	}
+
+	$requestedAction = (isset($_REQUEST['customAction']) ? $_REQUEST['customAction'] : '');
+
+	if ($requestedAction == 'changeMAG') {
+		$_SESSION['recaptcha'] = $_POST['g-recaptcha-custom'];
+		$response = xtreamUIpanel_ChangeMAG($params, $_POST['newMAC']);
+
+		if ($response == 'success') {
+			$magdata = $_POST['newMAC'];
+			$result = $returndata['mac_change_success'];
+		}
+		else {
+			$result = $returndata['mac_error'];
+		}
+	}
+
+	$checkallinvoice = xtreamUIRCheckAllInvoicePaid($params['serviceid']);
+	$TotalINvoices = (isset($checkallinvoice['totalinvoices']) ? $checkallinvoice['totalinvoices'] : '');
+	$checkallinvoice = (isset($checkallinvoice['lastinvoicestatus']) ? $checkallinvoice['lastinvoicestatus'] : '');
+	$refreshandrenew = '0';
+
+	if (1 < $TotalINvoices) {
+		$refreshandrenew = '1';
+	}
+
+	$showrefreshbtn = 'no';
+	if (($checkallinvoice == 'Paid') || empty($checkallinvoice)) {
+		$showrefreshbtn = 'yes';
+	}
+
+	if ($params['status'] == 'Terminated') {
+		$showrefreshbtn = 'no';
+	}
+
+	if ($requestedAction == 'refreshservice') {
+		if (($checkallinvoice == 'Paid') || empty($checkallinvoice)) {
+			$_SESSION['recaptcha'] = $_POST['g-recaptcha-response'];
+			$response = xtreamuipanel_createaccount($params);
+
+			if ($response == 'success') {
+				$ServiceID = $_POST['id'];
+				Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', $ServiceID)->update(['domainstatus' => 'Active']);
+				$HostingData = Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', $ServiceID)->get();
+
+				if (!empty($HostingData)) {
+					$OrderID = $HostingData[0]->orderid;
+					Illuminate\Database\Capsule\Manager::table('tblorders')->where('id', $OrderID)->update(['status' => 'Active']);
+				}
+
+				$command = 'SendEmail';
+				$postData = [
+					'messagename' => 'IPTV Service Details',
+					'id'          => $params['serviceid'],
+					'customvars'  => ['portal_url' => $portal_url, 'service_server_hostname' => $portal_url]
+				];
+				$results = localAPI($command, $postData, '');
+				echo '<script>window.location.href = \'clientarea.php?action=productdetails&id=' . $ServiceID . '&refreshservice=true\';</script>';
+			}
+			else {
+				$response = 'error';
+				$result = 'Error! Please connect Support';
+			}
+		}
+		else {
+			$response = 'error';
+			$result = 'Error! Please check Your Invoice is Unpaid';
+		}
+	}
+
+	if ($requestedAction == 'renewservice') {
+		if (($checkallinvoice == 'Paid') || empty($checkallinvoice)) {
+			$_SESSION['recaptcha'] = $_POST['g-recaptcha-response'];
+			$response = xtreamuipanel_renew($params);
+
+			if ($response == 'success') {
+				$ServiceID = $_POST['id'];
+				Illuminate\Database\Capsule\Manager::table('tblhosting')->where('id', $ServiceID)->update(['domainstatus' => 'Active']);
+				$command = 'SendEmail';
+				$postData = [
+					'messagename' => 'IPTV Service Details',
+					'id'          => $params['serviceid'],
+					'customvars'  => ['portal_url' => $portal_url]
+				];
+				$results = localAPI($command, $postData, '');
+				echo '<script>window.location.href = \'clientarea.php?action=productdetails&id=' . $ServiceID . '&refreshservice=true\';</script>';
+			}
+			else {
+				$response = 'error';
+				$result = 'Error! Please connect Support';
+			}
+		}
+		else {
+			$response = 'error';
+			$result = 'Error! Please check Your Invoice is Unpaid';
+		}
+	}
+	if (isset($_GET['refreshservice']) && ($_GET['refreshservice'] == 'true')) {
+		$response = 'success';
+		$result = 'Service Active Successfully!';
+	}
+
+	if ($params['configoption2'] == 'magdevice') {
+		$responsedata = xtreamUIResellerMAGDevice($params, $returndata, $response, $result);
+		$templateFile = $responsedata['templateFile'];
+		$variabledata = $responsedata['variabledata'];
+		$variabledata['showrefreshbtn'] = $showrefreshbtn;
+		$variabledata['checkcaptcha'] = $checkcaptcha;
+		$variabledata['sitekey'] = $sitekey;
+	}
+	else if ($params['configoption2'] == 'streamlineonly') {
+		$otherdevicesconfig = ($params['configoption8'] == 'on' ? 'on' : '');
+
+		if ($requestedAction == 'manage') {
+			$access_outputdata = ['HLS' => 'm3u8', 'MPEGTS - Default' => 'ts', 'RTMP' => 'rtmp'];
+			$templateFile = 'templates/manage.tpl';
+		}
+		else {
+			$templateFile = 'templates/overview.tpl';
+		}
+		$variabledata = ['iptv_username' => $params['username'], 'iptv_password' => $params['password'], 'ServerHostName' => $portal_url, 'response' => $response, 'message' => isset($result) && !empty($result) ? $result : $response, 'lang' => $returndata, 'otherdevicesconfig' => $otherdevicesconfig, 'm3ulink' => $params['configoption5'], 'watchstream' => $params['configoption6'], 'mag_portal' => $params['configoption7'], 'usefulErrorHelper' => isset($error) && !empty($error) ? $error : '', 'accessoutput' => $access_outputdata, 'outputfirst' => 'ts', 'm3ulinkoutput' => 'ts', 'sitekey' => $sitekey, 'status' => $params['status'], 'showrefreshbtn' => $showrefreshbtn, 'refreshandrenew' => $refreshandrenew, 'checkcaptcha' => $checkcaptcha];
+	}
+
+	if ($params['configoption2'] == 'reselleraccount') {
+		if ($requestedAction == 'manage') {
+			$serviceId = $params['serviceid'];
+			$username = $params['username'];
+			$password = $params['password'];
+			$resellerPanel = $params['configoption9'];
+			$group = $params['templatevars']['groupname'];
+			$name = $params['templatevars']['product'];
+			$templateFile = 'templates/managereseller.tpl';
+			$returndata = $params['clientsdetails']['language'];
+		}
+		else {
+			$templateFile = 'templates/overviewreseller.tpl';
+		}
+
+		$variabledata = ['groupname' => $group, 'product' => $name, 'iptv_username' => $params['username'], 'iptv_password' => $params['password'], 'resellerPanelURL' => $resellerPanel, 'lang' => $returndata, 'reseller_credits' => $reseller_credits];
+	}
+
+	try {
+		return ['tabOverviewReplacementTemplate' => $templateFile, 'templateVariables' => $variabledata];
+	}
+	catch (Exception $e) {
+		logModuleCall('xtreamCode', __FUNCTION__, $params, $e->getMessage(), $e->getTraceAsString());
+		return [
+			'tabOverviewReplacementTemplate' => 'error.tpl',
+			'templateVariables'              => ['usefulErrorHelper' => $e->getMessage()]
+		];
+	}
+}
+
+function xtreamUIpanel_generate_ran($length = 9, $add_dashes = false, $available_sets = 'lud')
+{
+	$sets = [];
+
+	if (strpos($available_sets, 'l') !== false) {
+		$sets[] = 'abcdefghjkmnpqrstuvwxyz';
+	}
+
+	if (strpos($available_sets, 'u') !== false) {
+		$sets[] = 'ABCDEFGHJKMNPQRSTUVWXYZ';
+	}
+
+	if (strpos($available_sets, 'd') !== false) {
+		$sets[] = '23456789';
+	}
+
+	$all = '';
+	$password = '';
+
+	foreach ($sets as $set) {
+		$password .= $set[array_rand(str_split($set))];
+		$all .= $set;
+	}
+
+	$all = str_split($all);
+
+	for ($i = 0; $i < ($length - count($sets)); $i++) {
+		$password .= $all[array_rand($all)];
+	}
+
+	$password = str_shuffle($password);
+
+	if (!$add_dashes) {
+		return $password;
+	}
+
+	$dash_len = floor(sqrt($length));
+	$dash_str = '';
+
+	while ($dash_len < strlen($password)) {
+		$dash_str .= substr($password, 0, $dash_len) . '-';
+		$password = substr($password, $dash_len);
+	}
+
+	$dash_str .= $password;
+	return $dash_str;
+}
+
+function xtreamUIResellerMAGDevice($params, $returndata, $response, $result)
+{
+	$portal_url = $params['configoption12'];
+	$responsedata['variabledata'] = ['usefulErrorHelper' => 'User Not found!<br /> ' . "\r\n\r\n\r\n\r\n" . '<br />' . "\r\n\r\n\r\n\r\n" . 'Raise a Ticket if you this unexpected error - <a href=\'/submitticket.php\' style=\'text-decoration: underline;\'>Raise a Ticket</a>' . "\r\n\r\n\r\n\r\n" . '<br /><br />' . "\r\n\r\n\r\n\r\n" . 'Your services should not be Pending or Cancelled or Terminated'];
+	$responsedata['templateFile'] = 'templates/error.tpl';
+
+	if (!empty($params['customfields'][$returndata['custom_field_mag']])) {
+		$fieldid = Illuminate\Database\Capsule\Manager::table('tblcustomfields')->where('fieldname', $returndata['custom_field_mag'])->where('type', 'product')->where('relid', $params['packageid'])->get();
+		if (isset($fieldid) && !empty($fieldid)) {
+			$checkExists = Illuminate\Database\Capsule\Manager::table('tblcustomfieldsvalues')->where('relid', $params['serviceid'])->where('fieldid', $fieldid[0]->id)->get();
+			if (isset($checkExists) && !empty($checkExists)) {
+				$magdata = $checkExists[0]->value;
+			}
+		}
+		$magdevice = (isset($magdata) && !empty($magdata) ? $magdata : $params['customfields'][$returndata['custom_field_mag']]);
+		$responsedata['templateFile'] = 'templates/magtemplateSingle.tpl';
+		$responsedata['variabledata'] = ['ServerHostName' => $portal_url, 'mag' => $magdevice, 'response' => $response, 'message' => isset($result) && !empty($result) ? $result : $response, 'lang' => $returndata, 'engma' => 'no', 'mag_portal' => $params['configoption7'], 'status' => $params['status']];
+		return $responsedata;
+	}
+}
+
+function WSxtreamUIResellerCheckLicenseByKey()
+{
+	$result = Illuminate\Database\Capsule\Manager::table('tbladdonmodules')->where('module', '=', 'xtreamUIdashboard')->get();
+
+	foreach ($result as $row) {
+		$settings[$row->setting] = $row->value;
+	}
+
+	if ($settings['license']) {
+		$localkey = $settings['localkey'];
+		$result = WSxtreamUIResellerCheckLicense($settings['license'], $localkey);
+		$result['licensekey'] = $settings['license'];
+	}
+	else {
+		$result['status'] = 'licensekeynotfound';
+	}
+
+	return $result;
+}
+
+function WSxtreamUIResellerCheckLicense($licensekey, $localkey = '')
+{
+	$whmcsurl = '';
+	$licensing_secret_key = 'resellerpanel';
+	$localkeydays = 14;
+	$allowcheckfaildays = 5;
+	$check_token = time() . md5(mt_rand(1000000000, 9999999999.0) . $licensekey);
+	$checkdate = date('Ymdhis');
+	if (!isset($_SERVER['SERVER_NAME']) && empty($_SERVER['SERVER_NAME'])) {
+		$results['status'] = 'Active';
+		return $results;
+	}
+
+	$domain = $_SERVER['SERVER_NAME'];
+	$usersip = (isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : $_SERVER['LOCAL_ADDR']);
+	$dirpath = dirname(dirname(__DIR__)) . '/addons/xtreamUIdashboard';
+	$verifyfilepath = 'modules/servers/licensing/verify1.php';
+	$localkeyvalid = false;
+
+	if ($localkey) {
+		$localkey = str_replace("\n", '', $localkey);
+		$localdata = substr($localkey, 0, strlen($localkey) - 32);
+		$md5hash = substr($localkey, strlen($localkey) - 32);
+
+		if ($md5hash == md5($localdata . $licensing_secret_key)) {
+			$localdata = strrev($localdata);
+			$md5hash = substr($localdata, 0, 32);
+			$localdata = substr($localdata, 32);
+			$localdata = base64_decode($localdata);
+			$localkeyresults = unserialize($localdata);
+			$originalcheckdate = $localkeyresults['checkdate'];
+
+			if ($md5hash == md5($originalcheckdate . $licensing_secret_key)) {
+				$localexpiry = date('Ymdhis', mktime(date('h'), date('i'), date('s'), date('m'), date('d') - $localkeydays, date('Y')));
+
+				if ($localexpiry < $originalcheckdate) {
+					$localkeyvalid = true;
+					$results = $localkeyresults;
+					$validdomains = explode(',', $results['validdomain']);
+
+					if (!in_array($_SERVER['SERVER_NAME'], $validdomains)) {
+						$localkeyvalid = false;
+						$localkeyresults['status'] = 'Invalid';
+						$results = [];
+					}
+
+					$validips = explode(',', $results['validip']);
+
+					if (!in_array($usersip, $validips)) {
+						$localkeyvalid = false;
+						$localkeyresults['status'] = 'Invalid';
+						$results = [];
+					}
+
+					$validdirs = explode(',', $results['validdirectory']);
+
+					if (!in_array($dirpath, $validdirs)) {
+						$localkeyvalid = false;
+						$localkeyresults['status'] = 'Invalid';
+						$results = [];
+					}
+				}
+			}
+		}
+	}
+
+	if (!$localkeyvalid) {
+		$responseCode = 0;
+		$postfields = ['licensekey' => $licensekey, 'domain' => $domain, 'ip' => $usersip, 'dir' => $dirpath];
+
+		if ($check_token) {
+			$postfields['check_token'] = $check_token;
+		}
+
+		$query_string = '';
+
+		foreach ($postfields as $k => $v) {
+			$query_string .= $k . '=' . urlencode($v) . '&';
+		}
+
+		if (function_exists('curl_exec')) {
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $whmcsurl . $verifyfilepath);
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $query_string);
+			curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_USERAGENT, 'AtoZ');
+			$data = curl_exec($ch);
+			$responseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			curl_close($ch);
+		}
+		else {
+			$responseCodePattern = '/^HTTP\\/\\d+\\.\\d+\\s+(\\d+)/';
+			$fp = @fsockopen($whmcsurl, 80, $errno, $errstr, 5);
+
+			if ($fp) {
+				$newlinefeed = "\r\n";
+				$header = 'POST ' . $whmcsurl . $verifyfilepath . ' HTTP/1.0' . $newlinefeed;
+				$header .= 'Host: ' . $whmcsurl . $newlinefeed;
+				$header .= 'Content-type: application/x-www-form-urlencoded' . $newlinefeed;
+				$header .= 'Content-length: ' . @strlen($query_string) . $newlinefeed;
+				$header .= 'Connection: close' . $newlinefeed . $newlinefeed;
+				$header .= $query_string;
+				$data = $line = '';
+				@stream_set_timeout($fp, 20);
+				@fputs($fp, $header);
+				$status = @socket_get_status($fp);
+
+				while (!@feof($fp) && $status) {
+					$line = @fgets($fp, 1024);
+					$patternMatches = [];
+					if (!$responseCode && preg_match($responseCodePattern, trim($line), $patternMatches)) {
+						$responseCode = (empty($patternMatches[1]) ? 0 : $patternMatches[1]);
+					}
+
+					$data .= $line;
+					$status = @socket_get_status($fp);
+				}
+
+				@fclose($fp);
+			}
+		}
+
+		if ($responseCode != 200) {
+			$localexpiry = date('Ymdhis', mktime(date('h'), date('i'), date('s'), date('m'), date('d') - ($localkeydays + $allowcheckfaildays), date('Y')));
+
+			if ($localexpiry < $originalcheckdate) {
+				$results = $localkeyresults;
+			}
+			else {
+				$results = [];
+				$results['status'] = 'Invalid';
+				$results['description'] = 'Remote Check Failed';
+				return $results;
+			}
+		}
+		else {
+			preg_match_all('/<(.*?)>([^<]+)<\\/\\1>/i', $data, $matches);
+			$results = [];
+
+			foreach ($matches[1] as $k => $v) {
+				$results[$v] = $matches[2][$k];
+			}
+		}
+
+		if (!is_array($results)) {
+			exit('Invalid License Server Response');
+		}
+		if ($results['md5hash'] && ($results['md5hash'] != md5($licensing_secret_key . $check_token))) {
+			$results['status'] = 'Invalid';
+			$results['description'] = 'MD5 Checksum Verification Failed';
+			return $results;
+		}
+
+		if ($results['status'] == 'Active') {
+			$results['checkdate'] = $checkdate;
+			$data_encoded = serialize($results);
+			$data_encoded = base64_encode($data_encoded);
+			$data_encoded = md5($checkdate . $licensing_secret_key) . $data_encoded;
+			$data_encoded = strrev($data_encoded);
+			$data_encoded = $data_encoded . md5($data_encoded . $licensing_secret_key);
+			$data_encoded = wordwrap($data_encoded, 80, "\n", true);
+			$results['localkey'] = $data_encoded;
+		}
+
+		$results['remotecheck'] = true;
+	}
+
+	unset($postfields, $data, $matches, $whmcsurl, $licensing_secret_key, $checkdate, $usersip, $localkeydays, $allowcheckfaildays, $md5hash);
+	return $results;
+}
+
+function xtreamUIRXtreamCode_whmcsadmin()
+{
+	$whmcsadmin = Illuminate\Database\Capsule\Manager::table('tbladmins')->where('id', '1')->get();
+	return $whmcsadmin[0]->username;
+}
+
+function XtreamxtreamUIResellerIpAdress2()
+{
+	$ipaddress = '';
+
+	if (getenv('HTTP_CLIENT_IP')) {
+		$ipaddress = getenv('HTTP_CLIENT_IP');
+	}
+	else if (getenv('HTTP_X_FORWARDED_FOR')) {
+		$ipaddress = getenv('HTTP_X_FORWARDED_FOR');
+	}
+	else if (getenv('HTTP_X_FORWARDED')) {
+		$ipaddress = getenv('HTTP_X_FORWARDED');
+	}
+	else if (getenv('HTTP_FORWARDED_FOR')) {
+		$ipaddress = getenv('HTTP_FORWARDED_FOR');
+	}
+	else if (getenv('HTTP_FORWARDED')) {
+		$ipaddress = getenv('HTTP_FORWARDED');
+	}
+	else if (getenv('REMOTE_ADDR')) {
+		$ipaddress = getenv('REMOTE_ADDR');
+	}
+	else {
+		$ipaddress = 'UNKNOWN';
+	}
+
+	return $ipaddress;
+}
+
+function xtreamUIRCheckAllInvoicePaid($serviceid)
+{
+	$returnData = [];
+	$hosting = Illuminate\Database\Capsule\Manager::table('tblhosting')->join('tblinvoiceitems', 'tblinvoiceitems.relid', '=', 'tblhosting.id')->join('tblinvoices', 'tblinvoices.id', '=', 'tblinvoiceitems.invoiceid')->select('tblinvoices.status', 'tblinvoices.id as invoiceid')->orderBy('tblinvoices.id', 'DESC')->where('tblhosting.id', $serviceid)->where('tblinvoiceitems.type', 'Hosting')->get();
+	$returnData = ['lastinvoicestatus' => $hosting[0]->status, 'totalinvoices' => count($hosting)];
+	return $returnData;
+}
+
+function WSxtreamUI_milliseconds()
+{
+	$mt = explode(' ', microtime());
+	return ((int) $mt[1] * 1000) + (int) round($mt[0] * 1000);
+}
+
+if (!defined('WHMCS')) {
+	exit('This file cannot be accessed directly');
+}
+
+require_once 'hooks.php';
+
+?>

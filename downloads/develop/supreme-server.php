@@ -1,0 +1,29 @@
+<?php
+
+use WHMCS\ClientArea;
+use WHMCS\Database\Capsule;
+
+define('CLIENTAREA', true);
+
+require __DIR__ . '/init.php';
+
+$ca = new ClientArea();
+
+$ca->setPageTitle('Supreme IPTV Server');
+
+$ca->addToBreadCrumb('index.php', Lang::trans('globalsystemname'));
+$ca->addToBreadCrumb('supreme-server.php', 'Supreme Server');
+
+$ca->initPage();
+
+//$ca->requireLogin(); // Uncomment this line to require a login to access this page
+
+// To assign variables to the template system use the following syntax.
+// These can then be referenced using {$variablename} in the template.
+
+//$ca->assign('variablename', $value);
+
+
+$ca->setTemplate('supreme-server');
+
+$ca->output();

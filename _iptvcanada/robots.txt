@@ -1,0 +1,18 @@
+#iptvcanada
+User-agent: *
+Disallow: /portfolio
+Disallow: /becoming-a-successful-iptv-reseller-in-the-usa
+Disallow: /getting-started-with-iptv-reselling-the-power-of-free-trials
+Disallow: /the-expressway-to-success-becoming-an-iptv-express-reseller
+Disallow: /reseller-hosting-for-iptv-empowering-entrepreneurs-in-the-streaming-industry
+Disallow: /channel-list.php
+Disallow: /dmca-policy
+Disallow: /refund-policy
+Disallow: /privacy-policy
+Disallow: /terms-and-conditions
+Disallow: /affiliates-program.php
+Disallow: /*webtv.tel/
+Disallow: /index.php?rp=/login
+Disallow: /index.php/download
+Disallow: /supporttickets.php
+Disallow: /index.php?rp=/knowledgebase

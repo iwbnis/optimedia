@@ -1,0 +1,36 @@
+<?php 
+$lang['first_name_is_required'] = 'पहला नाम आवश्यक है';
+$lang['first_name'] = 'प्रथम नाम';
+$lang['last_name_is_required'] = 'अंतिम नाम आवश्यक है';
+$lang['last_name'] = 'कुलनाम';
+$lang['username_is_required'] = 'उपयोगकर्ता नाम की आवश्यकता है';
+$lang['username'] = 'उपयोगकर्ता नाम';
+$lang['valid_email_is_required'] = 'वैध ईमेल की आवश्यकता है: ex@abc.xyz';
+$lang['email'] = 'ईमेल';
+$lang['password_is_required'] = 'पासवर्ड की आवश्यकता है';
+$lang['repeat_password_is_required'] = 'रिपीट पासवर्ड की आवश्यकता है';
+$lang['repeat_password'] = 'पासवर्ड दोहराएं';
+$lang['address_is_required'] = 'पता आवश्यक है';
+$lang['address'] = 'पता';
+$lang['country_is_required'] = 'देश की आवश्यकता है';
+$lang['country'] = 'देश';
+$lang['state_is_required'] = 'राज्य की आवश्यकता है';
+$lang['state'] = 'राज्य';
+$lang['paypal_email_is_required'] = 'PayPal ईमेल की आवश्यकता है';
+$lang['paypal_email'] = 'PayPal ईमेल';
+$lang['phone_number_is_required'] = 'फोन नंबर की आवश्यकता है';
+$lang['phone_number'] = 'फोन संख्या';
+$lang['alternate_phone_number_is_required'] = 'वैकल्पिक फोन नंबर की आवश्यकता है';
+$lang['alternate_phone_number'] = 'वैकल्पिक फोन नंबर';
+$lang['i_accept_the_terms_of_the'] = 'मैं की शर्तों को स्वीकार';
+$lang['affiliate_policy'] = 'संबद्ध नीति';
+$lang['password'] = 'पासवर्ड';
+$lang['sign_in'] = 'साइन इन करें';
+$lang['sign_up'] = 'नाम लिखो';
+$lang['forget_password'] = 'पासवर्ड भूल जाओ';
+$lang['registered_email'] = 'पंजीकृत ईमेल';
+$lang['send_mail'] = 'मेल भेजें';
+$lang['back_login'] = 'बैक लॉगिन';
+$lang['privacy_policy'] = 'गोपनीयता नीति';
+$lang['close'] = 'बंद करना';
+

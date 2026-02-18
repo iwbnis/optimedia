@@ -1,0 +1,20 @@
+<?php
+add_hook('ClientAreaHeadOutput', 1, function($vars) {
+    if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+        $invoiceId = (int) $_GET['id'];
+        $invoice = localAPI('GetInvoice', ['invoiceid' => $invoiceId]);
+        
+        if ($invoice && $invoice['status'] == 'Paid') {
+            // Output JavaScript to refresh the page after 2 seconds
+            $js = '
+                <script type="text/javascript">
+                    setTimeout(function() {
+                        location.reload(true);
+                    }, 2000);
+                </script>
+            ';
+            
+            return $js;
+        }
+    }
+});

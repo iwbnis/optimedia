@@ -1,0 +1,148 @@
+/* Fullscreen overlay for modal background */
+#active-popup-center_popup_close_btn_2_overlay {
+    background-color: rgba(52,73,94, 0.7);
+    position: fixed;
+    width: 100%;
+    height: 100% !important;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+}
+
+/* Modal container */
+#active-popup-center_popup_close_btn_2_overlay .popup {
+    display: inline-block !important;
+}
+
+#active-popup-center_popup_close_btn_2_overlay .modal-content {
+    position: relative;
+    text-align: center;
+}
+
+#active-popup-center_popup_close_btn_2_overlay .popup-window {
+    border: 1px solid rgb(221, 221, 221);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid rgb(221, 221, 221);
+    background-color:white;
+    border: none;
+}
+
+#active-popup-center_popup_close_btn_2_overlay .modal-content h1,
+#active-popup-center_popup_close_btn_2_overlay .modal-content p { color: #fff; }
+
+#active-popup-center_popup_close_btn_2_overlay .modal-content p { padding: 20% 5% 0 5%; }
+
+/* Close button */
+#active-popup-center_popup_close_btn_2_overlay .popup-close {
+
+    width: 100%;
+    text-align: center;
+    color: white;
+
+}
+
+#active-popup-center_popup_close_btn_2_overlay .popup-close button.mg-popup-close{
+
+    width: 100%;
+    height: 40px;
+    font-weight: 600;
+    border-radius: inherit;
+}
+
+#active-popup-center_popup_close_btn_2_overlay .popup-window.ready .popup-image-message {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+#active-popup-center_popup_close_btn_2_overlay .notshow-container {
+    background: #fff none repeat scroll 0 0;
+    bottom: -33px;
+    font-size: 12px;
+    left: 0;
+    padding-top: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+    width: 100%;
+    min-width: 200px;
+}
+
+#active-popup-center_popup_close_btn_2_overlay .popup-message.message {
+    background: #fff none repeat scroll 0 0;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+
+
+/* Customize the label (the container) */
+#active-popup-center_popup_close_btn_2_overlay  .notShownAgain-container {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    border-radius: 1px;
+    cursor: pointer;
+    font-size: 12px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Hide the browser's default checkbox */
+#active-popup-center_popup_close_btn_2_overlay  .notShownAgain-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* Create a custom checkbox */
+#active-popup-center_popup_close_btn_2_overlay .notShownAgain-checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 5px;
+    height: 17px;
+    width: 17px;
+    background-color: #eee;
+    border: 1px solid lightgrey;
+}
+
+/* On mouse-over, add a grey background color */
+#active-popup-center_popup_close_btn_2_overlay .notShownAgain-container:hover input ~ .notShownAgain-checkmark {
+    background-color: #ccc;
+}
+
+/* When the checkbox is checked, add a blue background */
+#active-popup-center_popup_close_btn_2_overlay .notShownAgain-container input:checked ~ .notShownAgain-checkmark {
+    background-color: #ba4545;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+#active-popup-center_popup_close_btn_2_overlay .notShownAgain-checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+/* Show the checkmark when checked */
+#active-popup-center_popup_close_btn_2_overlay .notShownAgain-container input:checked ~ .notShownAgain-checkmark:after {
+    display: block;
+}
+
+/* Style the checkmark/indicator */
+#active-popup-center_popup_close_btn_2_overlay .notShownAgain-container .notShownAgain-checkmark:after {
+    left: 5px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}

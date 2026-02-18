@@ -1,0 +1,39 @@
+{
+  "schema": "1.0",
+  "type": "whmcs-addons",
+  "name": "WHMCSGTM",
+  "license": "MIT",
+  "category": "marketing",
+  "description": {
+    "name": "Tag Manager & Enhanced Ecommerce v4.1.2",
+    "tagline": "Quick and easy integrate Google Tag Manager and GA Enhanced Ecommerce.",
+    "long": "Tag Manager & Enhanced Ecommerce provides a quick and easy way to integrate Google Tag Manager tracking and Analytics Enhanced Ecommerce into your WHMCS installation",
+    "features": [
+      "Enable all Google Analytics Enhancement Ecommerce Reports",
+      "Enable Shopping Behavior Analysis",
+      "Enable Checkout Behavior Analysis",
+      "Enable Product Performance Reports",
+      "Enable Sales Performance Reports",
+      "Enable Product List Performance Reports",
+      "Insert dozen of tracking codes without any manual coding",
+      "Online and Offline purchase tracking",
+      "Fully integration with Google Ads conversion tracking"
+    ]
+  },
+  "logo": {
+    "filename": "logo.png"
+  },
+  "support": {
+    "homepage": "https://www.mimirtech.co/google-analytics-for-whmcs",
+    "learn_more": "https://docs.mimirtech.co/whmcs-gtm",
+    "email": "support@mimirtech.co",
+    "support_url": "https://manage.mimirtech.co/",
+    "docs_url": "https://docs.mimirtech.co/whmcs-gtm"
+  },
+  "authors": [
+    {
+      "name": "MIMIRTECH",
+      "homepage": "https://www.mimirtech.co/"
+    }
+  ]
+}

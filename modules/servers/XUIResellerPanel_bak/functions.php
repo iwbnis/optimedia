@@ -1,0 +1,971 @@
+<?php
+
+use WHMCS\Database\Capsule;
+
+function testconnection($panel_details)
+{
+    $panel_url = $panel_details['panel_url'];
+    $username = $panel_details['username'];
+    $password = $panel_details['password'];
+    $mag_portal = $panel_details['mag_portal'];
+    $panel_name = $panel_details['panel_name'];
+    $action = $panel_details['action'];
+    $m3uurl = $panel_details['m3uurl'];
+    $watchstrmurl = $panel_details['watchstrmurl'];
+
+    //curl to check credentials 
+    $cookie_path = dirname(__FILE__) . '/Cookie.txt';
+    $GetFileContent = file_get_contents($cookie_path);
+    $Exploded = explode("PHPSESSID", $GetFileContent);
+    $XSRF = "";
+    if (empty($XSRF)) {
+        $ch = curl_init($panel_url . '/login');
+        curl_setopt($ch, CURLOPT_URL, $panel_url . "/login");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 0);
+        curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_path);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+        $ret1 = curl_exec($ch);
+        $GetFileContent = file_get_contents($cookie_path);
+        $Exploded = explode("PHPSESSID", $GetFileContent);
+        $XSRF = "";
+        if (!empty($Exploded) && isset($Exploded['1']) && !empty(trim($Exploded['1']))) {
+            $againEXlpode = explode("\n", $Exploded['1']);
+            $XSRF = "PHPSESSID=" . trim($againEXlpode['0']);
+        }
+    }
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $panel_url . '/login');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, "referrer=&username=$username&password=$password&login=");
+    curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+    $headers = array();
+    $headers[] = 'Connection: keep-alive';
+    $headers[] = 'Cache-Control: max-age=0';
+    $headers[] = 'Upgrade-Insecure-Requests: 1';
+    $headers[] = 'Content-Type: application/x-www-form-urlencoded';
+    $headers[] = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36';
+    $headers[] = 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9';
+    $headers[] = 'Referer: ' . $panel_url . '/login';
+    $headers[] = 'Accept-Language: en-US,en;q=0.9';
+    $headers[] = 'Cookie: ' . $XSRF;
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        echo 'Error:' . curl_error($ch);
+    }
+    curl_setopt($ch, CURLOPT_URL,  $panel_url . '/dashboard');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+    $result = curl_exec($ch);
+    $login = "";
+    $credits = "";
+    $reseller_name = "";
+    $dom = new DOMDocument();
+    @$dom->loadHTML($result);
+    $tags = $dom->getElementsByTagName('span');
+    for ($i = 0; $i < $tags->length; $i++) {
+        $grab = $tags->item($i);
+        if ($grab->nodeValue == "Logout") {
+            $login = "yes";
+        }
+        if ($grab->getAttribute('id') == "owner_credits") {
+            $credits = $grab->nodeValue;
+        }
+    }
+    $classname = "m-0";
+    $finder = new DomXPath($dom);
+    $tags = $finder->query("//*[contains(@class, '$classname')]");
+    for ($i = 0; $i < $tags->length; $i++) {
+        $grab = $tags->item($i);
+        if ($grab->tagName == "h5") {
+            $reseller_name = $grab->nodeValue;
+        }
+        break;
+    }
+    if ($login == "yes") {
+        if (isset($action) && $action == "new") {
+            $insert = Capsule::table('xui_paneldetails')->insert(['identifier' => $panel_name, 'panel_link' => $panel_url, 'username' => $username, 'password' => $password, 'mag_portal' => $mag_portal, 'm3uurl' => $m3uurl, 'watchstrmurl' => $watchstrmurl]);
+            echo "success";
+            exit;
+        } elseif (isset($action) && $action != "new") {
+            $update = Capsule::table('xui_paneldetails')->where('id', $action)->update(['identifier' => $panel_name, 'panel_link' => $panel_url, 'username' => $username, 'password' => $password, 'mag_portal' => $mag_portal, 'm3uurl' => $m3uurl, 'watchstrmurl' => $watchstrmurl]);
+            echo "success";
+            exit;
+        } else {
+            if (isset($panel_details['getcredits'])) {
+                return  "$reseller_name Credits(<font color='orange'><u> " . $credits . "</u></font>)";
+            }
+        }
+        echo 'success';
+        exit;
+    }
+}
+
+function getproductsinfo($panel_details, $action, $productid = NULL)
+{
+    $panel_url = $panel_details['panel_url'];
+    $username = $panel_details['username'];
+    $password = $panel_details['password'];
+
+    //curl to check credentials 
+    $cookie_path = dirname(__FILE__) . '/Cookie.txt';
+    $GetFileContent = file_get_contents($cookie_path);
+    $Exploded = explode("PHPSESSID", $GetFileContent);
+    $XSRF = "";
+    if (!empty($Exploded) && isset($Exploded['1']) && !empty(trim($Exploded['1']))) {
+        $againEXlpode = explode("\n", $Exploded['1']);
+        $XSRF = "PHPSESSID=" . trim($againEXlpode['0']);
+    }
+    if (empty($XSRF)) {
+        $ch = curl_init($panel_url . '/login');
+        curl_setopt($ch, CURLOPT_URL, $panel_url . "/login");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 0);
+        curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_path);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+        $ret1 = curl_exec($ch);
+        $GetFileContent = file_get_contents($cookie_path);
+        $Exploded = explode("PHPSESSID", $GetFileContent);
+        $XSRF = "";
+        if (!empty($Exploded) && isset($Exploded['1']) && !empty(trim($Exploded['1']))) {
+            $againEXlpode = explode("\n", $Exploded['1']);
+            $XSRF = "PHPSESSID=" . trim($againEXlpode['0']);
+        }
+    }
+    if ($action == "getproducts") {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $panel_url . '/login');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, "referrer=&username=$username&password=$password&login=");
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+        $headers = array();
+        $headers[] = 'Connection: keep-alive';
+        $headers[] = 'Cache-Control: max-age=0';
+        $headers[] = 'Upgrade-Insecure-Requests: 1';
+        $headers[] = 'Content-Type: application/x-www-form-urlencoded';
+        $headers[] = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36';
+        $headers[] = 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9';
+        $headers[] = 'Referer: ' . $panel_url . '/login';
+        $headers[] = 'Accept-Language: en-US,en;q=0.9';
+        $headers[] = 'Cookie: ' . $XSRF;
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        $result = curl_exec($ch);
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
+        }
+        curl_setopt($ch, CURLOPT_URL,  $panel_url . '/dashboard');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+        $result = curl_exec($ch);
+
+        $login = "";
+        $dom = new DOMDocument();
+        @$dom->loadHTML($result);
+        $tags = $dom->getElementsByTagName('span');
+        for ($i = 0; $i < $tags->length; $i++) {
+            $grab = $tags->item($i);
+            if ($grab->nodeValue == "Logout") {
+                $login = "yes";
+            }
+            if ($grab->getAttribute('id') == "owner_credits") {
+                $credits = $grab->nodeValue;
+            }
+        }
+        if ($login == "yes") {
+            //trial packages streamline only
+            $trialstreamline = array();
+            $trialmag = array();
+            curl_setopt($ch, CURLOPT_URL,  $panel_url . '/line?trial=1');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+            $result = curl_exec($ch);
+            $dom = new DOMDocument();
+            @$dom->loadHTML($result);
+            $select = $dom->getElementsByTagName('select');
+            if ($select->length > 0) {
+                for ($i = 0; $i < $select->length; $i++) {
+                    $selectgrab = $select->item($i);
+                    if ($selectgrab->getAttribute('id') == "package") {
+                        $optionTags = $selectgrab->getElementsByTagName('option');
+                        if ($optionTags->length > 0) {
+                            for ($i = 0; $i < $optionTags->length; $i++) {
+                                $pacakge_id  = $optionTags->item($i)->getAttribute('value');
+                                $pacakge_name = trim($optionTags->item($i)->nodeValue);
+                                $trialstreamline[$pacakge_id] = $pacakge_name;
+                                $trialmag[$pacakge_id] = $pacakge_name;
+                            }
+                        }
+                    }
+                }
+            }
+
+            //official packages  
+            $officialstreamline = array();
+            $officialmag = array();
+            curl_setopt($ch, CURLOPT_URL,  $panel_url . '/line');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+            $result = curl_exec($ch);
+            $dom = new DOMDocument();
+            @$dom->loadHTML($result);
+            $select = $dom->getElementsByTagName('select');
+            if ($select->length > 0) {
+                for ($i = 0; $i < $select->length; $i++) {
+                    $selectgrab = $select->item($i);
+                    if ($selectgrab->getAttribute('id') == "package") {
+                        $optionTags = $selectgrab->getElementsByTagName('option');
+                        if ($optionTags->length > 0) {
+                            for ($i = 0; $i < $optionTags->length; $i++) {
+                                $pacakge_id  = $optionTags->item($i)->getAttribute('value');
+                                $pacakge_name = trim($optionTags->item($i)->nodeValue);
+                                $officialstreamline[$pacakge_id] = $pacakge_name;
+                                $officialmag[$pacakge_id] = $pacakge_name;
+                            }
+                        }
+                    }
+                }
+            }
+            $classname = "m-0";
+            $finder = new DomXPath($dom);
+            $tags = $finder->query("//*[contains(@class, '$classname')]");
+            for ($i = 0; $i < $tags->length; $i++) {
+                $grab = $tags->item($i);
+                if ($grab->tagName == "h5") {
+                    $reseller_name = $grab->nodeValue;
+                }
+                break;
+            }
+            $packages = array(
+                'resellername' => $reseller_name,
+                'credits' => $credits,
+                'trialstreamline' => $trialstreamline,
+                'trialstreamline' => $trialstreamline,
+                'officialstreamline' => $officialstreamline,
+                'trialmag' => $trialmag,
+                'officialmag' => $officialmag,
+            );
+            $package_info_ch = $ch;
+            return $packages;
+        } else {
+            $result = array(
+                'status' => 'error',
+                'message' => 'no response from the server',
+            );
+        }
+    }
+    if ($action == "getproductinfo") {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $panel_url . '/api?action=get_package&package_id=' . $productid);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+        $headers = array();
+        $headers[] = 'Accept: application/json, text/javascript, */*; q=0.01';
+        $headers[] = 'Accept-Language: en-US,en;q=0.9';
+        $headers[] = 'Proxy-Connection: keep-alive';
+        $headers[] = 'Referer: ' . $panel_url . '/line';
+        $headers[] = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36';
+        $headers[] = 'X-Requested-With: XMLHttpRequest';
+        $headers[] = 'Cookie: ' . $XSRF;
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        $result = curl_exec($ch);
+        $res = array(
+            'status' => 'success',
+            'data' => json_decode($result),
+        );
+        $res = json_encode($res);
+        return $res;
+    }
+    $result1 = array(
+        'status' => 'error',
+        'message' => 'no response from the server',
+    );
+    return $result1;
+}
+function moduleconfiguration_xuione()
+{
+    if ($_REQUEST['action'] == 'edit') {
+        $productID = (isset($_REQUEST['id'])) ? $_REQUEST['id'] : "Undefined";
+        $productdetailsare = Capsule::table('tblproducts')->where('id', $productID)->get();
+        $selected_server = $productdetailsare[0]->configoption1;
+        $productType = $productdetailsare[0]->servertype;
+        if ($productType == 'XUIResellerPanel') {
+            $noserver = "false";
+            $serversCustomCount = Capsule::table('xui_paneldetails')->where('id', $selected_server)->count();
+            if ($serversCustomCount > 0) {
+                $noserver = "false";
+                $serversCustom = Capsule::table('xui_paneldetails')->where('id', $selected_server)->get();
+                $products = array();
+                foreach ($serversCustom as $server) {
+                    $panel_details = array(
+                        'panel_url' => $server->panel_link,
+                        'username' => $server->username,
+                        'password' => $server->password,
+                        'panel_name' => $server->panel_name,
+                    );
+                    $packages = getproductsinfo($panel_details, 'getproducts');
+                    $resellername = $packages['resellername'];
+                    $credits = $packages['credits'];
+                    $trialstreamline = isset($packages['trialstreamline']) && !empty($packages['trialstreamline']) ? $packages['trialstreamline'] : "";
+                    $officialstreamline = isset($packages['officialstreamline']) && !empty($packages['officialstreamline']) ? $packages['officialstreamline'] : "";
+                    $trialmag = isset($packages['trialmag']) && !empty($packages['trialmag']) ? $packages['trialmag'] : "";
+                    $officialmag = isset($packages['officialmag']) && !empty($packages['officialmag']) ? $packages['officialmag'] : "";
+                    if (isset($trialstreamline) || isset($trialmag)) {
+                        if (isset($trialstreamline)) {
+                            foreach ($trialstreamline as $pacakge_id => $pacakge_name) {
+                                $selected = ($pacakge_id == $productdetailsare[0]->configoption7) ? 'selected' : '';
+                                $products['linetrialproduct' . $server->id] .= "<option " . $selected . " value='" . $pacakge_id . "'>" .  $pacakge_name . "</option>";
+                            }
+                        }
+                        if (isset($trialmag)) {
+                            foreach ($trialmag as $pacakge_id => $pacakge_name) {
+                                $selected = ($pacakge_id == $productdetailsare[0]->configoption7) ? 'selected' : '';
+                                $products['magtrialproduct' . $server->id] .= "<option " . $selected . " value='" . $pacakge_id . "'>" .  $pacakge_name . "</option>";
+                            }
+                        }
+                    }
+                    if (isset($officialstreamline) || isset($officialmag)) {
+                        if (isset($officialstreamline)) {
+                            foreach ($officialstreamline as $pacakge_id => $pacakge_name) {
+                                $selected = ($pacakge_id == $productdetailsare[0]->configoption8) ? 'selected' : '';
+                                $products['lineproduct' . $server->id] .= "<option " . $selected . " value='" . $pacakge_id . "'>" . $pacakge_name . "</option>";
+                            }
+                        }
+                        if (isset($officialmag)) {
+                            foreach ($officialmag as $pacakge_id => $pacakge_name) {
+                                $selected = ($pacakge_id == $productdetailsare[0]->configoption8) ? 'selected' : '';
+                                $products['magproduct' . $server->id] .= "<option " . $selected . " value='" . $pacakge_id . "'>" . $pacakge_name . "</option>";
+                            }
+                        }
+                    }
+                }
+            } else {
+                $noserver = "true";
+            }
+            if (!empty($products)) {
+                $jsondata = json_encode($products);
+            } else {
+                $jsondata = json_encode(array('No data!'));
+            }
+            return <<<HTML
+<div id="organizebouquetsmodal" class="modal fade" role="dialog">
+    <div class="modal-dialog" style="width:900px;">
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Organize Bouquets List</h4>
+        </div>
+        <div class="modal-body" style="padding-bottom:0px;height: 450px;overflow:auto">
+        <div id="messageBouquqtsSaved"></div>
+        <div class="col-sm-12">
+            <div class="row"  id="oModalBdy">  
+
+            </div> 
+        </div>
+        </div>
+        <div class="modal-footer">
+        <marquee width="60%" direction="left" height="" style="float: left;">
+            <p style="float: left;font-weight: bold;margin: 7px;">You have to click save changes below to save the selected bouquets.</p>
+        </marquee>
+        <button type="button" class="btn btn-primary"  onclick="savebouquets()" >Save Changes</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+    </div>
+
+    </div>
+</div> 
+<div id="organizebouquetsCategoriesmodal" class="modal fade" role="dialog">
+    <div class="modal-dialog" style="width:900px;">
+    <!-- Modal content-->
+    <div class="modal-content">
+        <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Organize Bouquet Categories List</h4>
+        </div>
+        <div class="modal-body" style="padding-bottom:0px;height: 450px;overflow:auto">
+        <div id="message"></div>
+        <p> By default, the unselect bouquets are under Uncategorized Section</p>
+        <div class="conatiner-fluid"> 
+            <!-- categories    --> 
+            <div id="categories_title"></div>  
+        </div>  
+        <div class="conatiner-fluid"> 
+            <div class="col-sm-12">
+                <div class="row" id="bouquest_section" style="padding: 10px;"></div> 
+            </div>
+        </div>
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="savebouquetcategories" onclick="saveCategorizeBouquets()" >Save Changes</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+    </div>
+
+    </div>
+</div> 
+<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+<script type="text/javascript">    
+    function saveCategorizeBouquets(){  
+        $("#savebouquetcategories").html('Save Changes <i class="fas fa-spinner fa-spin"></i>');
+        $("#savebouquetcategories").prop('disabled',true);
+        bouquet_categorize_array = localStorage.getItem('bouquet_categorize_array');     
+        bouquet_categorize_array = jQuery.parseJSON(bouquet_categorize_array);  
+        datatoSave = [];
+        selected = [];
+        $("input[name='selectedbouquets']:checked").each(function(index, value){ 
+            selected[index] = $(this).val();
+        }); 
+        $("input[name='selectedbouquets']").each(function(index, value){
+            datatoSave[$(this).val()] = $(this).data('bouquetname'); 
+        }); 
+        uncategorizedArray = localStorage.getItem("uncategorizedArray"); 
+        if (uncategorizedArray == "" || uncategorizedArray == null || uncategorizedArray == "null" || uncategorizedArray == undefined || uncategorizedArray == "undefined") {
+            uncategorizedArray = [];
+        } else {
+            uncategorizedArray = jQuery.parseJSON(uncategorizedArray);
+        }  
+        packageid = jQuery("select[name='packageconfigoption[7]']").find(":selected").val();
+        //request to save Categorize Bouquets
+        $.ajax({
+            type: "POST",
+            url: "../modules/servers/XUIResellerPanel/Config.php", 
+            data: {
+                action: 'saveBouquetCategories',  
+                bouquetsData: bouquet_categorize_array,
+                uncategorizedArray: uncategorizedArray,
+                datatoSave: datatoSave,
+                packageid: packageid,
+                productid: $("#inputProductId").val()
+            },
+            success: function (response) {   
+                if(response == "success"){
+                    $("#savebouquetcategories").prop('disabled',false);
+                    $("#savebouquetcategories").html('Save Changes'); 
+                    $("#message").html('<div class="alert alert-success" role="alert">Changes saved successfully!</div>');
+                }else{
+                    $("#message").html('<div class="alert alert-danger" role="alert">Unable to save changes.</div>');
+                    $("#savebouquetcategories").prop('disabled',false);
+                    $("#savebouquetcategories").html('Save Changes'); 
+                }
+            }
+        });      
+    }
+    function getCategoriesBouquets(productid){
+        localStorage.setItem("bouquet_categorize_array","");
+        localStorage.setItem("uncategorizedArray","");
+        //fetch categories and selected bouquets 
+        $.ajax({
+            type: "POST",
+            url: "../modules/servers/XUIResellerPanel/Config.php", 
+            data: {
+                action: 'getBouquetCategories',  
+                productid: productid,
+                packageid:  jQuery("select[name='packageconfigoption[7]']").find(":selected").val()
+            },
+            success: function (response) {       
+                var obj = jQuery.parseJSON(response);    
+                if(obj.status == "success"){  
+                    cat_data = obj.cat_data;  
+                    catid = $(".activecat").find(".selected_cat").data('catid'); 
+                    categories = obj.data;  
+                    categories_title = "";                     
+                    categories_title += '<ul class="nav nav-tabs">';
+                    count = 0;
+                    categories_title += '<div class="col-sm-12" style="padding:0"><label style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"><input id="selectAllcat" onchange="selectAllcat(this)" type="checkbox">&nbsp&nbsp Select All</label></div>';
+                    $.each(categories, function(index, val) {   
+                        $.each(val, function(index, category_name) {    
+                            category_id = index;
+                            count++; 
+                            if(count == 1){
+                                active = "active activecat";
+                                selected_cat = "selected_cat";
+                            }else{
+                                active = "";
+                                selected_cat = "";
+                            }
+                            categories_title += '<li role="presentation" class="categories_select '+active+'"><a style="cursor: pointer;" data-catid="'+category_id+'" data-catname="'+category_name+'" class="'+selected_cat+'" onclick=categoriseBouquets('+category_id+')>'+category_name+'</a></li>';
+                        });  
+                    });  
+                    categories_title += '</ul>';
+                    $("#categories_title").html(categories_title); 
+                    savedBouquetsWithProduct = jQuery("input[name='packageconfigoption[12]']").val();
+                    savedbouquets = jQuery("input[name='packageconfigoption[12]']").val();  
+                    savedbouquets = savedbouquets.split(","); 
+                    bouquets = localStorage.getItem('bouquets');     
+                    bouquets = jQuery.parseJSON(bouquets); 
+                    if(savedBouquetsWithProduct == 0 || savedBouquetsWithProduct == null || savedBouquetsWithProduct == undefined || savedBouquetsWithProduct == "" || savedBouquetsWithProduct == "null" || savedBouquetsWithProduct == "undefined"){   
+                        alert('Please select some bouquets first!');
+                    }else{  
+                        if(cat_data != ""){
+                            localStorage.setItem("bouquet_categorize_array", JSON.stringify(cat_data));   
+                        }else{
+                            localStorage.setItem("bouquet_categorize_array", "");  
+                        }  
+                        catid = $(".activecat").find('.selected_cat').data('catid');   
+                        categoriseBouquets(catid);
+                        selectALLcats();
+                        $("#organizebouquetsCategoriesmodal").modal("show"); 
+                    }     
+                }else{
+                    alert('Please add Bouquet Categories first.');
+                }
+            },error: function(){  
+                alert('Please add Bouquet Categories first.');
+            }
+        });  
+		    html += '<div class="col-sm-12"><label style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"><input id="selectAll" onchange="selectAll(this)" type="checkbox">&nbsp&nbsp Select All</label></div>';    
+
+    }    
+
+    function selectALLcats(){
+        totallength = $(".allbouquetscats").length; 
+        totallengthchecked = $('input[class="allbouquetscats"]:checked').length;
+        if(totallength == totallengthchecked){
+            $("#selectAllcat").prop("checked", true);
+        }else{
+            $("#selectAllcat").prop("checked",false);
+        }
+    }
+
+    function saveselectedbouquets(THIS){  
+
+        selectALLcats();
+
+        uncategorizedArray = localStorage.getItem("uncategorizedArray"); 
+        if (uncategorizedArray == "" || uncategorizedArray == null || uncategorizedArray == "null" || uncategorizedArray == undefined || uncategorizedArray == "undefined") {
+            uncategorizedArray = [];
+        } else {
+            uncategorizedArray = jQuery.parseJSON(uncategorizedArray);
+        }  
+        selectedArray = localStorage.getItem("bouquet_categorize_array");
+        if(selectedArray == 0 || selectedArray == null || selectedArray == undefined || selectedArray == "" || selectedArray == "null" || selectedArray == "undefined"){
+            selectedArray = [];
+        }else{
+            selectedArray = jQuery.parseJSON(selectedArray); 
+        }
+        $("input[type='checkbox'][name='selectedbouquets']").each(function(){  
+            bouquet_id = $(this).val(); 
+            category_id = $(".activecat").find('.selected_cat').data('catid');   
+            if($(this).is(':checked') && $(this).prop('disabled') == false){   
+                console.log(bouquet_id);
+                selectedArray[bouquet_id] = category_id; 
+            }else if($(this).prop('checked') == false && $(this).prop('disabled') == false){    
+                uncategorizedArray[bouquet_id] = "uncategorized"; 
+                delete selectedArray[bouquet_id];  
+            }
+        }); 
+        // console.log(selectedArray);
+        uncategorizedArray = localStorage.setItem("uncategorizedArray", JSON.stringify(uncategorizedArray)); 
+        localStorage.setItem("bouquet_categorize_array", JSON.stringify(selectedArray));   
+    }
+    function savebouquets(){  
+        selected = []; 
+        $(".allbouquets:checked").each(function(index, value){
+            selectedbouquets = $(this).val();
+            selected[index] = selectedbouquets; 
+        });
+        jQuery("input[name='packageconfigoption[12]']").val(selected); 
+        // request to save selected bouquests in the product config12
+        $.ajax({
+            type: "POST",
+            url: "../modules/servers/XUIResellerPanel/Config.php", 
+            data: {
+                action: 'saveSelectedBouquets', 
+                productid: $("#inputProductId").val(),
+                selectedbouquets: jQuery("input[name='packageconfigoption[12]']").val()
+            },
+            success: function (response) {  
+                if(response == "success"){
+                    $("#messageBouquqtsSaved").html('<div class="alert alert-success" role="alert">Changes saved successfully!</div>');
+                }else{
+                    $("#messageBouquqtsSaved").html('<div class="alert alert-danger" role="alert">Unable to save changes.</div>');
+                }
+            } 
+        }); 
+    }  
+    function categoriseBouquets(catid){ 
+        $('.categories_select').removeClass('active');
+        $('.categories_select').removeClass('activecat');
+        $('.categories_select').find('a').removeClass('selected_cat');
+        $("[data-catid="+catid+"]").parent('.categories_select').addClass('active'); 
+        $("[data-catid="+catid+"]").parent('.categories_select').addClass('activecat');
+        $('.categories_select').find('a').addClass('selected_cat');
+        // catid = $(THIS).data('catid');   
+        savedbouquets = jQuery("input[name='packageconfigoption[12]']").val(); 
+        savedbouquets = savedbouquets.split(",");  
+        bouquet_categorize_array = "";
+        bouquet_categorize_array = localStorage.getItem('bouquet_categorize_array');   
+        bouquets = localStorage.getItem('bouquets');     
+        bouquets = jQuery.parseJSON(bouquets); 
+        var html = "";   
+        if(bouquet_categorize_array == 0 || bouquet_categorize_array == null || bouquet_categorize_array == undefined || bouquet_categorize_array == ""){
+            $.each(bouquets, function(index, value) {   
+                $.each(savedbouquets, function(index, val) {   
+                    if(val == value.id){   
+                        html += '<div class="col-sm-4"><label style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"><input class="allbouquetscats" name="selectedbouquets" onclick="saveselectedbouquets(this)" data-bouquetname="'+ value.bouquet_name+'" type="checkbox" value="'+value.id+'">&nbsp&nbsp'+ value.bouquet_name+'</label></div>';
+                    }
+                });  
+            });
+        }else{  
+            bouquet_categorize_array = jQuery.parseJSON(bouquet_categorize_array); 
+            //show all the bouquets unchecked
+            $.each(bouquets, function(index, value) {   
+                $.each(savedbouquets, function(index, val) { 
+                    if(val == value.id){ 
+                        if(bouquet_categorize_array[value.id] == catid){
+                            selected = "checked";
+                            disabled = ""; 
+                            catname = ""; 
+                        }else if(bouquet_categorize_array[value.id] != catid && bouquet_categorize_array[value.id] != null && bouquet_categorize_array[value.id] != "null" && bouquet_categorize_array[value.id] != undefined && bouquet_categorize_array[value.id] != "uncategorized"){
+                            selected = "checked";
+                            disabled = "disabled";
+                            category_id = bouquet_categorize_array[value.id]; 
+                            catname = '('+$("[data-catid="+category_id+"]").data('catname')+')';   
+                            console.log('catname');
+                        } else{
+                            selected = "";
+                            disabled = "";
+                            catname = "";
+                        } 
+                        html += '<div class="col-sm-4"><label style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"><input class="allbouquetscats" name="selectedbouquets" onclick="saveselectedbouquets(this)" data-bouquetname="'+ value.bouquet_name+'" type="checkbox" value="'+value.id+'" '+selected +' '+disabled+'>&nbsp&nbsp'+ value.bouquet_name+' '+catname+'</label></div>';
+                    }
+                });  
+            }); 
+        } 
+        $("#bouquest_section").html('<div class="row">' + html + '</div>'); 
+    }   
+    function getbouquets(){   
+        $("#messageBouquqtsSaved").html('');
+        savedbouquets = jQuery("input[name='packageconfigoption[12]']").val();  
+        savedbouquets = savedbouquets.split(",");
+        bouquets = localStorage.getItem('bouquets');  
+        bouquets = jQuery.parseJSON(bouquets); 
+        var html = "";
+        html += '<div class="col-sm-12"><label style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"><input id="selectAll" onchange="selectAll(this)" type="checkbox">&nbsp&nbsp Select All</label></div>';
+        $.each(bouquets, function(index, value) {  
+            selected = "";
+            $.each(savedbouquets, function(index, val) {   
+                if(val == value.id){
+                    selected = "checked";
+                }
+            });  
+            html += '<div class="col-sm-4"><label style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"><input class="allbouquets" onchange="checkifchecked()" data-bouquetname="'+ value.bouquet_name+'" type="checkbox" value="'+value.id+'" '+selected+'>&nbsp&nbsp'+ value.bouquet_name+'</label></div>';
+        });
+        $("#oModalBdy").html(html);
+        checkifchecked();
+        $("#organizebouquetsmodal").modal("show");         
+    }  
+    function selectAll(THIS){
+        if($(THIS).is(":checked")){
+            $(".allbouquets").prop("checked",true);
+        }else{
+            $(".allbouquets").prop("checked",false);
+        }  
+    } 
+    
+
+
+    function selectAllcat(THIS){
+        if($(THIS).is(":checked")){
+            $("input[type='checkbox'][name='selectedbouquets']").prop("checked",true);
+        }else{
+            $("input[type='checkbox'][name='selectedbouquets']").prop("checked",false);
+        }  
+
+
+        uncategorizedArray = localStorage.getItem("uncategorizedArray"); 
+        if (uncategorizedArray == "" || uncategorizedArray == null || uncategorizedArray == "null" || uncategorizedArray == undefined || uncategorizedArray == "undefined") {
+            uncategorizedArray = [];
+        } else {
+            uncategorizedArray = jQuery.parseJSON(uncategorizedArray);
+        }
+
+        selectedArray = localStorage.getItem("bouquet_categorize_array");
+        if(selectedArray == 0 || selectedArray == null || selectedArray == undefined || selectedArray == "" || selectedArray == "null" || selectedArray == "undefined"){
+            selectedArray = [];
+        }else{
+            selectedArray = jQuery.parseJSON(selectedArray); 
+        }
+
+        if($(THIS).is(":checked")){            
+            $("input[type='checkbox'][name='selectedbouquets']").each(function(){  
+                bouquet_id = $(this).val(); 
+                category_id = $(".activecat").find('.selected_cat').data('catid');   
+                if($(this).is(':checked') && $(this).prop('disabled') == false){   
+                    console.log(bouquet_id);
+                    selectedArray[bouquet_id] = category_id; 
+                }
+            }); 
+        }else{
+            $("input[type='checkbox'][name='selectedbouquets']").each(function(){  
+                bouquet_id = $(this).val(); 
+                $("input[type='checkbox'][name='selectedbouquets']").prop("checked",false);
+                if($(this).prop('checked') == false && $(this).prop('disabled') == false){    
+                    uncategorizedArray[bouquet_id] = "uncategorized"; 
+                    delete selectedArray[bouquet_id];        
+                }
+            }); 
+        } 
+
+        uncategorizedArray = localStorage.setItem("uncategorizedArray", JSON.stringify(uncategorizedArray)); 
+        localStorage.setItem("bouquet_categorize_array", JSON.stringify(selectedArray));
+
+
+    }
+    
+
+    function checkifchecked(){
+        totallength = $(".allbouquets").length; 
+        totallengthchecked = $('input[class="allbouquets"]:checked').length;
+        if(totallength == totallengthchecked){
+            $("#selectAll").prop("checked", true);
+        }else{
+            $("#selectAll").prop("checked",false);
+        } 
+    }
+    $("#moduleSettingsLoader").hide(); 
+    $(document).ajaxComplete(function(event,xhr,options){   
+        var str1 = options.url;
+        var str2 = "configproducts";
+        if(str1.indexOf(str2) != -1){    
+            if($noserver == false){ 
+                localStorage.setItem("uncategorizedArray","");
+                bouquet_categorize_array = [];
+                jQuery("input[name='packageconfigoption[11]']").closest('td').hide();
+                $("#tblModuleSettings tbody tr td").filter(function () {
+                    return $(this).text() === "ISP Lock";
+                }).hide();
+                jQuery("input[name='packageconfigoption[12]']").hide();
+                jQuery("input[name='packageconfigoption[13]']").hide();
+                $("#tblModuleSettings").show();
+                $("#moduleSettingsLoader").hide();
+                $("#moduleSettingsLoader").after('<img id="customloading" src="images/loading.gif">');   
+                $("#package_info").html('Loading...');
+                var options = $jsondata; 
+                var resellername = '$resellername'; 
+                var credits = '$credits'; 
+                var productID = '$productID';  
+                if(resellername != "" && credits != ""){
+                    $("#useroinfo").html(resellername + ' Credits (<span style="color: orange;">'+ credits + '</span>)'); 
+                }else{
+                    $("#useroinfo").html('<span style="color: red;">No Credits found!</span>');
+                    $("#package_info").html('<span style="color: red;">Unable to fetch product info!</span>'); 
+                }
+                jQuery("select[name='packageconfigoption[5]']").change(function () {
+                    $("#customloading").show();  
+                    setTimeout(function () {
+                        changeLineType();
+                        getproductinfoo(); 
+                    }, 1000);
+                });
+                jQuery("select[name='packageconfigoption[3]']").change(function () {
+                    $("#customloading").show();  
+                    setTimeout(function () {
+                        changepackage();
+                        getproductinfoo();
+                            hideextrafields();
+                            $("#customloading").hide();  
+                    }, 1000);
+                });
+                jQuery("select[name='packageconfigoption[8]']").change(function () {
+                    getproductinfoo(); 
+                });
+                jQuery("select[name='packageconfigoption[7]']").change(function () {  
+                    getproductinfoo(); 
+                });   
+                function getproductinfoo(){  
+                    $("#customloading").show(); 
+                    serverid = jQuery("select[name='packageconfigoption[1]']").val();  
+                    trialOrOfficial = jQuery("select[name='packageconfigoption[5]']").find(":selected").val();  
+                    productid = "";
+                    if(trialOrOfficial == "official"){
+                        productid = jQuery("select[name='packageconfigoption[8]']").find(":selected").val();   
+                    }
+                    if(trialOrOfficial == "trial"){
+                        productid = jQuery("select[name='packageconfigoption[7]']").find(":selected").val();   
+                    }  
+                    if(productid != "undefined" && serverid != "undefined" && productid != "" && serverid != "" && productid != null && serverid != null){ 
+                        $("#customloading").show(); 
+                        $.ajax({
+                            type: "POST",
+                            url: "../modules/servers/XUIResellerPanel/Config.php", 
+                            data: {
+                                action: 'getproductinfo', 
+                                productid: productid,
+                                serverid: serverid
+                            },
+                            success: function (response) {   
+                                var obj = jQuery.parseJSON(response);  
+                                if(obj.status == "success"){ 
+                                    responsedata = obj.data.data;
+                                    cost_credits = responsedata.cost_credits; 
+                                    duration = responsedata.duration; 
+                                    max_connections = responsedata.max_connections; 
+                                    bouquets = obj.data.bouquets;    
+                                    localStorage.setItem("bouquets", JSON.stringify(bouquets));
+                                    $("#package_info").html('<table name="addserver" class="form" method="request" action="edit" id="" width="100%" border="0" cellspacing="2" cellpadding="3"><tbody><tr><td style="width: 40%;background-color: #efefef;" class="fieldlabel">Package Cost</td><td class="fieldarea"><b><input readonly=""  style="width: 70%;" type="text" class="form-control text-center"  value="' + cost_credits + ' Credits"></b></td></tr> <tr><td style="width: 40%;background-color: #efefef;" class="fieldlabel">Duration</td><td class="fieldarea"><b><input style="width: 70%;" readonly="" type="text" class="form-control text-center"   value="' +duration+ '"></b></td></tr> <tr><td style="width: 40%;background-color: #efefef;" class="fieldlabel">Max. Connections</td><td class="fieldarea"><b><input style="width: 70%;" readonly="" type="text" class="form-control text-center"  value="' + max_connections    + '"></b></td></tr> </tbody> </table>');
+                                    $("#customloading").hide(); 
+                                } else{
+                                    //not able to fetch product info
+                                    $("#package_info").parent().hide();
+                                    $("#customloading").hide(); 
+                                }
+                            },error: function(){ 
+                                $("#customloading").hide(); 
+                            }
+                        });  
+                    }else{
+                        $("#customloading").hide(); 
+                    } 
+                } 
+                function changepackage() {
+                    if ($("select[name='packageconfigoption[3]']").val() === 'streamlineonly') {
+                        if ($("select[name='packageconfigoption[5]']").val() === 'trial') {
+                            var linetrialproduct = 'linetrialproduct' + $("select[name='packageconfigoption[1]']").val();
+                            var trialproducts = $("select[name='packageconfigoption[7]']"); 
+                            trialproducts.empty().append(options[linetrialproduct]);
+                        } else {
+                            var lineproduct = 'lineproduct' + $("select[name='packageconfigoption[1]']").val();
+                            var productorg = $("select[name='packageconfigoption[8]']"); 
+                            productorg.empty().append(options[lineproduct]);
+                        }
+                    }
+                    if ($("select[name='packageconfigoption[3]']").val() === 'streamlineOrmagdevice') {
+                        if ($("select[name='packageconfigoption[5]']").val() === 'trial') {
+                            var linetrialproduct = 'linetrialproduct' + $("select[name='packageconfigoption[1]']").val();
+                            var trialproducts = $("select[name='packageconfigoption[7]']"); 
+                            trialproducts.empty().append(options[linetrialproduct]);
+                        } else {
+                            var lineproduct = 'lineproduct' + $("select[name='packageconfigoption[1]']").val();
+                            var productorg = $("select[name='packageconfigoption[8]']"); 
+                            productorg.empty().append(options[lineproduct]);
+                        }
+                    }
+                    if ($("select[name='packageconfigoption[3]']").val() === 'magdevice') {
+                        if ($("select[name='packageconfigoption[5]']").val() === 'trial') {
+                            var magtrialproduct = 'magtrialproduct' + $("select[name='packageconfigoption[1]']").val();
+                            var trialproducts = $("select[name='packageconfigoption[7]']"); 
+                            trialproducts.empty().append(options[magtrialproduct]);
+                        } else {
+                            var magproduct = 'magproduct' + $("select[name='packageconfigoption[1]']").val();
+                            var productorg = $("select[name='packageconfigoption[8]']"); 
+                            productorg.empty().append(options[magproduct]);
+                        }
+                    } 
+                }
+                function hideextrafields() {
+                    if ($("select[name='packageconfigoption[3]']").val() === 'streamlineOrmagdevice') {
+                        $("#m3ulink").replaceWith('<td class="fieldlabel" width="20%">M3U link</td>');
+                        $("#watchstreams").replaceWith('<td class="fieldlabel" width="20%">Watch Streams!</td>');
+                        $("input[name='packageconfigoption[4]']").parent().show(); 
+                        $("input[name='packageconfigoption[6]']").parent().show(); 
+                    }
+                    if ($("select[name='packageconfigoption[3]']").val() === 'streamlineonly') {
+                        $("#m3ulink").replaceWith('<td class="fieldlabel" width="20%">M3U link</td>');
+                        $("#watchstreams").replaceWith('<td class="fieldlabel" width="20%">Watch Streams!</td>');
+                        $("input[name='packageconfigoption[4]']").parent().show(); 
+                        $("input[name='packageconfigoption[6]']").parent().show(); 
+                    }
+                    if ($("select[name='packageconfigoption[3]']").val() === 'magdevice') {
+                        $("#tblModuleSettings tbody tr td").filter(function () {
+                                return $(this).text() === "M3U link";
+                            }).replaceWith('<div id="m3ulink"></div>');
+
+                                $("input[name='packageconfigoption[4]']").parent().hide();
+                        $("#tblModuleSettings tbody tr td").filter(function () {
+                                return $(this).text() === "Watch Streams!";
+                            }).replaceWith('<div id="watchstreams"></div>');
+                                $("input[name='packageconfigoption[6]']").parent().hide(); 
+                    } 
+                }
+                function changeLineType() {  
+                    if ($("select[name='packageconfigoption[5]']").val() === 'trial') {
+                        if ($("select[name='packageconfigoption[3]']").val() === 'streamlineOrmagdevice') {
+                            var linetrialproduct = 'linetrialproduct' + $("select[name='packageconfigoption[1]']").val();
+                            var trialproducts = $("select[name='packageconfigoption[7]']"); 
+                            trialproducts.empty().append(options[linetrialproduct]);
+                        }
+                        if ($("select[name='packageconfigoption[3]']").val() === 'streamlineonly') {
+                            var linetrialproduct = 'linetrialproduct' + $("select[name='packageconfigoption[1]']").val();
+                            var trialproducts = $("select[name='packageconfigoption[7]']");
+                            trialproducts.empty().append(options[linetrialproduct]);
+                        }
+                        if ($("select[name='packageconfigoption[3]']").val() === 'magdevice') {
+                            var magtrialproduct = 'magtrialproduct' + $("select[name='packageconfigoption[1]']").val();
+                            var trialproducts = $("select[name='packageconfigoption[7]']"); 
+                            trialproducts.empty().append(options[magtrialproduct]);
+                        } 
+                        $("#tblModuleSettings tbody tr td").filter(function () {
+                            return $(this).text() === "Select Package";
+                        }).html('<td class="fieldlabel" width="20%" id="loveysingh"></td>');
+                        $("select[name='packageconfigoption[8]']").hide();
+                        $("#tblModuleSettings tbody tr td").filter(function () {
+                            return $(this).text() === "Select Trial Package";
+                        }).show();
+                        $("select[name='packageconfigoption[7]']").parent().show();
+                    } else { 
+                        if ($("select[name='packageconfigoption[3]']").val() === 'streamlineonly') {
+                            var lineproduct = 'lineproduct' + $("select[name='packageconfigoption[1]']").val();
+                            var productorg = $("select[name='packageconfigoption[8]']");
+                            productorg.empty().append(options[lineproduct]);
+                        }
+                            if ($("select[name='packageconfigoption[3]']").val() === 'streamlineOrmagdevice') {
+                            var lineproduct = 'lineproduct' + $("select[name='packageconfigoption[1]']").val();
+                            var productorg = $("select[name='packageconfigoption[8]']"); 
+                            productorg.empty().append(options[lineproduct]);
+                        }
+                        if ($("select[name='packageconfigoption[3]']").val() === 'magdevice') {
+                            var magproduct = 'magproduct' + $("select[name='packageconfigoption[1]']").val();
+                            var productorg = $("select[name='packageconfigoption[8]']"); 
+                            productorg.empty().append(options[magproduct]);
+                        } 
+                        $("#tblModuleSettings tbody tr td").filter(function () {
+                            return $(this).text() === "Select Package";
+                        }).show();
+                            $("#loveysingh").html('Select Package');
+                            
+                        $("select[name='packageconfigoption[8]']").show();
+                            
+                        $("#tblModuleSettings tbody tr td").filter(function () {
+                            return $(this).text() === "Select Trial Package";
+                        }).hide();
+                        $("select[name='packageconfigoption[7]']").parent().hide(); 
+                    } 
+                    if(resellername == "" || credits == ""){ 
+                        $("#tblModuleSettings tbody tr td").filter(function () {
+                            return $(this).text() === "Select Trial Package";
+                        }).hide();
+                        $("select[name='packageconfigoption[7]']").parent().hide(); 
+                        $("#tblModuleSettings tbody tr td").filter(function () {
+                            return $(this).text() === "Select Package";
+                        }).hide();
+                        $("select[name='packageconfigoption[8]']").parent().hide(); 
+                    }
+                }     
+                changeLineType();
+                getproductinfoo();
+                hideextrafields();
+                var usersinfo = 'users' + $("select[name='packageconfigoption[1]']").val();
+                $("#usersinfo").replaceWith(options[usersinfo]); 
+            } else{
+                $("#tblModuleSettings").hide();
+                $("#custom_table").hide();
+                $("#tblModuleSettings").after('<table class="form module-settings" width="100%" border="0" cellspacing="2" cellpadding="3" id="custom_table"><tbody><tr><td class="fieldlabel" width="20%" style="color:red;">Note:</td><td class="fieldarea" style="color: red;">Click on Save Changes to proceed.</td></tr></tbody></table>');
+            }
+        }
+    });  
+</script>
+HTML;
+        }
+    }
+}

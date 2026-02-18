@@ -1,0 +1,5 @@
+- \ModulesGarden\ProductCrossSelling\Core\Lang\Lang
+- \ModulesGarden\ProductCrossSelling\Core\App\Controllers\Instances\Addon\Config
+- \ModulesGarden\ProductCrossSelling\Core\UI\Widget\Sidebar\SidebarService
+- \ModulesGarden\ProductCrossSelling\Core\Helper\WhmcsParams
+- \ModulesGarden\ProductCrossSelling\Core\App\AppParamsContainer
