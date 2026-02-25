@@ -1,5 +1,6 @@
 {include file="orderforms/{$carttpl}/common.tpl"}
-<link rel="stylesheet" href="/templates/hostx-child/templates/orderforms/hostx_cart/css/configureproduct-custom.css?v=1708800001">
+<link rel="stylesheet" href="/templates/hostx-child/templates/orderforms/hostx_cart/css/configureproduct-custom.css?v=1708800006">
+<input type="hidden" id="whmcsLoggedIn" value="{if $loggedin}1{else}0{/if}">
 <div class="cp-enhanced">
 <script>
 var _localLang = {
@@ -245,10 +246,44 @@ var _localLang = {
                               </div>
                             </div>
 
+                            {* --- Channel List Preview (always accessible) --- *}
+                            <div class="cp-channel-preview">
+                                <button type="button" class="btn btn-block cp-btn-gradient"
+                                        data-toggle="modal" data-target="#channelListModal">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:-2px;"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                                    View Channel List
+                                </button>
+                                <p class="cp-channel-hint">Browse 14,000+ channels before you configure your package</p>
+                            </div>
+
+                            {* --- Account Selector (Renew flow, outside configOptions) --- *}
+                            <div id="userServicesDiv" style="display:none;">
+                                <div class="cp-form-group">
+                                    <div class="cp-group-header teal">
+                                        <div class="cp-group-icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                        </div>
+                                        <h3>Select Your Account</h3>
+                                    </div>
+                                    <div class="cp-group-body">
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <div class="form-group user-log">
+                                                    <label for="userServices">Account</label>
+                                                    <select id="userServices" class="form-control select-inline custom-select">
+                                                        <option value="">Select account</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             {* ============================================================ *}
                             {* === MAIN CONFIG OPTIONS (grouped sections)               === *}
                             {* ============================================================ *}
-                            <div class="product-configurable-options-custom" id="productConfigOptionsCustom">
+                            <div class="product-configurable-options-custom" id="productConfigOptionsCustom" style="display:none;">
 
                                 {* Provider auto-selected (single provider: Edge) *}
                                 <input type="hidden" id="inputProvider" value="">
@@ -264,16 +299,44 @@ var _localLang = {
                                     </div>
                                     <div class="cp-group-body">
                                         <div class="row">
-                                            <div class="col-sm-6 group-heading" id="userServicesDiv" style="display:none;">
-                                                <div class="form-group user-log">
-                                                    <label for="userServices">Select account</label>
-                                                    <select id="userServices" class="form-control select-inline custom-select">
-                                                        <option value="">Select account</option>
+                                            <div class="col-sm-6" id="fieldDevice">
+                                                <div class="form-group">
+                                                    <label for="inputConfigOption15Device">Your Device
+                                                        <span class="cp-info-icon" data-tooltip="Select the device you'll use to watch. This ensures the best compatible app and setup instructions.">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                                        </span>
+                                                    </label>
+                                                    <select name="configoptionDevice" id="inputConfigOption15Device" class="form-control select-inline custom-select">
+                                                        <option value="">-- Select --</option>
+                                                        <option value="Firestick">Firestick</option>
+                                                        <option value="MAG">MAG</option>
+                                                        <option value="Android">Android</option>
+                                                        <option value="Apple">Apple</option>
                                                     </select>
                                                 </div>
                                             </div>
 
-                                            <div class="col-sm-6" id="fieldAdult">
+                                            <div class="col-sm-6 cp-field-locked" id="fieldPackageType">
+                                                <div class="form-group">
+                                                    <label for="inputPackageType">Package Type
+                                                        <span class="cp-info-icon" data-tooltip="Select the channel package region. Choice includes all countries worldwide.">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                                        </span>
+                                                    </label>
+                                                    <select id="inputPackageType" class="form-control select-inline custom-select">
+                                                        <option value="">-- Select --</option>
+                                                        <option value="CHOICE" title="14,000+ channels from every country worldwide. Our most popular all-in-one package.">Choice (All Countries)</option>
+                                                        <option value="AMERICAS TV" title="10,000+ channels focused on USA, Canada & Latin America with premium sports.">Americas</option>
+                                                        <option value="CANADA PREMIUM TV" title="8,000+ Canadian channels including local & regional sports and French content.">Canada Premium</option>
+                                                        <option value="USA PREMIUM TV" title="US-focused package with all major networks, sports, news and entertainment.">USA Premium</option>
+                                                        <option value="ENGLISH COUNTRIES TV" title="Channels from USA, Canada, UK, Australia & other English-speaking countries.">English Countries</option>
+                                                        <option value="USA-CAN-UK" title="Combined package covering USA, Canada and UK channels.">USA-CAN-UK</option>
+                                                    </select>
+                                                    <small id="packageTypeInfo" class="cp-option-info"></small>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-6 cp-field-locked" id="fieldAdult">
                                                 <div class="form-group">
                                                     <label for="inputAdult">Include Adult Content
                                                         <span class="cp-info-icon" data-tooltip="Choose whether to include 18+ adult channels in your package.">
@@ -323,23 +386,6 @@ var _localLang = {
                                                 </div>
                                             </div>
 
-                                            <div class="col-sm-6 cp-field-locked" id="fieldDevice">
-                                                <div class="form-group">
-                                                    <label for="inputConfigOption15Device">Your Device
-                                                        <span class="cp-info-icon" data-tooltip="Select the device you'll use to watch. This ensures the best compatible app and setup instructions.">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                                                        </span>
-                                                    </label>
-                                                    <select name="configoptionDevice" id="inputConfigOption15Device" class="form-control select-inline custom-select">
-                                                        <option value="">-- Select --</option>
-                                                        <option value="Firestick">Firestick</option>
-                                                        <option value="MAG">MAG</option>
-                                                        <option value="Android">Android</option>
-                                                        <option value="Apple">Apple</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-
                                             <div class="col-sm-6 cp-field-locked" id="fieldPackage">
                                                 <div class="form-group">
                                                     <label for="selectedProductId">IPTV Package / Product
@@ -350,6 +396,19 @@ var _localLang = {
                                                     <select id="selectedProductId" name="selectedProductId" class="form-control select-inline custom-select">
                                                         <option value="">Select Package / Product</option>
                                                     </select>
+                                                </div>
+                                            </div>
+
+                                            {* --- MAG Address (shown when device=MAG and package selected) --- *}
+                                            <div class="col-sm-6" id="magAddress" style="display:none;">
+                                                <div class="form-group">
+                                                    <label for="magIp">MAG Address
+                                                        <span class="cp-info-icon" data-tooltip="Enter your MAG device MAC address. Format: 00:1A:79:XX:XX:XX. Found in your MAG device settings.">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                                        </span>
+                                                    </label>
+                                                    <input type="text" id="magIp" name="magIp" class="form-control" placeholder="00:1A:79:XX:XX:XX" maxlength="17">
+                                                    <div id="magError" style="color:red; display:none; font-size:12px; margin-top:4px;">Invalid MAG Address</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -366,17 +425,7 @@ var _localLang = {
                                     </div>
                                     <div class="cp-group-body">
                                         <div class="row">
-                                            <div class="col-sm-6">
-                                                <div class="form-group mb-sm-0">
-                                                    <button type="button" class="btn btn-primary btn-block cp-btn-gradient"
-                                                            data-toggle="modal" data-target="#channelListModal">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:-2px;"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-                                                        View Channel List
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-sm-6">
+                                            <div class="col-sm-12">
                                                 <div class="form-group mb-sm-0">
                                                     <button type="button" onclick="openBouquetModal()"
                                                             class="btn btn-primary btn-block cp-btn-gradient">
@@ -400,17 +449,7 @@ var _localLang = {
                                     </div>
                                     <div class="cp-group-body">
                                         <div class="row">
-                                            <div class="col-sm-6">
-                                                <div class="form-group">
-                                                    <label for="billing_cycle">Payment Terms</label>
-                                                    <select name="billing_cycle" id="billing_cycle" class="form-control select-inline custom-select">
-                                                        <option value="monthly" selected>Monthly</option>
-                                                        <option value="quarterly">Quarterly</option>
-                                                        <option value="semiannually">Semi-Annually</option>
-                                                        <option value="annually">Annually</option>
-                                                    </select>
-                                                </div>
-                                            </div>
+                                            <input type="hidden" name="billing_cycle" id="billing_cycle" value="monthly">
 
                                             <div class="col-sm-6">
                                                 <div class="form-group">
@@ -473,14 +512,6 @@ var _localLang = {
                                             <button type="button" class="generate-btn" id="generatePassword">Generate Password</button>
                                         </div>
 
-                                        {* --- MAG Address (shown when device = MAG) --- *}
-                                        <div class="form-group user-log" id="magAddress" style="display:none;">
-                                            <div class="form-group">
-                                                <label for="magIp">MAG Address</label>
-                                                <input type="text" id="magIp" name="magIp" placeholder="Format 00:1A:79:12:34:5A" maxlength="17">
-                                                <div id="magError" style="color:red; display:none;">Invalid MAG Address</div>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
 
@@ -510,7 +541,7 @@ var _localLang = {
                                                 </div>
                                             </div>
 
-                                            <div class="col-sm-6">
+                                            <div class="col-sm-6" id="resellerBillingCycleWrap" style="display:none;">
                                                 <div class="form-group">
                                                     <label for="resellerBillingCycle">Payment Terms</label>
                                                     <select id="resellerBillingCycle" class="form-control select-inline custom-select">
@@ -743,7 +774,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var xuiData = [];
     var xui_catss = [];
     var userServices = [];
-    var loggedIn = false;
+    var loggedIn = document.getElementById('whmcsLoggedIn') && document.getElementById('whmcsLoggedIn').value === '1';
 
     // ========== DOM REFS ==========
     var selectserviceType = document.getElementById("selectserviceType");
@@ -757,6 +788,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var durationSelect = document.getElementById("inputDuration");
     var connectionsSelect = document.getElementById("inputConnections");
     var deviceSelect = document.getElementById("inputConfigOption15Device");
+    var packageTypeSelect = document.getElementById("inputPackageType");
     var selectedProductId = document.getElementById("selectedProductId");
     var billingCycleSelect = document.getElementById("billing_cycle");
     var vpnToggle = document.getElementById("vpnToggle");
@@ -858,13 +890,16 @@ document.addEventListener("DOMContentLoaded", function() {
     function toggleServiceType() {
         var val = selectserviceType.value;
 
-        // Reset reseller panel
+        // Reset all panels
         if (resellerConfigOptions) resellerConfigOptions.style.display = "none";
+        if (configOptionsCustom) configOptionsCustom.style.display = "none";
 
         if (val === "Select Service") {
+            // Initial state: only service cards + channel list visible
             if (panel) panel.style.display = "none";
             if (cartBody) cartBody.style.setProperty("width", "100%", "important");
         } else if (val === "Create new service") {
+            if (configOptionsCustom) configOptionsCustom.style.display = "block";
             if (panel) panel.style.display = "block";
             if (cartBody) cartBody.style.setProperty("width", "60%", "");
             if (userServicesDiv) userServicesDiv.style.display = "none";
@@ -878,15 +913,16 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (cartBody) cartBody.style.setProperty("width", "100%", "important");
                 return;
             }
-            if (panel) panel.style.display = "block";
-            if (cartBody) cartBody.style.setProperty("width", "60%", "");
+            // Only show account selector, hide config options
+            if (configOptionsCustom) configOptionsCustom.style.display = "none";
+            if (panel) panel.style.display = "none";
+            if (cartBody) cartBody.style.setProperty("width", "100%", "important");
             if (userServicesDiv) userServicesDiv.style.display = "block";
             if (loginDetails) loginDetails.style.display = "none";
         } else if (val === "Reseller") {
             if (panel) panel.style.display = "block";
             if (cartBody) cartBody.style.setProperty("width", "60%", "");
             if (resellerConfigOptions) resellerConfigOptions.style.display = "block";
-            // Reset order summary for reseller
             resetOrderSummary();
         }
     }
@@ -904,7 +940,7 @@ document.addEventListener("DOMContentLoaded", function() {
         toggleServiceType();
     };
 
-    // ========== PROGRESSIVE FIELD UNLOCK ==========
+    // ========== PROGRESSIVE FIELD-BY-FIELD UNLOCK ==========
     function unlockField(id) {
         var el = document.getElementById(id);
         if (el && el.classList.contains('cp-field-locked')) {
@@ -918,29 +954,40 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Adult → unlocks Duration
+    // Device → Package Type
+    deviceSelect.addEventListener("change", function() {
+        if (this.value) unlockField('fieldPackageType');
+    });
+    // Package Type → Adult + show info
+    packageTypeSelect.addEventListener("change", function() {
+        if (this.value) unlockField('fieldAdult');
+        var infoEl = document.getElementById('packageTypeInfo');
+        if (infoEl) {
+            var sel = this.options[this.selectedIndex];
+            infoEl.textContent = sel && sel.title ? sel.title : '';
+        }
+    });
+    // Adult → Duration
     adultSelect.addEventListener("change", function() {
         if (this.value) unlockField('fieldDuration');
     });
-
-    // Duration → unlocks Connections
+    // Duration → Connections
     durationSelect.addEventListener("change", function() {
         if (this.value) unlockField('fieldConnections');
     });
-
-    // Connections → unlocks Device
+    // Connections → Package
     connectionsSelect.addEventListener("change", function() {
-        if (this.value) unlockField('fieldDevice');
-    });
-
-    // Device → unlocks Package
-    deviceSelect.addEventListener("change", function() {
         if (this.value) unlockField('fieldPackage');
     });
 
     // Package selected → unlock Groups 2, 3, 4
     function unlockAfterPackage() {
         if (selectedProductId && selectedProductId.value) {
+            // Show MAG Address if device is MAG
+            if (deviceSelect.value === "MAG") {
+                if (magAddressDiv) magAddressDiv.style.display = "block";
+                if (loginDetails) loginDetails.style.display = "none";
+            }
             unlockGroup('cpGroup2');
             unlockGroup('cpGroup3');
             unlockGroup('cpGroup4');
@@ -950,8 +997,11 @@ document.addEventListener("DOMContentLoaded", function() {
     // ========== DEVICE TOGGLE (MAG vs Login) ==========
     function toggleDeviceFields() {
         if (deviceSelect.value === "MAG") {
+            // Only show MAG Address if package is already selected
+            if (selectedProductId && selectedProductId.value) {
+                if (magAddressDiv) magAddressDiv.style.display = "block";
+            }
             if (loginDetails) loginDetails.style.display = "none";
-            if (magAddressDiv) magAddressDiv.style.display = "block";
         } else {
             if (selectserviceType.value !== "Renew Existing Service") {
                 if (loginDetails) loginDetails.style.display = "block";
@@ -967,6 +1017,7 @@ document.addEventListener("DOMContentLoaded", function() {
         var d = durationSelect ? durationSelect.value.trim() : "";
         var c = connectionsSelect ? connectionsSelect.value.trim() : "";
         var dev = deviceSelect ? deviceSelect.value.trim() : "";
+        var pt = packageTypeSelect ? packageTypeSelect.value.trim() : "";
 
         if (c && !c.startsWith("1 ")) {
             c = c.replace("Connection", "Connections");
@@ -974,22 +1025,65 @@ document.addEventListener("DOMContentLoaded", function() {
 
         var productsToSearch = allProducts;
 
+        // Filter by device
         if (dev) {
-            var filtered = allProducts.filter(function(prod) {
+            var filtered = productsToSearch.filter(function(prod) {
                 return prod.name.toLowerCase().indexOf(dev.toLowerCase()) !== -1;
             });
-            if (filtered.length > 0) {
-                populateProductDropdown(filtered);
-                productsToSearch = filtered;
-            } else {
-                populateProductDropdown(allProducts);
-                productsToSearch = allProducts;
-            }
-        } else {
-            populateProductDropdown(allProducts);
+            if (filtered.length > 0) productsToSearch = filtered;
         }
 
-        var key = "CHOICE (" + a + "): " + d + " (" + c + ")";
+        // Filter by package type
+        if (pt) {
+            var ptFiltered = productsToSearch.filter(function(prod) {
+                return prod.name.toUpperCase().indexOf(pt.toUpperCase()) !== -1;
+            });
+            if (ptFiltered.length > 0) productsToSearch = ptFiltered;
+        }
+
+        // Filter by adult
+        if (a) {
+            var adultFiltered = productsToSearch.filter(function(prod) {
+                return prod.name.toUpperCase().indexOf("(" + a + ")") !== -1;
+            });
+            if (adultFiltered.length > 0) productsToSearch = adultFiltered;
+        }
+
+        // Filter by duration — extract number, match "N Month" or "N Months"
+        if (d) {
+            var dNum = d.match(/(\d+)/);
+            if (dNum) {
+                var durationFiltered = productsToSearch.filter(function(prod) {
+                    var re = new RegExp(":\\s*" + dNum[1] + "\\s+months?\\s*\\(", "i");
+                    return re.test(prod.name);
+                });
+                if (durationFiltered.length > 0) productsToSearch = durationFiltered;
+            }
+        }
+
+        // Filter by connections — extract number, match "(N Connection" or "(N Connections"
+        if (c) {
+            var cNum = c.match(/(\d+)/);
+            if (cNum) {
+                var connFiltered = productsToSearch.filter(function(prod) {
+                    var re = new RegExp("\\(" + cNum[1] + "\\s+connections?\\)", "i");
+                    return re.test(prod.name);
+                });
+                if (connFiltered.length > 0) productsToSearch = connFiltered;
+            }
+        }
+
+        populateProductDropdown(productsToSearch);
+
+        // Auto-select if only 1 result
+        if (productsToSearch.length === 1) {
+            selectedProductId.value = productsToSearch[0].id;
+            fetchProductPrice(productsToSearch[0].id);
+            unlockAfterPackage();
+            return;
+        }
+
+        var key = (pt || "CHOICE") + " (" + a + "): " + d + " (" + c + ")";
 
         var found = null;
         for (var i = 0; i < productsToSearch.length; i++) {
@@ -1008,7 +1102,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    [adultSelect, durationSelect, connectionsSelect, deviceSelect].forEach(function(el) {
+    [adultSelect, durationSelect, connectionsSelect, deviceSelect, packageTypeSelect].forEach(function(el) {
         if (el) el.addEventListener("change", matchProduct);
     });
 
@@ -1229,6 +1323,10 @@ document.addEventListener("DOMContentLoaded", function() {
             var upgradeBtn = document.getElementById("upgradeBtn");
             if (upgradeBtn) {
                 upgradeBtn.href = "/clientarea.php?action=productdetails&id=" + selectedAccountId;
+            }
+            var payInvoiceBtn = document.getElementById("payInvoiceBtn");
+            if (payInvoiceBtn) {
+                payInvoiceBtn.href = "/clientarea.php?action=productdetails&id=" + selectedAccountId + "#tabInvoices";
             }
             if (typeof $ !== 'undefined') {
                 $('#accountActionModal').modal('show');

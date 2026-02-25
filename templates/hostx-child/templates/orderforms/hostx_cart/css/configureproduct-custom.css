@@ -383,6 +383,32 @@
     }
 }
 
+/* Channel list preview */
+.cp-enhanced .cp-channel-preview {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.cp-enhanced .cp-channel-preview .cp-btn-gradient {
+    max-width: 320px;
+    margin: 0 auto;
+}
+.cp-enhanced .cp-channel-hint {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: #999;
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+.cp-enhanced .cp-option-info {
+    display: block;
+    font-family: 'Inter', sans-serif;
+    font-size: 11.5px;
+    color: #6c5ce7;
+    margin-top: 6px;
+    line-height: 1.4;
+}
+
 /* Progressive field lock */
 .cp-enhanced .cp-field-locked {
     opacity: 0.35;
@@ -411,8 +437,22 @@
 .cp-enhanced .cp-form-group.cp-locked .cp-group-header {
     position: relative;
 }
-.cp-enhanced .cp-form-group.cp-locked .cp-group-header::after {
-    content: 'Complete the options above to unlock';
+.cp-enhanced #cpGroup1.cp-locked .cp-group-header::after {
+    content: 'Select a service type to unlock';
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: #aaa;
+    letter-spacing: 0.3px;
+}
+.cp-enhanced #cpGroup2.cp-locked .cp-group-header::after,
+.cp-enhanced #cpGroup3.cp-locked .cp-group-header::after,
+.cp-enhanced #cpGroup4.cp-locked .cp-group-header::after {
+    content: 'Select a package to unlock';
     position: absolute;
     right: 24px;
     top: 50%;
@@ -1489,14 +1529,43 @@
     to { transform: rotate(360deg); }
 }
 
-.cp-enhanced .iptv-fx-card a:nth-child(2) {
-    display: inline-block;
-    border-radius: 50px;
+.cp-enhanced .iptv-fx-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
 }
 
+.cp-enhanced .iptv-fx-card a,
 .cp-enhanced .iptv-fx-card button {
-    display: inline-block;
+    display: block;
+    width: 100%;
     border-radius: 50px;
+    padding: 12px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.cp-enhanced .iptv-fx-card a.btn-primary {
+    background: linear-gradient(135deg, #6c5ce7, #00cec9);
+    border: none;
+    color: #fff;
+}
+
+.cp-enhanced .iptv-fx-card a.btn-secondary {
+    background: #083C72;
+    border: none;
+    color: #fff;
+}
+
+.cp-enhanced .iptv-fx-card button.btn-outline-secondary {
+    background: transparent;
+    border: 1px solid #cbd5e0;
+    color: #666;
 }
 
 .cp-enhanced button.btn-close {
@@ -1506,12 +1575,30 @@
 }
 
 /* Generic modal padding (account action modal etc.) */
+.cp-enhanced #order-standard_cart #accountActionModal .modal-dialog {
+    margin: 15px;
+    max-width: 400px;
+}
+
 .cp-enhanced #order-standard_cart #accountActionModal .modal-body,
 .cp-enhanced #order-standard_cart #accountActionModal .modal-footer,
 .cp-enhanced #order-standard_cart #accountActionModal .modal-header {
     text-align: center !important;
     border: 0;
     padding: 0 20px 30px 20px;
+}
+
+.cp-enhanced #order-standard_cart #accountActionModal .modal-body p {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+@media (min-width: 576px) {
+    .cp-enhanced #order-standard_cart #accountActionModal .modal-dialog {
+        margin: 1.75rem auto;
+    }
 }
 
 /* --- MAG Address styling --- */
