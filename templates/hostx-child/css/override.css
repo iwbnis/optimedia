@@ -2445,6 +2445,67 @@ h1,h2 {
     text-decoration: none !important;
 }
 
+/* --- Quick Start Panel --- */
+.ent-mob-panel-quickstart {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+}
+.ent-mob-panel-qs-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    margin-bottom: 2px !important;
+}
+.ent-mob-panel-qs-links {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+}
+.ent-mob-qs-link {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background: #fff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    padding: 10px 14px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+}
+.ent-mob-qs-link:hover,
+.ent-mob-qs-link:active {
+    text-decoration: none !important;
+    border-color: #6c5ce7 !important;
+    color: #6c5ce7 !important;
+    background: #f5f3ff !important;
+    box-shadow: 0 2px 8px rgba(108,92,231,0.12) !important;
+}
+.ent-mob-qs-link i {
+    font-size: 14px !important;
+    color: #6c5ce7 !important;
+    width: 18px !important;
+    text-align: center !important;
+    flex-shrink: 0 !important;
+}
+.ent-mob-qs-link-all {
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe) !important;
+    color: #fff !important;
+    border-color: #6c5ce7 !important;
+}
+.ent-mob-qs-link-all i {
+    color: #fff !important;
+}
+.ent-mob-qs-link-all:hover,
+.ent-mob-qs-link-all:active {
+    background: linear-gradient(135deg, #5a4bd1, #8b7cf0) !important;
+    color: #fff !important;
+    border-color: #5a4bd1 !important;
+}
+
 /* ============================================
    EXPANDABLE INLINE SERVICE CARDS
    Accordion-style quick-view panels
@@ -2455,44 +2516,53 @@ h1,h2 {
     max-height: 0;
     overflow: hidden;
     opacity: 0;
-    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                opacity 0.3s ease,
-                padding 0.3s ease;
-    background: #f8f9fa;
-    border-left: 3px solid #6c5ce7;
+    transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.35s ease,
+                padding 0.35s ease,
+                margin 0.35s ease;
+    background: linear-gradient(160deg, #f5f3ff 0%, #f0f9ff 50%, #f0fdf4 100%);
+    border-left: 4px solid #6c5ce7;
+    border-radius: 0 12px 12px 0;
     margin: 0;
-    padding: 0 16px;
+    padding: 0 20px;
+    box-shadow: none;
 }
 .ent-expand-panel.ent-expand-open {
     max-height: 800px;
     opacity: 1;
-    padding: 20px 16px;
-    margin: 2px 0 4px;
+    padding: 24px 20px;
+    margin: 6px 0 10px;
     overflow-y: auto;
+    box-shadow: 0 8px 30px rgba(108, 92, 231, 0.12), 0 2px 8px rgba(0,0,0,0.06);
 }
 
 /* --- Service Details (Username, Password, etc.) --- */
 .ent-expand-service-details {
     background: #fff !important;
     border: 1px solid #e2e8f0 !important;
-    border-radius: 10px !important;
+    border-radius: 12px !important;
     padding: 0 !important;
-    margin-bottom: 16px !important;
+    margin-bottom: 18px !important;
     overflow: hidden !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
 }
 .ent-expand-detail-row {
     display: flex !important;
     align-items: center !important;
-    padding: 11px 18px !important;
+    padding: 13px 20px !important;
     border-bottom: 1px solid #f0f2f5 !important;
     margin: 0 !important;
-    gap: 12px !important;
+    gap: 14px !important;
+    transition: background 0.15s ease !important;
 }
 .ent-expand-detail-row:last-child {
     border-bottom: none !important;
 }
 .ent-expand-detail-row:nth-child(even) {
-    background: #f9fafb !important;
+    background: #f8fafc !important;
+}
+.ent-expand-detail-row:hover {
+    background: #f0efff !important;
 }
 .ent-expand-detail-label {
     font-size: 13px !important;
@@ -2504,35 +2574,45 @@ h1,h2 {
     align-items: center !important;
 }
 .ent-expand-detail-label i {
-    margin-right: 8px !important;
-    width: 16px !important;
+    margin-right: 10px !important;
+    width: 28px !important;
+    height: 28px !important;
     text-align: center !important;
+    line-height: 28px !important;
     color: #6c5ce7 !important;
-    font-size: 13px !important;
+    font-size: 12px !important;
+    background: linear-gradient(135deg, #f0efff, #e8e5ff) !important;
+    border-radius: 8px !important;
+    flex-shrink: 0 !important;
 }
 .ent-expand-detail-value {
-    font-size: 13px !important;
-    font-weight: 600 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
     color: #1e293b !important;
     flex: 1 !important;
     word-break: break-word !important;
+    letter-spacing: -0.2px !important;
 }
 .ent-pw-toggle {
     display: inline-block !important;
-    background: #6c5ce7 !important;
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe) !important;
     color: #fff !important;
     border: none !important;
-    border-radius: 4px !important;
-    padding: 3px 12px !important;
+    border-radius: 6px !important;
+    padding: 4px 14px !important;
     font-size: 11px !important;
     font-weight: 600 !important;
     cursor: pointer !important;
     margin-left: 10px !important;
     vertical-align: middle !important;
     letter-spacing: 0.3px !important;
+    transition: all 0.2s !important;
+    box-shadow: 0 2px 6px rgba(108,92,231,0.25) !important;
 }
 .ent-pw-toggle:hover {
-    background: #5a4bd1 !important;
+    background: linear-gradient(135deg, #5a4bd1, #8b7cf0) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 10px rgba(108,92,231,0.35) !important;
 }
 
 /* --- Edit Bouquets Modal --- */
@@ -2647,31 +2727,48 @@ h1,h2 {
 
 /* --- Mini Gradient Header --- */
 .ent-expand-header {
-    background: linear-gradient(135deg, #6c5ce7, #00cec9);
-    border-radius: 8px;
-    padding: 14px 18px;
-    margin-bottom: 16px;
+    background: linear-gradient(135deg, #6c5ce7 0%, #8b5cf6 40%, #00cec9 100%);
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 14px;
     flex-wrap: wrap;
+    box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+.ent-expand-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
 }
 .ent-expand-header-info {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
     min-width: 0;
     flex: 1;
+    position: relative;
+    z-index: 1;
 }
 .ent-expand-header-title {
-    font-size: 15px;
+    font-size: 17px;
     font-weight: 700;
     color: #fff;
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 .ent-expand-header-domain {
     font-size: 12px;
@@ -2741,107 +2838,136 @@ h1,h2 {
 /* --- Action Buttons --- */
 .ent-expand-actions {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     flex-wrap: wrap;
+    margin-top: 4px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(108,92,231,0.1);
 }
 .ent-expand-btn {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: 6px;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
     font-size: 13px;
     font-weight: 600;
     text-decoration: none !important;
     border: none;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
     white-space: nowrap;
+    letter-spacing: 0.2px;
 }
 .ent-expand-btn:hover {
     text-decoration: none !important;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
 }
 .ent-expand-btn-primary {
-    background: linear-gradient(135deg, #6c5ce7, #00cec9);
+    background: linear-gradient(135deg, #6c5ce7 0%, #8b5cf6 50%, #00cec9 100%);
     color: #fff !important;
+    box-shadow: 0 3px 12px rgba(108,92,231,0.3);
 }
 .ent-expand-btn-primary:hover,
 .ent-expand-btn-primary:focus {
     color: #fff !important;
-    opacity: 0.9;
+    box-shadow: 0 6px 20px rgba(108,92,231,0.4);
 }
 .ent-expand-btn-secondary {
-    background: #e9ecef;
-    color: #495057 !important;
+    background: #fff;
+    color: #6c5ce7 !important;
+    border: 2px solid #e2deff;
 }
 .ent-expand-btn-secondary:hover,
 .ent-expand-btn-secondary:focus {
-    background: #dee2e6;
-    color: #333 !important;
+    background: #f5f3ff;
+    border-color: #6c5ce7;
+    color: #5a4bd1 !important;
+    box-shadow: 0 4px 14px rgba(108,92,231,0.15);
 }
 .ent-expand-btn-danger {
     background: #fff5f5;
     color: #e74c3c !important;
-    border: 1px solid #fecaca;
+    border: 2px solid #fecaca;
 }
 .ent-expand-btn-danger:hover,
 .ent-expand-btn-danger:focus {
     background: #fee2e2;
     color: #c0392b !important;
+    border-color: #f87171;
+    box-shadow: 0 4px 14px rgba(231,76,60,0.15);
 }
 
 /* --- Chevron Icon --- */
 .ent-expand-chevron {
-    display: inline-block;
-    transition: transform 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-size: 11px;
-    color: #6c757d;
+    color: #fff;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    box-shadow: 0 2px 6px rgba(108,92,231,0.3);
+    flex-shrink: 0;
 }
 .ent-expand-chevron.ent-expand-chevron-open {
     transform: rotate(90deg);
+    background: linear-gradient(135deg, #00cec9, #6c5ce7);
+    box-shadow: 0 3px 10px rgba(0,206,201,0.3);
 }
 
 /* --- Loading Spinner --- */
 .ent-expand-loading {
     text-align: center;
-    padding: 30px 0;
-    color: #6c757d;
+    padding: 40px 0;
+    color: #8395a7;
 }
 .ent-expand-loading i {
-    font-size: 24px;
-    margin-bottom: 8px;
+    font-size: 28px;
+    margin-bottom: 12px;
     display: block;
     color: #6c5ce7;
 }
 .ent-expand-loading span {
-    font-size: 13px;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 /* --- Error Fallback --- */
 .ent-expand-error {
     text-align: center;
-    padding: 20px;
-    color: #6c757d;
+    padding: 30px;
+    color: #8395a7;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px dashed #dfe4ea;
 }
 .ent-expand-error p {
-    margin-bottom: 10px;
-    font-size: 13px;
+    margin-bottom: 12px;
+    font-size: 14px;
 }
 
 /* --- Dashboard list-group-item tweaks --- */
 .list-group-item.ent-expandable-item {
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.25s ease;
     position: relative;
+    border-left: 4px solid transparent !important;
+    padding-right: 14px !important;
 }
 .list-group-item.ent-expandable-item:hover {
-    background-color: #f0f0ff !important;
+    background: linear-gradient(90deg, #f5f3ff, #fafafe) !important;
+    border-left-color: #a29bfe !important;
+    transform: translateX(2px);
 }
 .list-group-item.ent-expandable-item.ent-expand-active {
-    background-color: #f0f0ff !important;
-    border-left: 3px solid #6c5ce7 !important;
+    background: linear-gradient(90deg, #ede9fe, #f0f0ff) !important;
+    border-left-color: #6c5ce7 !important;
+    box-shadow: inset 0 0 0 1px rgba(108,92,231,0.1);
 }
 
 /* --- My Services Table Expand Row --- */
@@ -2911,6 +3037,10 @@ tr.ent-service-row {
     .ent-expand-header {
         flex-direction: column;
         align-items: flex-start;
+        padding: 16px;
+    }
+    .ent-expand-header-title {
+        font-size: 15px;
     }
     .ent-expand-actions {
         flex-direction: column;
@@ -2920,7 +3050,18 @@ tr.ent-service-row {
         justify-content: center;
     }
     .ent-expand-panel.ent-expand-open {
-        padding: 14px 12px;
+        padding: 16px 14px;
+        margin: 4px 0 8px;
+        border-radius: 0 10px 10px 0;
+    }
+    .ent-expand-detail-label {
+        min-width: unset !important;
+    }
+    .ent-expand-detail-row {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 6px !important;
+        padding: 12px 16px !important;
     }
 }
 

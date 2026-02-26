@@ -560,7 +560,7 @@
 
         var chevron = document.createElement('span');
         chevron.className = 'ent-expand-chevron fas fa-chevron-right';
-        chevron.style.cssText = 'float:right; margin-top:3px; margin-left:8px;';
+        chevron.style.cssText = 'float:right; margin-top:2px; margin-left:10px;';
         item.appendChild(chevron);
 
         var panel = document.createElement('div');

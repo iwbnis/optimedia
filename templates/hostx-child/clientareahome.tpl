@@ -106,6 +106,10 @@
             <span class="ent-mob-tab-icon"><img src="https://test.choiceiptv.net/templates/hostx-child/imagenew/pending.png"></span>
             <span class="ent-mob-tab-label">{lang key='navinvoices'}</span>
         </button>
+        <button class="ent-mob-tab" data-tab="quickstart">
+            <span class="ent-mob-tab-icon"><img src="https://test.choiceiptv.net/templates/hostx-child/imagenew/desktop.png"></span>
+            <span class="ent-mob-tab-label">Quick Start</span>
+        </button>
     </div>
     <div class="ent-mob-panels">
         <div class="ent-mob-panel active" data-panel="services">
@@ -146,6 +150,37 @@
                     <span class="ent-mob-panel-vs">vs last month</span>
                 </div>
                 <a href="clientarea.php?action=invoices" class="ent-mob-panel-link">View All <i class="bi bi-arrow-right"></i></a>
+            </div>
+        </div>
+        <div class="ent-mob-panel" data-panel="quickstart">
+            <div class="ent-mob-panel-inner ent-mob-panel-quickstart">
+                <div class="ent-mob-panel-qs-title">Set up your device</div>
+                <div class="ent-mob-panel-qs-links">
+                    <a href="index.php?rp=/knowledgebase/63/Amazon-Firestick-Apps.html" class="ent-mob-qs-link">
+                        <i class="fab fa-amazon"></i> Firestick
+                    </a>
+                    <a href="index.php?rp=/knowledgebase/38/ANDROID-DOWNLOAD-LINKS.html" class="ent-mob-qs-link">
+                        <i class="fab fa-android"></i> Android
+                    </a>
+                    <a href="index.php?rp=/knowledgebase/51/How-to-Setup-iPTV-on-iOS-Devices-iPhone-iPad.html" class="ent-mob-qs-link">
+                        <i class="fab fa-apple"></i> iPhone / iPad
+                    </a>
+                    <a href="index.php?rp=/knowledgebase/8/Smart-TV-Devices" class="ent-mob-qs-link">
+                        <i class="fas fa-tv"></i> Smart TV
+                    </a>
+                    <a href="index.php?rp=/knowledgebase/49/How-to-Setup-IPTV-On-MAG-Devices.html" class="ent-mob-qs-link">
+                        <i class="fas fa-hdd"></i> MAG Box
+                    </a>
+                    <a href="index.php?rp=/knowledgebase/45/VLC-Media-Player.html" class="ent-mob-qs-link">
+                        <i class="fas fa-laptop"></i> PC / Mac
+                    </a>
+                    <a href="index.php?rp=/knowledgebase/71/Purple-Smart-IPTV-Player.html" class="ent-mob-qs-link">
+                        <i class="fas fa-stream"></i> ROKU
+                    </a>
+                    <a href="index.php?rp=/knowledgebase/6/Setup-Tutorials" class="ent-mob-qs-link ent-mob-qs-link-all">
+                        <i class="fas fa-book-open"></i> All Guides
+                    </a>
+                </div>
             </div>
         </div>
     </div>
