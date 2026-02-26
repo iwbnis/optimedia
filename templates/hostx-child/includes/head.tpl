@@ -16,7 +16,7 @@
 {/assetExists}
 {if $whmcsDefaultPagesHostx eq 'true'}
   {assetExists file="hostx-client-area.css"}
-    <link href="{$__assetPath__}?v={$versionHash}&t=20260226m" rel="stylesheet">
+    <link href="{$__assetPath__}?v={$versionHash}&t=20260226n" rel="stylesheet">
   {/assetExists}
 {/if}
 {if $isPageDedicated}
@@ -28,7 +28,7 @@
 {/assetExists}
 {if $whmcsDefaultPagesHostx eq 'true'}
   {assetExists file="hostx-client-area-responsive.css"}
-    <link href="{$__assetPath__}?v={$versionHash}&t=20260226m" rel="stylesheet">
+    <link href="{$__assetPath__}?v={$versionHash}&t=20260226n" rel="stylesheet">
   {/assetExists}
 {/if}
 <script>
@@ -86,7 +86,7 @@
   {$colorDataCustom}
 {/if}
 {assetExists file="override.css"}
-  <link href="{$__assetPath__}?v={$versionHash}&t=20260226m" rel="stylesheet">
+  <link href="{$__assetPath__}?v={$versionHash}&t=20260226n" rel="stylesheet">
 {/assetExists}
 <script src="{assetPath file='scripts.min.js'}?v={$versionHash}"></script>
 {if $templatefile == "viewticket" && !$loggedin}

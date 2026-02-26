@@ -3352,3 +3352,286 @@ tr.ent-service-row {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* ===== KB ARTICLE STYLES ===== */
+.card-body article {
+    font-size: 15px;
+    line-height: 1.75;
+    color: #2d3748;
+}
+.card-body article h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 28px 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e9e5ff;
+}
+.card-body article h3:first-child {
+    margin-top: 0;
+}
+.card-body article h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 22px 0 10px 0;
+}
+.card-body article p {
+    margin: 0 0 14px 0;
+    color: #4a5568;
+}
+.card-body article a {
+    color: #6c5ce7;
+    font-weight: 500;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(108,92,231,0.2);
+    transition: all 0.2s;
+}
+.card-body article a:hover {
+    color: #5a4bd1;
+    border-bottom-color: #6c5ce7;
+}
+.card-body article ol {
+    padding-left: 0;
+    counter-reset: kb-step;
+    list-style: none;
+    margin: 0 0 18px 0;
+}
+.card-body article ol > li {
+    position: relative;
+    padding: 10px 12px 10px 48px;
+    margin-bottom: 6px;
+    background: #fafafa;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+    counter-increment: kb-step;
+    transition: background 0.15s;
+}
+.card-body article ol > li:hover {
+    background: #f5f3ff;
+    border-color: #e9e5ff;
+}
+.card-body article ol > li::before {
+    content: counter(kb-step);
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    width: 26px;
+    height: 26px;
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.card-body article ul {
+    padding-left: 0;
+    list-style: none;
+    margin: 0 0 18px 0;
+}
+.card-body article ul > li {
+    position: relative;
+    padding: 8px 12px 8px 32px;
+    margin-bottom: 4px;
+}
+.card-body article ul > li::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 16px;
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    border-radius: 50%;
+}
+.card-body article table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0 20px 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.card-body article table th {
+    background: linear-gradient(135deg, #6c5ce7, #7c6cf0);
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 16px;
+    text-align: left;
+    border: none;
+}
+.card-body article table td {
+    padding: 11px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+    color: #4a5568;
+}
+.card-body article table tr:last-child td {
+    border-bottom: none;
+}
+.card-body article table tr:nth-child(even) td {
+    background: #fafbfc;
+}
+.card-body article table tr:hover td {
+    background: #f5f3ff;
+}
+.card-body article strong {
+    color: #1a202c;
+    font-weight: 600;
+}
+.card-body article em {
+    color: #718096;
+    font-style: italic;
+}
+/* Info callout boxes */
+.kb-callout {
+    padding: 14px 16px 14px 52px;
+    border-radius: 10px;
+    margin: 16px 0;
+    position: relative;
+    font-size: 14px;
+    line-height: 1.6;
+}
+.kb-callout::before {
+    position: absolute;
+    left: 16px;
+    top: 14px;
+    font-size: 18px;
+    font-family: 'Font Awesome 5 Free', 'Font Awesome 5 Pro';
+    font-weight: 900;
+}
+.kb-callout-info {
+    background: #ebf5ff;
+    border-left: 4px solid #4299e1;
+    color: #2b6cb0;
+}
+.kb-callout-info::before {
+    content: '\f05a';
+    color: #4299e1;
+}
+.kb-callout-tip {
+    background: #f0fff4;
+    border-left: 4px solid #48bb78;
+    color: #276749;
+}
+.kb-callout-tip::before {
+    content: '\f0eb';
+    color: #48bb78;
+}
+.kb-callout-warn {
+    background: #fffbeb;
+    border-left: 4px solid #ecc94b;
+    color: #975a16;
+}
+.kb-callout-warn::before {
+    content: '\f071';
+    color: #ecc94b;
+}
+/* App download cards */
+.kb-app-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin: 16px 0 20px 0;
+}
+.kb-app-card {
+    background: #fff;
+    border: 1px solid #edf2f7;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    transition: all 0.2s;
+}
+.kb-app-card:hover {
+    border-color: #d6d0ff;
+    box-shadow: 0 4px 12px rgba(108,92,231,0.1);
+    transform: translateY(-2px);
+}
+.kb-app-card .kb-app-name {
+    font-weight: 700;
+    color: #1a202c;
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+.kb-app-card .kb-app-url {
+    font-size: 13px;
+    color: #6c5ce7;
+    font-weight: 500;
+    word-break: break-all;
+}
+.kb-app-card .kb-app-desc {
+    font-size: 12px;
+    color: #a0aec0;
+    margin-top: 4px;
+}
+/* Credential box */
+.kb-cred-box {
+    background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+    border: 1px solid #d6d0ff;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 16px 0;
+}
+.kb-cred-box h4 {
+    margin: 0 0 8px 0 !important;
+    font-size: 15px !important;
+    color: #5b21b6 !important;
+}
+.kb-cred-box p {
+    margin: 0 !important;
+    font-size: 14px;
+    color: #4c1d95;
+}
+/* Quick action button */
+.kb-btn {
+    display: inline-block;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none !important;
+    border: none !important;
+    transition: all 0.2s;
+    margin: 4px 4px 4px 0;
+}
+.kb-btn-primary {
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    color: #fff !important;
+}
+.kb-btn-primary:hover {
+    box-shadow: 0 4px 12px rgba(108,92,231,0.35);
+    transform: translateY(-1px);
+    color: #fff !important;
+}
+.kb-btn-outline {
+    background: #fff;
+    color: #6c5ce7 !important;
+    border: 2px solid #d6d0ff !important;
+}
+.kb-btn-outline:hover {
+    background: #f5f3ff;
+    border-color: #6c5ce7 !important;
+}
+/* Responsive */
+@media (max-width: 576px) {
+    .card-body article ol > li {
+        padding-left: 42px;
+    }
+    .kb-app-grid {
+        grid-template-columns: 1fr;
+    }
+    .card-body article table {
+        font-size: 13px;
+    }
+    .card-body article table th,
+    .card-body article table td {
+        padding: 8px 10px;
+    }
+}
