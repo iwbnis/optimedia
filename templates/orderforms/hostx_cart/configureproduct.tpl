@@ -1,5 +1,5 @@
 {include file="orderforms/{$carttpl}/common.tpl"}
-<link rel="stylesheet" href="/templates/hostx-child/templates/orderforms/hostx_cart/css/configureproduct-custom.css?v=1708800006">
+<link rel="stylesheet" href="/templates/hostx-child/templates/orderforms/hostx_cart/css/configureproduct-custom.css?v=20260226r">
 <input type="hidden" id="whmcsLoggedIn" value="{if $loggedin}1{else}0{/if}">
 <div class="cp-enhanced">
 <script>
@@ -312,6 +312,7 @@ var _localLang = {
                                                         <option value="MAG">MAG</option>
                                                         <option value="Android">Android</option>
                                                         <option value="Apple">Apple</option>
+                                                        <option value="Other">Other</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -363,8 +364,12 @@ var _localLang = {
                                                         <option value="1 Month">1 Month</option>
                                                         <option value="3 Months">3 Months</option>
                                                         <option value="6 Months">6 Months</option>
-                                                        <option value="12 Months">12 Months</option>
+                                                        <option value="12 Months">&#11088; 12 Months — BEST VALUE + FREE BOX</option>
                                                     </select>
+                                                    <div id="durationBestValueBadge" class="cp-best-value-badge" style="display:none;">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                                        Best value — includes a FREE TVHub Android IPTV Box!
+                                                    </div>
                                                 </div>
                                             </div>
 
@@ -439,19 +444,19 @@ var _localLang = {
                                     </div>
                                 </div>
 
-                                {* --- Group 3: Payment & Add-ons --- *}
+                                {* --- Group 3: Add-ons --- *}
                                 <div class="cp-form-group cp-locked" id="cpGroup3">
                                     <div class="cp-group-header purple">
                                         <div class="cp-group-icon">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
                                         </div>
-                                        <h3>Payment & Add-ons</h3>
+                                        <h3>Add-ons</h3>
                                     </div>
                                     <div class="cp-group-body">
                                         <div class="row">
                                             <input type="hidden" name="billing_cycle" id="billing_cycle" value="monthly">
 
-                                            <div class="col-sm-6">
+                                            <div class="col-sm-6" style="display:none;">
                                                 <div class="form-group">
                                                     <label for="vpnToggle">Add VPN (Optional)</label><br>
                                                     <label class="cp-toggle-switch">
@@ -465,11 +470,39 @@ var _localLang = {
                                             </div>
 
                                             <div class="col-sm-6">
-                                                <div class="form-group">
-                                                    <label for="androidProducts">Add Android IPTV Box</label>
+                                                <div class="form-group" id="androidBoxGroup">
+                                                    <label for="androidProducts">Add TVHub Android IPTV Box <span id="androidBoxPriceTag" style="font-weight:600;color:#6c5ce7;"></span></label>
                                                     <select id="androidProducts" class="form-control">
                                                         <option value="">None</option>
                                                     </select>
+                                                    <div id="androidBoxQtyWrap" style="display:none;margin-top:8px;">
+                                                        <label for="androidBoxQty" style="font-size:13px;margin-bottom:4px;">Quantity</label>
+                                                        <select id="androidBoxQty" class="form-control" style="width:90px;display:inline-block;">
+                                                            <option value="1">1</option>
+                                                            <option value="2">2</option>
+                                                            <option value="3">3</option>
+                                                            <option value="4">4</option>
+                                                            <option value="5">5</option>
+                                                        </select>
+                                                    </div>
+                                                    <small id="androidBoxNote" class="form-text" style="color:#48bb78;display:none;"><strong>FREE</strong> with 12-month plans!</small>
+                                                    <div id="androidUpsellNudge" class="cp-upsell-nudge" style="display:none;">
+                                                        <div class="cp-upsell-nudge-inner">
+                                                            <div class="cp-upsell-nudge-icon">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                                                            </div>
+                                                            <div class="cp-upsell-nudge-text">
+                                                                <strong>Save <span id="upsellSaveAmount">$79.99</span>!</strong> Switch to 12 months and get this box <strong>FREE</strong>.
+                                                            </div>
+                                                            <button type="button" id="upsellSwitchBtn" class="cp-upsell-nudge-btn">
+                                                                Get FREE Box + 12 Months
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div id="androidBoxConfirm" class="cp-box-confirm" style="display:none;">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                                        FREE TVHub Android Box included with your 12-month plan!
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -816,6 +849,7 @@ document.addEventListener("DOMContentLoaded", function() {
             populateProviders();
             populateProductDropdown(allProducts);
             populateAndroidProducts();
+            fetchAndroidBoxPrice();
             populateResellerPackages();
             populateBouquetCatTabs();
             if (loggedIn) {
@@ -884,6 +918,176 @@ document.addEventListener("DOMContentLoaded", function() {
                            '<input type="hidden" id="catInput' + cat.id + '" value="">';
             tabContainer.appendChild(li);
         });
+    }
+
+    // ========== ANDROID BOX FREE/PAID LOGIC ==========
+    var androidPriceTag = document.getElementById('androidBoxPriceTag');
+    var androidBoxNote = document.getElementById('androidBoxNote');
+    var androidBoxQtyWrap = document.getElementById('androidBoxQtyWrap');
+    var androidBoxQty = document.getElementById('androidBoxQty');
+    var bestValueBadge = document.getElementById('durationBestValueBadge');
+    var upsellNudge = document.getElementById('androidUpsellNudge');
+    var upsellSaveAmount = document.getElementById('upsellSaveAmount');
+    var androidBoxConfirm = document.getElementById('androidBoxConfirm');
+    window.androidBoxIsFree = false;
+    window.androidBoxPaidPrice = 0;
+
+    function isAnnualPlan() {
+        if (!durationSelect) return false;
+        var val = durationSelect.value.trim().toLowerCase();
+        return val === '12 months' || val === 'annually';
+    }
+
+    function getAndroidQty() {
+        if (window.androidBoxIsFree) return 1;
+        return androidBoxQty ? parseInt(androidBoxQty.value) || 1 : 1;
+    }
+
+    function updateAndroidBoxLabel() {
+        var isFree = isAnnualPlan();
+        var hasDuration = durationSelect && durationSelect.value && durationSelect.value !== '';
+        window.androidBoxIsFree = isFree;
+        var qty = getAndroidQty();
+        var unitPrice = window.androidBoxPaidPrice;
+        var totalBoxPrice = unitPrice * qty;
+
+        if (isFree) {
+            // === 12 MONTHS: Auto-select box, lock dropdown, show FREE ===
+            if (androidSelect && androidSelect.options.length > 1 && !androidSelect.value) {
+                androidSelect.value = androidSelect.options[1].value;
+            }
+            androidSelect.disabled = true;
+            androidSelect.style.opacity = '0.7';
+
+            if (androidPriceTag) {
+                androidPriceTag.textContent = '— FREE';
+                androidPriceTag.style.color = '#48bb78';
+            }
+            if (androidBoxNote) androidBoxNote.style.display = 'none';
+            if (androidBoxQtyWrap) androidBoxQtyWrap.style.display = 'none';
+            if (androidBoxQty) androidBoxQty.value = '1';
+            if (upsellNudge) upsellNudge.style.display = 'none';
+            if (bestValueBadge) bestValueBadge.style.display = 'flex';
+            if (androidBoxConfirm) androidBoxConfirm.style.display = 'flex';
+
+            // Summary row
+            window.selectedProductData.androidPrice = 0;
+            var existingRow = document.querySelector('#androidProductPrice');
+            if (!existingRow && summaryTotalsEl) {
+                var newDiv = document.createElement('div');
+                newDiv.classList.add('clearfix');
+                newDiv.id = 'androidProductPrice';
+                newDiv.innerHTML = '<span class="pull-left float-left">TVHub Android Box:</span>' +
+                                   '<span class="pull-right float-right">FREE</span>';
+                summaryTotalsEl.appendChild(newDiv);
+            } else if (existingRow) {
+                var ps = existingRow.querySelector('.float-right');
+                if (ps) ps.textContent = 'FREE';
+                var ls = existingRow.querySelector('.float-left');
+                if (ls) ls.textContent = 'TVHub Android Box:';
+            }
+            updateGrandTotal();
+        } else {
+            // === NOT 12 MONTHS: Enable dropdown, show price/upsell ===
+            androidSelect.disabled = false;
+            androidSelect.style.opacity = '1';
+
+            if (androidPriceTag) {
+                if (unitPrice > 0) {
+                    androidPriceTag.textContent = qty > 1
+                        ? '— $' + unitPrice.toFixed(2) + ' x ' + qty + ' = $' + totalBoxPrice.toFixed(2) + ' USD'
+                        : '— $' + unitPrice.toFixed(2) + ' USD';
+                } else {
+                    androidPriceTag.textContent = '';
+                }
+                androidPriceTag.style.color = '#6c5ce7';
+            }
+            if (androidBoxNote) androidBoxNote.style.display = 'none';
+            if (bestValueBadge) bestValueBadge.style.display = 'none';
+            if (androidBoxConfirm) androidBoxConfirm.style.display = 'none';
+
+            // Show qty if box is selected
+            var boxSelected = androidSelect && androidSelect.value && androidSelect.value !== '';
+            if (androidBoxQtyWrap) {
+                androidBoxQtyWrap.style.display = boxSelected ? 'block' : 'none';
+            }
+
+            // Upsell nudge
+            if (upsellNudge) {
+                var showUpsell = hasDuration && unitPrice > 0;
+                upsellNudge.style.display = showUpsell ? 'block' : 'none';
+                if (upsellSaveAmount && unitPrice > 0) {
+                    upsellSaveAmount.textContent = '$' + (unitPrice * qty).toFixed(2);
+                }
+            }
+
+            // Recalculate summary if box is selected
+            if (boxSelected) {
+                window.selectedProductData.androidPrice = totalBoxPrice;
+                var existingRow = document.querySelector('#androidProductPrice');
+                if (existingRow) {
+                    var ps = existingRow.querySelector('.float-right');
+                    if (ps) ps.textContent = '$' + totalBoxPrice.toFixed(2) + ' USD';
+                    var ls = existingRow.querySelector('.float-left');
+                    if (ls) ls.textContent = 'TVHub Android Box x' + qty + ':';
+                }
+                updateGrandTotal();
+            } else {
+                // Box deselected — remove row
+                window.selectedProductData.androidPrice = 0;
+                var existingRow = document.querySelector('#androidProductPrice');
+                if (existingRow) existingRow.remove();
+                updateGrandTotal();
+            }
+        }
+    }
+
+    // Listen for duration changes to update free/paid status
+    durationSelect.addEventListener('change', function() {
+        updateAndroidBoxLabel();
+    });
+
+    // Listen for quantity changes
+    if (androidBoxQty) {
+        androidBoxQty.addEventListener('change', function() {
+            updateAndroidBoxLabel();
+        });
+    }
+
+    // Upsell switch button: switch to 12 months + auto-select box
+    var upsellSwitchBtn = document.getElementById('upsellSwitchBtn');
+    if (upsellSwitchBtn) {
+        upsellSwitchBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Switch duration to 12 months
+            durationSelect.value = '12 Months';
+            durationSelect.dispatchEvent(new Event('change'));
+            // Auto-select the first android box product
+            if (androidSelect && androidSelect.options.length > 1) {
+                androidSelect.value = androidSelect.options[1].value;
+                androidSelect.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+
+    // Fetch android box price on load (after products populate)
+    function fetchAndroidBoxPrice() {
+        if (androidSelect && androidSelect.options.length > 1) {
+            var boxPid = androidSelect.options[1].value;
+            fetch('getProductPrice010.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pid: boxPid })
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.result === 'success') {
+                    window.androidBoxPaidPrice = parseFloat(data.product.pricing.monthly || 0);
+                    updateAndroidBoxLabel();
+                }
+            })
+            .catch(function() {});
+        }
     }
 
     // ========== SERVICE TYPE TOGGLE ==========
@@ -1231,6 +1435,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 durationSelect.value = key;
                 billingCycleSelect.value = durationToCycle[key];
                 updateBillingLabel(durationToCycle[key]);
+                updateAndroidBoxLabel();
                 break;
             }
         }
@@ -1288,32 +1493,35 @@ document.addEventListener("DOMContentLoaded", function() {
         var existingRow = document.querySelector("#androidProductPrice");
         if (existingRow) existingRow.remove();
 
-        if (!pid || pid === "0") {
+        if (!pid || pid === "0" || pid === "") {
             window.selectedProductData.androidPrice = 0;
+            if (androidBoxQtyWrap) androidBoxQtyWrap.style.display = 'none';
+            if (androidBoxQty) androidBoxQty.value = '1';
+            updateAndroidBoxLabel();
             updateGrandTotal();
             return;
         }
 
-        fetch("getProductPrice010.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ pid: pid })
-        })
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-            if (data.result === "success") {
-                var price = parseFloat(data.product.pricing.monthly || 0);
-                window.selectedProductData.androidPrice = price;
+        var isFree = window.androidBoxIsFree;
+        var qty = getAndroidQty();
+        var totalBoxPrice = isFree ? 0 : window.androidBoxPaidPrice * qty;
+        window.selectedProductData.androidPrice = totalBoxPrice;
 
-                var newDiv = document.createElement("div");
-                newDiv.classList.add("clearfix");
-                newDiv.id = "androidProductPrice";
-                newDiv.innerHTML = '<span class="pull-left float-left">' + data.product.name + ':</span>' +
-                                   '<span class="pull-right float-right">$' + price.toFixed(2) + ' USD</span>';
-                summaryTotalsEl.appendChild(newDiv);
-                updateGrandTotal();
-            }
-        });
+        // Show quantity selector for paid boxes
+        if (androidBoxQtyWrap) {
+            androidBoxQtyWrap.style.display = isFree ? 'none' : 'block';
+        }
+
+        var newDiv = document.createElement("div");
+        newDiv.classList.add("clearfix");
+        newDiv.id = "androidProductPrice";
+        var label = isFree ? 'TVHub Android Box:' : 'TVHub Android Box x' + qty + ':';
+        var priceText = isFree ? 'FREE' : '$' + totalBoxPrice.toFixed(2) + ' USD';
+        newDiv.innerHTML = '<span class="pull-left float-left">' + label + '</span>' +
+                           '<span class="pull-right float-right">' + priceText + '</span>';
+        summaryTotalsEl.appendChild(newDiv);
+        updateAndroidBoxLabel();
+        updateGrandTotal();
     });
 
     // ========== USER SERVICES (Renew) ==========
@@ -1371,8 +1579,9 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         var androidVal = "";
-        if (androidSelect.value) {
-            androidVal = "&android=" + androidSelect.value;
+        if (androidSelect.value && !window.androidBoxIsFree) {
+            var aqty = getAndroidQty();
+            androidVal = "&android=" + androidSelect.value + "&androidqty=" + aqty;
         }
 
         var userSvcVal = document.getElementById("userServices").value;
@@ -1633,6 +1842,15 @@ document.addEventListener("DOMContentLoaded", function() {
         if (vpnRow) vpnRow.remove();
         var androidRow = document.querySelector("#androidProductPrice");
         if (androidRow) androidRow.remove();
+
+        // Reset android box selection, quantity and label
+        if (androidSelect) {
+            androidSelect.value = '';
+            androidSelect.disabled = false;
+            androidSelect.style.opacity = '1';
+        }
+        if (androidBoxQty) androidBoxQty.value = '1';
+        updateAndroidBoxLabel();
     }
 
     // ========== RESELLER PASSWORD TOGGLE ==========
